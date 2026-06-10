@@ -1,6 +1,7 @@
+import environment from "./config/env.js";
+
 import 'dotenv/config';
 import app from "./app.js";
-import environment from "./config/env.js";
 
 /******** PORT Define *******/
 const PORT = process.env.PORT || 5000;

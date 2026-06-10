@@ -5,7 +5,7 @@ const otpSchema = new mongoose.Schema(
 
 
         otp: {
-            type: Number,
+            type: String,
             required: true,
             trim: true,
         },
@@ -26,6 +26,6 @@ const otpSchema = new mongoose.Schema(
 );
 
 // Prevent redefining in watch mode / hot reload
-const OTP = mongoose.models.Otp || mongoose.model("Otp", otpSchema);
+const OTP = mongoose.models.OtpTracking || mongoose.model("OtpTracking", otpSchema);
 
 export default OTP;

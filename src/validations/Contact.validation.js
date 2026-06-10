@@ -1,43 +1,58 @@
 import Joi from "joi";
 
 const contactSchema = Joi.object({
-    name: Joi.string()
-        .trim()
-        .min(2)
-        .max(100)
-        .required()
-        .messages({
-            "string.empty": "Name is required.",
-            "string.min": "Name must be at least 2 characters.",
-        }),
-
-    email: Joi.string()
-        .trim()
-        .email({ tlds: { allow: false } })
-        .allow("") // optional email
-        .messages({
-            "string.email": "Invalid email format.",
-        }),
-
-    subject: Joi.string()
-        .trim()
-        .min(5)
-        .max(100)
-        .optional()
-        .messages({
-            "string.empty": "Subject is required.",
-            "string.min": "Subject should be at least 5 characters.",
-        }),
-
-    message: Joi.string()
-        .trim()
-        .min(5)
-        .max(5000)
-        .required()
-        .messages({
-            "string.empty": "Message is required.",
-            "string.min": "Message should be at least 5 characters.",
-        }),
+    OrgID: Joi.number().integer().required().messages({
+        "number.base": "OrgID must be a number",
+        "any.required": "OrgID is required",
+    }),
+    JobTitle: Joi.string().max(255).optional().allow(""),
+    FirstName: Joi.string().max(150).required().messages({
+        "string.empty": "First name is required",
+        "string.max": "First name cannot exceed 150 characters",
+    }),
+    Surname: Joi.string().max(150).required().messages({
+        "string.empty": "Surname is required",
+        "string.max": "Surname cannot exceed 150 characters",
+    }),
+    Sex: Joi.string().max(2).optional().allow(""),
+    JobFunctionCode: Joi.string().max(10).optional().allow(""),
+    ContactEMail: Joi.string().email().max(150).optional().allow("").messages({
+        "string.email": "Invalid contact email format",
+    }),
+    EMail: Joi.string().email().max(150).optional().allow("").messages({
+        "string.email": "Invalid email format",
+    }),
 });
+
+export const updateContactSchema = Joi.object({
+    OrgID: Joi.number().integer().optional(),
+    JobTitle: Joi.string().max(255).optional().allow(""),
+    FirstName: Joi.string().max(150).optional().allow(""),
+    Surname: Joi.string().max(150).optional().allow(""),
+    Sex: Joi.string().max(2).optional().allow(""),
+    JobFunctionCode: Joi.string().max(10).optional().allow(""),
+    ContactEMail: Joi.string().email().max(150).optional().allow(""),
+    EMail: Joi.string().email().max(150).optional().allow(""),
+}).min(1).messages({
+    "object.min": "At least one field must be provided to update",
+});
+
+export const validate = (schema) => (req, res, next) => {
+    const { error, value } = schema.validate(req.body, {
+        abortEarly: false,
+        stripUnknown: true,
+    });
+
+    if (error) {
+        const errors = error.details.map((err) => ({
+            field: err.context?.key || "unknown",
+            message: err.message,
+        }));
+        return res.status(400).json({ success: false, errors });
+    }
+
+    req.validatedBody = value;
+    next();
+};
 
 export default contactSchema;

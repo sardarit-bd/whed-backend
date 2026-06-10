@@ -3,39 +3,32 @@ import Order from "../../models/Order.js";
 import Product from "../../models/Product.js";
 
 
-
-
-
-/************** get all admin deshboard data *****************/
+/************** get all admin dashboard data *****************/
 const adminDeshboard = async (req, res) => {
 
     try {
 
         //find  users and service category area and review
-        const product = await Product.find();
-        const order = await Order.find();
-
-
-
+        const products = await Product.find();
+        const orders = await Order.find();
 
         //make the total value
-        const totalproduct = product.length;
-        const totalOrder = order.length;
-        const totalPending = order.filter((order) => order.paymentStatus === "Pending");
-        const totalDelivered = order.filter((order) => order.paymentStatus === "Delivered");
-        const totalPaid = order.filter((order) => order.paymentStatus === "Paid");
+        const totalproduct = products.length;
+        const totalOrder = orders.length;
+        const totalPending = orders.filter((order) => order.paymentStatus === "Pending");
+        const totalDelivered = orders.filter((order) => order.paymentStatus === "Delivered");
+        const totalPaid = orders.filter((order) => order.paymentStatus === "Paid");
         const totalRevenueArr = [];
         for (let i = 0; i < totalPaid?.length; i++) {
-            const total = getTotalPrice(totalPaid[i]?.hasData[0]?.total);
-            totalRevenueArr.push(total);
+            const total = getTotalPrice(totalPaid[i]?.hasData);
+            totalRevenueArr.push(totalPaid[i].grandTotal || 0);
         }
         const totalRevenue = totalRevenueArr?.reduce((a, b) => a + b, 0);
 
 
-
         res.status(200).json({
             success: true,
-            message: "Admin deshboard data fetched successfully!",
+            message: "Admin dashboard data fetched successfully!",
             data: {
                 totalproduct,
                 totalOrder,
@@ -46,58 +39,43 @@ const adminDeshboard = async (req, res) => {
             }
         });
     } catch (error) {
-        console.error("Error fetching admin deshboard data:", error.message);
+        console.error("Error fetching admin dashboard data:", error.message);
         res.status(500).json({
             success: false,
-            message: "Something went wrong while fetching admin deshboard data.",
+            message: "Something went wrong while fetching admin dashboard data.",
         });
     }
 }
 
 
-
-
-
-
-/********** get my dashbaord info for the user controller is here **********/
+/********** get my dashboard info for the user **********/
 const myDeshboard = async (req, res) => {
-
-
     try {
-
-
-        const { id } = req.params;;
-
-
-        // For each product, attach its reviews and reviewer info
-        const order = await Order.find();
-
-        const myOrder = await Order.find({ userID: id });
+        // Use authenticated user's id instead of path param
+        const myOrder = await Order.find({ userID: req.user.id });
 
 
         const pending = myOrder.filter((order) => order.deliveryStatus === "Pending");
         const responseData = {
             myTotalOrder: myOrder.length,
             myPendingOrder: pending.length,
-            Mytotalexpenses: myOrder.reduce((total, order) => total + order.grandTotal, 0)
+            Mytotalexpenses: myOrder.reduce((total, order) => total + (order.grandTotal || 0), 0)
         }
 
         // Return response
         res.status(200).json({
             success: true,
-            message: "My Order fetched successfully!",
+            message: "My dashboard fetched successfully!",
             data: responseData,
         });
 
     } catch (error) {
-        console.error("Error fetching My order:", error.message);
+        console.error("Error fetching my dashboard:", error.message);
         res.status(500).json({
             success: false,
-            message: "Something went wrong while fetching order.",
+            message: "Something went wrong while fetching my dashboard.",
         });
     }
-
-
 };
 
 

@@ -1,21 +1,24 @@
 import express from "express";
-import { createInstitute, deleteInstitute, getAllInstitutes, getSingleInstitute, updateInstitute } from '../../controllers/instituteController/institute.controller.js';
-import { authorize, protect } from "../../middlewares/auth.middleware.js";
+import { createInstitute, deleteInstitute, getAllInstitutes, getSingleInstitute, getInstitutesByState, updateInstitute } from '../../controllers/instituteController/institute.controller.js';
+import { protect } from "../../middlewares/auth.middleware.js";
+import { checkStateResponsibility } from "../../middlewares/responsibility.middleware.js";
+import { logProfileHit } from "../../middlewares/stats.middleware.js";
+import { instituteSchema, updateInstituteSchema, validate } from "../../validations/institution.validation.js";
 
 
 const router = express.Router();
 
 
-
 router.get("/institutes", getAllInstitutes);
+router.get("/institutes/state/:stateId", getInstitutesByState);
 
-router.get("/institutes/:id", getSingleInstitute);
+router.get("/institute/:id", logProfileHit("Institute"), getSingleInstitute);
 
-router.post("/institutes", protect, authorize("admin"), createInstitute);
+router.post("/institute", protect, checkStateResponsibility, validate(instituteSchema), createInstitute);
 
-router.put("/institutes/:id", protect, authorize("admin"), updateInstitute);
+router.put("/institute/:id", protect, checkStateResponsibility, validate(updateInstituteSchema), updateInstitute);
 
-router.delete("/institutes/:id", protect, authorize("admin"), deleteInstitute);
+router.delete("/institute/:id", protect, checkStateResponsibility, deleteInstitute);
 
 
 

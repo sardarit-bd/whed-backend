@@ -1,15 +1,16 @@
 import express from "express";
 import { getAllUsers, getUser, updateUser } from '../../controllers/userController/user.controller.js';
-import { authorize, protect } from "../../middlewares/auth.middleware.js";
+import { updateUserSchema, validate } from "../../validations/user.validation.js";
 
 
 const router = express.Router();
 
 
 
-router.get("/allusers", protect, authorize("admin",), getAllUsers);
-router.get("/user/:id", protect, authorize("admin", "user"), protect, getUser);
-router.put("/user/:id", protect, authorize("admin", "user"), protect, updateUser);
+router.get("/users", getAllUsers);
+router.get("/user/:id", getUser);
+
+router.put("/user/:id", validate(updateUserSchema), updateUser);
 
 
 

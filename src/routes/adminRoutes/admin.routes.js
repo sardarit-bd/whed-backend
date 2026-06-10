@@ -5,7 +5,7 @@ import { authorize, protect } from "../../middlewares/auth.middleware.js";
 const router = express.Router();
 
 router.get("/deshboard", protect, authorize("admin"), adminDeshboard);
-router.get("/deshboard/:id", protect, authorize("user"), myDeshboard);
+router.get("/my-deshboard", protect, authorize("user", "admin"), myDeshboard);
 
 
 export default router;

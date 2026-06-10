@@ -1,0 +1,385 @@
+// Database Markup Language (DBML) Specification for WHED
+// You can paste this code directly into https://dbdiagram.io to visualize the ERD.
+
+Table whed_users {
+  UserID int [primary key, increment]
+  login varchar(100)
+  pass varchar(100)
+  nom varchar(150)
+  organisme varchar(255)
+  status int
+  language varchar(5)
+  role int
+  mail varchar(150)
+  expire bigint
+  totalexport int
+  access bigint
+  connexion int
+  datepass datetime
+  attente int
+}
+
+Table whed_state {
+  StateID int [primary key, increment]
+  CountryCode varchar(5)
+  StateCode varchar(5)
+  Country varchar(150)
+  State varchar(150)
+  Regions varchar(255)
+  ProxyStateID int
+  Public int
+}
+
+Table whed_statesystem {
+  StateID int [primary key]
+  sAgeOfEntry int
+  sAgeOfExit int
+  sSchoolSystem text
+  sHESystem text
+  sTrainingHETeachers text
+  sDistanceHE text
+  sNULAlternatives text
+  sNULAdmissionTest text
+  sNULNumerusClausus text
+  sNULOtherRequirements text
+  sULAlternatives text
+  sULAdmissionTest text
+  sULNumerusClausus text
+  sULOtherRequirements text
+  sFSDefinition text
+  srFSAdmissionRequirements text
+  sFSQuotas text
+  sFSHealth text
+  sFSLanguageProficiency text
+  sFSEntryRegulations text
+  sFSIndividualInst int
+  sFSCentralBody int
+  sRBSystemDesc text
+  sRBNULStudies text
+  sRBULStudies text
+  sRBPLStudies text
+  sRBProfession text
+  sRBOtherInfoSources text
+  sSSHome int
+  sSSHAmount varchar(100)
+  sSSForeign int
+  sSSFAmount varchar(100)
+  sSSFDetails text
+  sTCRoad int
+  sTCRail int
+  sTCAir int
+  sTCforeign int
+  sFNAvLivingCost text
+  sFNMinTuitionFee varchar(100)
+  sFNMaxTuitionFee varchar(100)
+  sFNMinTuitionFeeForeign varchar(100)
+  sFNMaxTuitionFeeForeign varchar(100)
+  sAcademicYearFrom varchar(50)
+  sAcademicYearTo varchar(50)
+  sSource text
+  sMajorUpdateDate date
+}
+
+Table whed_tcsinsttype {
+  sInstTypeID int [primary key, increment]
+  StateID int
+  sInstTypeSort int
+  sInstType varchar(255)
+  sInstTypeEnglish varchar(255)
+  sInstTypeDescription text
+}
+
+Table whed_tcsschool {
+  StateID int
+  sSchoolLevelCode varchar(10)
+  sLength varchar(50)
+  sAgeFrom int
+  sAgeTo int
+  sDiploma varchar(255)
+  
+  indexes {
+    (StateID, sSchoolLevelCode) [pk]
+  }
+}
+
+Table whed_tcsdecree {
+  DecreeID int [primary key, increment]
+  StateID int
+  sDecree varchar(255)
+  sYearDecree int
+  sDecreeDesc text
+}
+
+Table whed_lex_language {
+  LanguageCode varchar(10) [primary key]
+  Language varchar(150)
+}
+
+Table whed_tlsstatelanguagelink {
+  StateID int
+  LanguageCode varchar(10)
+  LanguageSort int
+  
+  indexes {
+    (StateID, LanguageCode) [pk]
+  }
+}
+
+Table whed_lex_stage {
+  StageCode varchar(10) [primary key]
+  Stage varchar(150)
+}
+
+Table whed_tlsstatestagelink {
+  StateID int
+  StageCode varchar(10)
+  sStageName varchar(255)
+  sStageDescription text
+  
+  indexes {
+    (StateID, StageCode) [pk]
+  }
+}
+
+Table whed_org {
+  OrgID int [primary key, increment]
+  AliasID int
+  Family int
+  OrgTypeCode varchar(10)
+  OrgName varchar(255)
+  InstNameEnglish varchar(255)
+  InstAcronym varchar(50)
+  InstNameAlt varchar(255)
+  CountryCode varchar(5)
+  StateCode varchar(5)
+  StateID int
+  Street varchar(255)
+  City varchar(150)
+  Province varchar(150)
+  PostCode varchar(50)
+  Tel varchar(100)
+  Fax varchar(100)
+  WWW varchar(255)
+  iOtherSites text
+  InstFundingTypeCode varchar(10)
+  iIAUMembershipOption int
+  iLogo varchar(255)
+  iIAULogo varchar(255)
+  iHistory text
+  iAcademicYear varchar(255)
+  iAdmissionRequirements text
+  iFeesN varchar(100)
+  iFeesNCurrencyCode varchar(10)
+  iFeesI varchar(100)
+  iFeesICurrencyCode varchar(10)
+  iLanguagesUsed varchar(255)
+  iAccreditingAgency varchar(255)
+  ReligionCode varchar(10)
+  iStudentBody varchar(5)
+  iMainPress varchar(255)
+  iStaffStatisticsYear int
+  iStaffFullTimeMale int
+  iStaffFullTimeFemale int
+  iStaffFullTimeTotal int
+  iStaffDocFullTimeMale int
+  iStaffDocFullTimeFemale int
+  iStaffDocFullTimeTotal int
+  iStudentStatisticsYear int
+  iStudentMale int
+  iStudentFemale int
+  iStudentTotal int
+  iStudentForeignMale int
+  iStudentForeignFemale int
+  iStudentForeignTotal int
+  iStudentPartTime int
+  iStudentDistance int
+  iStudentsDisabilities int
+  iMajorUpdateDate date
+  DateAccredited date
+  GlobalID varchar(100)
+  InstClassCode varchar(10)
+  DPControle varchar(100)
+  DPDateEnvoi bigint
+  DPEMail varchar(150)
+  DPEMailCopie varchar(150)
+  DPName varchar(150)
+  DPNbrRelance int
+  DPStatus int
+  DPTypeContact int
+}
+
+Table whed_contact {
+  ContactID int [primary key, increment]
+  OrgID int
+  JobTitle varchar(255)
+  FirstName varchar(150)
+  Surname varchar(150)
+  Sex varchar(2)
+  JobFunctionCode varchar(10)
+  ContactEMail varchar(150)
+  EMail varchar(150)
+}
+
+Table whed_division {
+  iDivisionID int [primary key, increment]
+  OrgID int
+  iDivision varchar(255)
+  iDivisionTypeCode varchar(10)
+  iMoreDetails text
+}
+
+Table whed_degree {
+  iDegreeID int [primary key, increment]
+  OrgID int
+  iDegree varchar(255)
+  CredID int
+  iDegreeOrigine varchar(255)
+  iDegreeNote text
+}
+
+Table whed_tlidegreefoslink {
+  iDegreeID int
+  FOSCode varchar(10)
+  
+  indexes {
+    (iDegreeID, FOSCode) [pk]
+  }
+}
+
+Table whed_tlidivisionfoslink {
+  iDivisionID int
+  FOSCode varchar(10)
+  
+  indexes {
+    (iDivisionID, FOSCode) [pk]
+  }
+}
+
+Table whed_lex_fos {
+  FOSCode varchar(10) [primary key]
+  FOSDisplay varchar(255)
+}
+
+Table whed_cred {
+  CredID int [primary key, increment]
+  StateID int
+  Cred varchar(255)
+  cDescription text
+  cAcronym varchar(50)
+  cEntryExamNational varchar(5)
+  cEntryExamInst varchar(5)
+  CredLevelCode varchar(10)
+}
+
+Table whed_tblcredreqcredlink {
+  CredID int
+  CredID_Req int
+  
+  indexes {
+    (CredID, CredID_Req) [pk]
+  }
+}
+
+Table whed_tblcredtypeinstlink {
+  CredID int
+  sTypeInstID int
+  
+  indexes {
+    (CredID, sTypeInstID) [pk]
+  }
+}
+
+Table whed_resp_country {
+  UserID int
+  StateID int
+  
+  indexes {
+    (UserID, StateID) [pk]
+  }
+}
+
+Table whed_resp_institution {
+  UserID int
+  StateID int
+  Exclusif int
+  
+  indexes {
+    (UserID, StateID) [pk]
+  }
+}
+
+Table whed_data_provider {
+  ProvID int [primary key, increment]
+  StateID int
+  DPTypeContact int
+  DPControle varchar(100)
+  DPOrgName varchar(255)
+  DPName varchar(150)
+  DPStreet varchar(255)
+  DPCity varchar(150)
+  DPProvince varchar(150)
+  DPPostCode varchar(50)
+  DPEMail varchar(150)
+  DPEMailCopie varchar(150)
+  DPStatus int
+  DPFlag int
+  DPDateEnvoi bigint
+  DPDateRelance bigint
+  DPDateLimite bigint
+  DPDateRetour bigint
+  DPDateValid bigint
+  DPDateAcces bigint
+  DPDateModif bigint
+  DPHistRelance text
+}
+
+Table whed_lex_status {
+  StatusCode int [primary key]
+  Status varchar(100)
+}
+
+// Relationships and Foreign Keys
+
+Ref: whed_state.ProxyStateID > whed_state.StateID
+Ref: whed_statesystem.StateID - whed_state.StateID
+Ref: whed_tcsinsttype.StateID > whed_state.StateID
+Ref: whed_tcsschool.StateID > whed_state.StateID
+Ref: whed_tcsdecree.StateID > whed_state.StateID
+
+Ref: whed_tlsstatelanguagelink.StateID > whed_state.StateID
+Ref: whed_tlsstatelanguagelink.LanguageCode > whed_lex_language.LanguageCode
+
+Ref: whed_tlsstatestagelink.StateID > whed_state.StateID
+Ref: whed_tlsstatestagelink.StageCode > whed_lex_stage.StageCode
+
+Ref: whed_org.StateID > whed_state.StateID
+Ref: whed_org.AliasID > whed_org.OrgID
+Ref: whed_org.DPStatus > whed_lex_status.StatusCode
+
+Ref: whed_contact.OrgID > whed_org.OrgID
+Ref: whed_division.OrgID > whed_org.OrgID
+Ref: whed_degree.OrgID > whed_org.OrgID
+Ref: whed_degree.CredID > whed_cred.CredID
+
+Ref: whed_tlidegreefoslink.iDegreeID > whed_degree.iDegreeID
+Ref: whed_tlidegreefoslink.FOSCode > whed_lex_fos.FOSCode
+
+Ref: whed_tlidivisionfoslink.iDivisionID > whed_division.iDivisionID
+Ref: whed_tlidivisionfoslink.FOSCode > whed_lex_fos.FOSCode
+
+Ref: whed_cred.StateID > whed_state.StateID
+
+Ref: whed_tblcredreqcredlink.CredID > whed_cred.CredID
+Ref: whed_tblcredreqcredlink.CredID_Req > whed_cred.CredID
+
+Ref: whed_tblcredtypeinstlink.CredID > whed_cred.CredID
+Ref: whed_tblcredtypeinstlink.sTypeInstID > whed_tcsinsttype.sInstTypeID
+
+Ref: whed_resp_country.UserID > whed_users.UserID
+Ref: whed_resp_country.StateID > whed_state.StateID
+
+Ref: whed_resp_institution.UserID > whed_users.UserID
+Ref: whed_resp_institution.StateID > whed_state.StateID
+
+Ref: whed_data_provider.StateID > whed_state.StateID
+Ref: whed_data_provider.DPStatus > whed_lex_status.StatusCode
