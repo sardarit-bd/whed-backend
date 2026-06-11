@@ -88,13 +88,13 @@ const loginUser = async (req, res) => {
       success: true,
       message: "User logged in successfully",
       data: {
-        id: user.id,
+        UserID: user.UserID,
         login: user.login,
         mail: user.mail,
         nom: user.nom,
         prenom: user.prenom,
         role: user.role,
-        token: generateToken(user.id, `${user.prenom} ${user.nom}`, user.mail, user.role),
+        token: generateToken(user.UserID, `${user.prenom} ${user.nom}`, user.mail, user.role, user.login),
       },
     });
   } catch (err) {
@@ -103,6 +103,7 @@ const loginUser = async (req, res) => {
 };
 
 const logoutUser = async (req, res) => {
+
   try {
     res.clearCookie("token", {
       httpOnly: true,
@@ -132,10 +133,17 @@ const forgotPassword = async (req, res) => {
       return res.status(404).json({ success: false, message: "User not found" });
     }
 
+    console.log("User found for forgot password:", user);
+
     const otp = generateOTP();
+
+    console.log(`Generated OTP for ${user.mail}: ${otp}`);
+    console.log('Sending OTP email...');
+
+
     await sendEmail(user.mail, otp);
 
-    await createOrUpdateOTP({ otp, email: user.mail, userId: user.id });
+    await createOrUpdateOTP({ otp, mail: user.mail, UserID: user.UserID });
 
     return res.status(200).json({
       success: true,

@@ -12,6 +12,7 @@ import contactRoutes from "./routes/contactRoutes/contact.routes.js";
 import healthRoutes from "./routes/health/health.route.js";
 import instituteRoute from "./routes/instituteRoute/institute.route.js";
 import stateRoute from './routes/stateRoute/state.routes.js';
+import countryRoute from './routes/countryRoute/country.routes.js';
 import userRoutes from './routes/userroute/user.routes.js';
 import stateSystemRoute from './routes/stateSystemRoute/stateSystem.routes.js';
 import credentialRoute from './routes/credentialRoute/credential.routes.js';
@@ -46,6 +47,10 @@ app.use("/api/v1", userRoutes);
 
 /********** State Routes Define Here *********/
 app.use("/api/v1", stateRoute);
+
+
+/********** Country Routes Define Here *********/
+app.use("/api/v1", countryRoute);
 
 
 /********** Contact Routes Define Here *********/

@@ -1,8 +1,8 @@
 import pool from '../config/db.js';
 
 const ALLOWED_STATE_FIELDS = new Set([
-    "Country", "State", "CountryCode", "StateCode", "StateAlpha", 
-    "ProxyStateID", "Palgrave", "UseCountryCreds", "EdSysLocked", 
+    "Country", "State", "CountryCode", "StateCode", "StateAlpha",
+    "ProxyStateID", "Palgrave", "UseCountryCreds", "EdSysLocked",
     "InstLocked", "Stub", "CredLocked", "Regions", "ISO3"
 ]);
 
@@ -18,8 +18,73 @@ const getAllStates = async (limit, offset) => {
     ORDER BY StateID DESC
     LIMIT ? OFFSET ?
   `;
-    const [rows] = await pool.query(query, [limit, offset]);
-    return rows;
+    const [states] = await pool.query(query, [limit, offset]);
+
+    if (!states || states.length === 0) {
+        return [];
+    }
+
+    const stateIds = states.map(s => s.id);
+
+    const countryQuery = `
+        SELECT 
+            rc.StateID as stateId,
+            rc.UserID as userId,
+            u.nom as editorName,
+            u.login as editorLogin
+        FROM whed_resp_country rc
+        JOIN whed_users u ON rc.UserID = u.UserID
+        WHERE rc.StateID IN (?)
+    `;
+
+    const instQuery = `
+        SELECT 
+            ri.StateID as stateId,
+            ri.UserID as userId,
+            ri.Exclusif as exclusive,
+            u.nom as editorName,
+            u.login as editorLogin
+        FROM whed_resp_institution ri
+        JOIN whed_users u ON ri.UserID = u.UserID
+        WHERE ri.StateID IN (?)
+    `;
+
+    const [countryRows, instRows] = await Promise.all([
+        pool.query(countryQuery, [stateIds]).then(([res]) => res),
+        pool.query(instQuery, [stateIds]).then(([res]) => res)
+    ]);
+
+    const countryMap = {};
+    const instMap = {};
+
+    for (const row of countryRows) {
+        if (!countryMap[row.stateId]) {
+            countryMap[row.stateId] = [];
+        }
+        countryMap[row.stateId].push({
+            userId: row.userId,
+            editorName: row.editorName,
+            editorLogin: row.editorLogin
+        });
+    }
+
+    for (const row of instRows) {
+        if (!instMap[row.stateId]) {
+            instMap[row.stateId] = [];
+        }
+        instMap[row.stateId].push({
+            userId: row.userId,
+            editorName: row.editorName,
+            editorLogin: row.editorLogin,
+            exclusive: row.exclusive
+        });
+    }
+
+    return states.map(s => ({
+        ...s,
+        countryResponsibilities: countryMap[s.id] || [],
+        institutionResponsibilities: instMap[s.id] || []
+    }));
 };
 
 const getTotalStates = async () => {
@@ -91,4 +156,117 @@ const deleteState = async (id) => {
     return result;
 };
 
-export { createState, deleteState, getAllStates, getSingleState, getTotalStates, updateState };
+const getMyStates = async (userId, limit, offset) => {
+    const query = `
+    SELECT DISTINCT
+        s.StateID as id,
+        s.Country as country,
+        s.State as state,
+        s.CountryCode as countryCode,
+        s.StateCode as stateCode
+    FROM whed_state s
+    LEFT JOIN whed_resp_country rc ON s.StateID = rc.StateID
+    LEFT JOIN whed_resp_institution ri ON s.StateID = ri.StateID
+    WHERE rc.UserID = ? OR ri.UserID = ?
+    ORDER BY s.StateID DESC
+    LIMIT ? OFFSET ?
+  `;
+    const [states] = await pool.query(query, [userId, userId, limit, offset]);
+
+    if (!states || states.length === 0) {
+        return [];
+    }
+
+    const stateIds = states.map(s => s.id);
+
+    const countryQuery = `
+        SELECT 
+            rc.StateID as stateId,
+            rc.UserID as userId,
+            u.nom as editorName,
+            u.login as editorLogin
+        FROM whed_resp_country rc
+        JOIN whed_users u ON rc.UserID = u.UserID
+        WHERE rc.StateID IN (?)
+    `;
+
+    const instQuery = `
+        SELECT 
+            ri.StateID as stateId,
+            ri.UserID as userId,
+            ri.Exclusif as exclusive,
+            u.nom as editorName,
+            u.login as editorLogin
+        FROM whed_resp_institution ri
+        JOIN whed_users u ON ri.UserID = u.UserID
+        WHERE ri.StateID IN (?)
+    `;
+
+    const [countryRows, instRows] = await Promise.all([
+        pool.query(countryQuery, [stateIds]).then(([res]) => res),
+        pool.query(instQuery, [stateIds]).then(([res]) => res)
+    ]);
+
+    const countryMap = {};
+    const instMap = {};
+
+    for (const row of countryRows) {
+        if (!countryMap[row.stateId]) {
+            countryMap[row.stateId] = [];
+        }
+        countryMap[row.stateId].push({
+            userId: row.userId,
+            editorName: row.editorName,
+            editorLogin: row.editorLogin
+        });
+    }
+
+    for (const row of instRows) {
+        if (!instMap[row.stateId]) {
+            instMap[row.stateId] = [];
+        }
+        instMap[row.stateId].push({
+            userId: row.userId,
+            editorName: row.editorName,
+            editorLogin: row.editorLogin,
+            exclusive: row.exclusive
+        });
+    }
+
+    return states.map(s => ({
+        ...s,
+        countryResponsibilities: countryMap[s.id] || [],
+        institutionResponsibilities: instMap[s.id] || []
+    }));
+};
+
+const getTotalMyStates = async (userId) => {
+    const query = `
+    SELECT COUNT(DISTINCT s.StateID) as total
+    FROM whed_state s
+    LEFT JOIN whed_resp_country rc ON s.StateID = rc.StateID
+    LEFT JOIN whed_resp_institution ri ON s.StateID = ri.StateID
+    WHERE rc.UserID = ? OR ri.UserID = ?
+  `;
+    const [result] = await pool.query(query, [userId, userId]);
+    return result[0].total;
+};
+
+const createMyState = async (stateData, userId) => {
+    const result = await createState(stateData);
+    const query = `INSERT INTO whed_resp_country (UserID, StateID) VALUES (?, ?)`;
+    await pool.query(query, [userId, result.id]);
+    return result;
+};
+
+export { 
+    createState, 
+    deleteState, 
+    getAllStates, 
+    getSingleState, 
+    getTotalStates, 
+    updateState, 
+    getMyStates, 
+    getTotalMyStates,
+    createMyState
+};

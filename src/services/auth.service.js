@@ -56,15 +56,15 @@ const getOTPByEmail = async (email) => {
 };
 
 const createOrUpdateOTP = async (otpData) => {
-    const { otp, email, userId } = otpData;
+    const { otp, mail, UserID } = otpData;
     let connection;
     try {
         connection = await pool.getConnection();
         await connection.beginTransaction();
-        const deleteQuery = 'DELETE FROM otp_tracking WHERE email = ?';
-        await connection.query(deleteQuery, [email]);
-        const insertQuery = 'INSERT INTO otp_tracking (otp, email, user_id) VALUES (?, ?, ?)';
-        const [result] = await connection.query(insertQuery, [otp, email, userId]);
+        const deleteQuery = 'DELETE FROM otp_tracking WHERE mail = ?';
+        await connection.query(deleteQuery, [mail]);
+        const insertQuery = 'INSERT INTO otp_tracking (otp, mail, user_id) VALUES (?, ?, ?)';
+        const [result] = await connection.query(insertQuery, [otp, mail, UserID]);
         await connection.commit();
         return { id: result.insertId };
     } catch (error) {

@@ -7,7 +7,7 @@ export const checkStateResponsibility = async (req, res, next) => {
   }
 
   // Editors (role 0) must be checked
-  const userId = req.user ? req.user.id : null;
+  const userId = req.user ? (req.user.UserID) : null;
   if (!userId) {
     return res.status(401).json({ success: false, message: "Unauthorized: Missing user credentials" });
   }
