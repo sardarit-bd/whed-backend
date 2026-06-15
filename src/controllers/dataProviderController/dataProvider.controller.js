@@ -4,7 +4,6 @@ import {
   generateSecurityToken as generateSecurityTokenService,
   getDataProviderById as getDataProviderByIdService,
   getDataProviders as getDataProvidersService,
-  getTotalDataProviders as getTotalDataProvidersService,
   submitDataProviderUpdates as submitDataProviderUpdatesService,
   updateDataProvider as updateDataProviderService,
   verifySecurityToken as verifySecurityTokenService
@@ -13,15 +12,9 @@ import {
 /********** get all data providers **********/
 const getAllDataProviders = async (req, res) => {
   try {
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
-    const offset = (page - 1) * limit;
     const status = req.query.status !== undefined ? parseInt(req.query.status) : null;
 
-    const [rows, total] = await Promise.all([
-      getDataProvidersService(limit, offset, status),
-      getTotalDataProvidersService(status)
-    ]);
+    const rows = await getDataProvidersService(status);
 
     if (!rows || rows.length === 0) {
       return res.status(404).json({
@@ -33,12 +26,6 @@ const getAllDataProviders = async (req, res) => {
     return res.status(200).json({
       success: true,
       message: "Data providers fetched successfully",
-      pagination: {
-        totalItems: total,
-        totalPages: Math.ceil(total / limit),
-        currentPage: page,
-        limit: limit
-      },
       data: rows
     });
   } catch (error) {

@@ -4,7 +4,7 @@ const ALLOWED_DEGREE_FIELDS = new Set([
     "OrgID", "iDegree", "CredID", "iDegreeOrigine", "iDegreeNote"
 ]);
 
-const getAllDegrees = async (limit, offset, orgId, credId) => {
+const getAllDegrees = async (orgId, credId) => {
     let query = `
     SELECT 
         d.iDegreeID as id,
@@ -33,8 +33,7 @@ const getAllDegrees = async (limit, offset, orgId, credId) => {
         query += ` WHERE ` + conditions.join(' AND ');
     }
 
-    query += ` ORDER BY d.iDegreeID DESC LIMIT ? OFFSET ?`;
-    params.push(limit, offset);
+    query += ` ORDER BY d.iDegreeID DESC`;
 
     const [rows] = await pool.query(query, params);
     return rows;

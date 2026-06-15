@@ -60,10 +60,12 @@ const registerUser = async (req, res) => {
 };
 
 const loginUser = async (req, res) => {
+
   try {
     const { login, pass } = req.validatedBody;
 
     const user = await getUserByLogin(login);
+
 
     if (!user) {
       return res.status(401).json({ success: false, message: "User not found" });
@@ -98,6 +100,7 @@ const loginUser = async (req, res) => {
       },
     });
   } catch (err) {
+    console.error("Login error:", err.message);
     res.status(500).json({ success: false, message: "Server error", error: err.message });
   }
 };

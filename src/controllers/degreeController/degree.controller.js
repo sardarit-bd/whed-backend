@@ -3,7 +3,6 @@ import {
   deleteDegree as deleteDegreeService,
   getAllDegrees as getAllDegreesService,
   getSingleDegree as getSingleDegreeService,
-  getTotalDegrees as getTotalDegreesService,
   linkDegreeFos as linkDegreeFosService,
   updateDegree as updateDegreeService
 } from "../../services/degree.service.js";
@@ -11,16 +10,10 @@ import {
 /********** get all degrees **********/
 const getAllDegrees = async (req, res) => {
   try {
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
-    const offset = (page - 1) * limit;
     const orgId = req.query.orgId ? parseInt(req.query.orgId) : null;
     const credId = req.query.credId ? parseInt(req.query.credId) : null;
 
-    const [rows, total] = await Promise.all([
-      getAllDegreesService(limit, offset, orgId, credId),
-      getTotalDegreesService(orgId, credId)
-    ]);
+    const rows = await getAllDegreesService(orgId, credId);
 
     if (!rows || rows.length === 0) {
       return res.status(404).json({
@@ -32,12 +25,6 @@ const getAllDegrees = async (req, res) => {
     return res.status(200).json({
       success: true,
       message: "Degrees fetched successfully",
-      pagination: {
-        totalItems: total,
-        totalPages: Math.ceil(total / limit),
-        currentPage: page,
-        limit: limit
-      },
       data: rows
     });
   } catch (error) {

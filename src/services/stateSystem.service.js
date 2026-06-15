@@ -1,17 +1,17 @@
 import pool from '../config/db.js';
 
 const ALLOWED_SYSTEM_FIELDS = new Set([
-    "StateID", "sAgeOfEntry", "sAgeOfExit", "sSchoolSystem", "sHESystem", 
-    "sTrainingHETeachers", "sDistanceHE", "sNULAlternatives", "sNULAdmissionTest", 
-    "sNULNumerusClausus", "sNULOtherRequirements", "sULAlternatives", 
-    "sULAdmissionTest", "sULNumerusClausus", "sULOtherRequirements", 
-    "sFSDefinition", "srFSAdmissionRequirements", "sFSQuotas", "sFSHealth", 
-    "sFSLanguageProficiency", "sFSEntryRegulations", "sFSIndividualInst", 
-    "sFSCentralBody", "sRBSystemDesc", "sRBNULStudies", "sRBULStudies", 
-    "sRBPLStudies", "sRBProfession", "sRBOtherInfoSources", "sSSHome", 
-    "sSSHAmount", "sSSForeign", "sSSFAmount", "sSSFDetails", "sTCRoad", 
-    "sTCRail", "sTCAir", "sTCforeign", "sFNAvLivingCost", "sFNMinTuitionFee", 
-    "sFNMaxTuitionFee", "sFNMinTuitionFeeForeign", "sFNMaxTuitionFeeForeign", 
+    "StateID", "sAgeOfEntry", "sAgeOfExit", "sSchoolSystem", "sHESystem",
+    "sTrainingHETeachers", "sDistanceHE", "sNULAlternatives", "sNULAdmissionTest",
+    "sNULNumerusClausus", "sNULOtherRequirements", "sULAlternatives",
+    "sULAdmissionTest", "sULNumerusClausus", "sULOtherRequirements",
+    "sFSDefinition", "srFSAdmissionRequirements", "sFSQuotas", "sFSHealth",
+    "sFSLanguageProficiency", "sFSEntryRegulations", "sFSIndividualInst",
+    "sFSCentralBody", "sRBSystemDesc", "sRBNULStudies", "sRBULStudies",
+    "sRBPLStudies", "sRBProfession", "sRBOtherInfoSources", "sSSHome",
+    "sSSHAmount", "sSSForeign", "sSSFAmount", "sSSFDetails", "sTCRoad",
+    "sTCRail", "sTCAir", "sTCforeign", "sFNAvLivingCost", "sFNMinTuitionFee",
+    "sFNMaxTuitionFee", "sFNMinTuitionFeeForeign", "sFNMaxTuitionFeeForeign",
     "sAcademicYearFrom", "sAcademicYearTo", "sSource", "sMajorUpdateDate"
 ]);
 
@@ -23,7 +23,7 @@ const ALLOWED_DECREE_FIELDS = new Set([
     "StateID", "sDecree", "sYearDecree", "sDecreeDesc"
 ]);
 
-const getStateSystems = async (limit, offset) => {
+const getStateSystems = async () => {
     const query = `
     SELECT 
         StateID as stateId,
@@ -33,9 +33,8 @@ const getStateSystems = async (limit, offset) => {
         sAcademicYearTo as academicYearTo
     FROM whed_statesystem
     ORDER BY StateID DESC
-    LIMIT ? OFFSET ?
   `;
-    const [rows] = await pool.query(query, [limit, offset]);
+    const [rows] = await pool.query(query);
     return rows;
 };
 
@@ -44,20 +43,24 @@ const getTotalStateSystems = async () => {
     return result[0].total;
 };
 
-const getStateSystemByStateId = async (stateId) => {
+const getEducationSystemByStateIdService = async (stateId) => {
+
     const systemQuery = `SELECT * FROM whed_statesystem WHERE StateID = ?`;
     const [systemRows] = await pool.query(systemQuery, [stateId]);
     const system = systemRows[0];
     if (!system) return null;
 
+    
     // Fetch related school levels
     const schoolQuery = `SELECT * FROM whed_tcsschool WHERE StateID = ?`;
     const [schoolRows] = await pool.query(schoolQuery, [stateId]);
 
+    
     // Fetch related decrees
     const decreeQuery = `SELECT * FROM whed_tcsdecree WHERE StateID = ?`;
     const [decreeRows] = await pool.query(decreeQuery, [stateId]);
 
+    
     // Fetch stages linked
     const stageQuery = `
     SELECT 
@@ -71,6 +74,7 @@ const getStateSystemByStateId = async (stateId) => {
   `;
     const [stageRows] = await pool.query(stageQuery, [stateId]);
 
+    
     // Fetch languages linked
     const languageQuery = `
     SELECT 
@@ -210,12 +214,11 @@ export {
     deleteDecree,
     deleteSchool,
     deleteStateSystem,
-    getDecreesByStateId,
-    getSchoolsByStateId,
-    getStateSystemByStateId,
+    getDecreesByStateId, getEducationSystemByStateIdService, getSchoolsByStateId,
     getStateSystems,
     getTotalStateSystems,
     updateDecree,
     updateSchool,
     updateStateSystem
 };
+

@@ -6,7 +6,7 @@ const ALLOWED_STATE_FIELDS = new Set([
     "InstLocked", "Stub", "CredLocked", "Regions", "ISO3"
 ]);
 
-const getAllStates = async (limit, offset) => {
+const getAllStates = async () => {
     const query = `
     SELECT 
         StateID as id,
@@ -16,9 +16,8 @@ const getAllStates = async (limit, offset) => {
         StateCode as stateCode
     FROM whed_state
     ORDER BY StateID DESC
-    LIMIT ? OFFSET ?
   `;
-    const [states] = await pool.query(query, [limit, offset]);
+    const [states] = await pool.query(query);
 
     if (!states || states.length === 0) {
         return [];
@@ -156,7 +155,7 @@ const deleteState = async (id) => {
     return result;
 };
 
-const getMyStates = async (userId, limit, offset) => {
+const getMyStates = async (userId) => {
     const query = `
     SELECT DISTINCT
         s.StateID as id,
@@ -169,9 +168,8 @@ const getMyStates = async (userId, limit, offset) => {
     LEFT JOIN whed_resp_institution ri ON s.StateID = ri.StateID
     WHERE rc.UserID = ? OR ri.UserID = ?
     ORDER BY s.StateID DESC
-    LIMIT ? OFFSET ?
   `;
-    const [states] = await pool.query(query, [userId, userId, limit, offset]);
+    const [states] = await pool.query(query, [userId, userId]);
 
     if (!states || states.length === 0) {
         return [];

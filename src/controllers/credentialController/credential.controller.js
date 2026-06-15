@@ -2,9 +2,8 @@ import {
   createCredential as createCredentialService,
   deleteCredential as deleteCredentialService,
   getAllCredentials as getAllCredentialsService,
-  getSingleCredential as getSingleCredentialService,
-  getTotalCredentials as getTotalCredentialsService,
   getCredentialsByStateId as getCredentialsByStateIdService,
+  getSingleCredential as getSingleCredentialService,
   linkInstitutionTypes as linkInstitutionTypesService,
   linkPrerequisites as linkPrerequisitesService,
   updateCredential as updateCredentialService
@@ -13,16 +12,10 @@ import {
 /********** get all credentials **********/
 const getAllCredentials = async (req, res) => {
   try {
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
-    const offset = (page - 1) * limit;
     const stateId = req.query.stateId ? parseInt(req.query.stateId) : null;
     const levelCode = req.query.levelCode || null;
 
-    const [rows, total] = await Promise.all([
-      getAllCredentialsService(limit, offset, stateId, levelCode),
-      getTotalCredentialsService(stateId, levelCode)
-    ]);
+    const rows = await getAllCredentialsService(stateId, levelCode);
 
     if (!rows || rows.length === 0) {
       return res.status(404).json({
@@ -34,12 +27,6 @@ const getAllCredentials = async (req, res) => {
     return res.status(200).json({
       success: true,
       message: "Credentials fetched successfully",
-      pagination: {
-        totalItems: total,
-        totalPages: Math.ceil(total / limit),
-        currentPage: page,
-        limit: limit
-      },
       data: rows
     });
   } catch (error) {
@@ -52,7 +39,7 @@ const getAllCredentials = async (req, res) => {
 };
 
 /********** get single credential **********/
-const getSingleCredential = async (req, res) => {
+const getSingleCredentialbystateID = async (req, res) => {
   try {
     const { id } = req.params;
     if (!id || isNaN(id)) {
@@ -189,13 +176,16 @@ const addInstitutionTypes = async (req, res) => {
 };
 
 /********** get credentials by state **********/
-const getCredentialsByState = async (req, res) => {
+const getCredentialsByStateId = async (req, res) => {
   try {
     const { stateId } = req.params;
     if (!stateId || isNaN(stateId)) {
       return res.status(400).json({ success: false, message: "Invalid state ID format." });
     }
+
+
     const credentials = await getCredentialsByStateIdService(stateId);
+    
     res.status(200).json({
       success: true,
       data: credentials
@@ -215,7 +205,7 @@ export {
   createCredential,
   deleteCredential,
   getAllCredentials,
-  getSingleCredential,
-  getCredentialsByState,
+  getCredentialsByStateId,
+  getSingleCredentialbystateID,
   updateCredential
 };

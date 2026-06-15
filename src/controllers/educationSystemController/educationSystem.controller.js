@@ -6,10 +6,9 @@ import {
   deleteSchool as deleteSchoolService,
   deleteStateSystem as deleteStateSystemService,
   getDecreesByStateId as getDecreesByStateIdService,
+  getEducationSystemByStateIdService,
   getSchoolsByStateId as getSchoolsByStateIdService,
-  getStateSystemByStateId as getStateSystemByStateIdService,
   getStateSystems as getStateSystemsService,
-  getTotalStateSystems as getTotalStateSystemsService,
   updateDecree as updateDecreeService,
   updateSchool as updateSchoolService,
   updateStateSystem as updateStateSystemService
@@ -18,14 +17,7 @@ import {
 /********** get all state systems **********/
 const getAllStateSystems = async (req, res) => {
   try {
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
-    const offset = (page - 1) * limit;
-
-    const [rows, total] = await Promise.all([
-      getStateSystemsService(limit, offset),
-      getTotalStateSystemsService()
-    ]);
+    const rows = await getStateSystemsService();
 
     if (!rows || rows.length === 0) {
       return res.status(404).json({
@@ -37,12 +29,6 @@ const getAllStateSystems = async (req, res) => {
     return res.status(200).json({
       success: true,
       message: "State systems fetched successfully",
-      pagination: {
-        totalItems: total,
-        totalPages: Math.ceil(total / limit),
-        currentPage: page,
-        limit: limit
-      },
       data: rows
     });
   } catch (error) {
@@ -54,14 +40,17 @@ const getAllStateSystems = async (req, res) => {
   }
 };
 
+
+
 /********** get single state system **********/
-const getStateSystemDetails = async (req, res) => {
+const getEducationSystemByStateID = async (req, res) => {
   try {
     const { stateId } = req.params;
+
     if (!stateId || isNaN(stateId)) {
       return res.status(400).json({ success: false, message: "Invalid state ID format." });
     }
-    const system = await getStateSystemByStateIdService(stateId);
+    const system = await getEducationSystemByStateIdService(stateId);
     if (!system) {
       return res.status(404).json({ success: false, message: "State system not found." });
     }
@@ -77,6 +66,11 @@ const getStateSystemDetails = async (req, res) => {
     });
   }
 };
+
+
+
+
+
 
 /********** create state system **********/
 const createStateSystem = async (req, res) => {
@@ -130,7 +124,7 @@ const updateStateSystem = async (req, res) => {
 };
 
 /********** delete state system **********/
-const deleteStateSystem = async (req, res) => {
+const removeEducationsystem = async (req, res) => {
   try {
     const { stateId } = req.params;
     if (!stateId || isNaN(stateId)) {
@@ -243,14 +237,11 @@ export {
   addDecree,
   addSchool,
   createStateSystem,
-  deleteStateSystem,
   editDecree,
   editSchool,
   getAllStateSystems,
-  getDecrees,
-  getSchools,
-  getStateSystemDetails,
-  removeDecree,
-  removeSchool,
+  getDecrees, getEducationSystemByStateID, getSchools,
+  removeDecree, removeEducationsystem, removeSchool,
   updateStateSystem
 };
+

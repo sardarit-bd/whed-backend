@@ -1,24 +1,35 @@
 import express from "express";
-import { createInstitute, deleteInstitute, getAllInstitutes, getSingleInstitute, getInstitutesByState, updateInstitute } from '../../controllers/instituteController/institute.controller.js';
+import { getAllInstitutes, getInstitutesByState } from '../../controllers/instituteController/institute.controller.js';
 import { protect } from "../../middlewares/auth.middleware.js";
-import { checkStateResponsibility } from "../../middlewares/responsibility.middleware.js";
-import { logProfileHit } from "../../middlewares/stats.middleware.js";
-import { instituteSchema, updateInstituteSchema, validate } from "../../validations/institution.validation.js";
 
 
 const router = express.Router();
 
 
-router.get("/institutes", getAllInstitutes);
-router.get("/institutes/state/:stateId", getInstitutesByState);
+//all get route
+router.get("/private/institutes", protect, getAllInstitutes);
+router.get("/private/state/:stateId/institutes", protect, getInstitutesByState);
+// router.get("/private/state/:stateId/institute/:id", protect, getInstitutesByState);
+// router.get("/private/state/:stateId/institute/:id/contacts", protect, getContacts);
 
-router.get("/institute/:id", logProfileHit("Institute"), getSingleInstitute);
 
-router.post("/institute", protect, checkStateResponsibility, validate(instituteSchema), createInstitute);
 
-router.put("/institute/:id", protect, checkStateResponsibility, validate(updateInstituteSchema), updateInstitute);
 
-router.delete("/institute/:id", protect, checkStateResponsibility, deleteInstitute);
+// //all post route
+// router.post("/private/state/:stateId/institute", protect, authorize(1, 0), checkStateResponsibility, validate(instituteSchema), createInstitute);
+
+
+
+// //all put route
+// router.put("/private/state/:stateId/institute/:id", protect, authorize(1, 0), checkStateResponsibility, validate(updateInstituteSchema), updateInstitute);
+
+
+
+// //all delete route
+// router.delete("/private/state/:stateId/institute/:id", protect, authorize(1, 0), checkStateResponsibility, deleteInstitute);
+
+
+
 
 
 

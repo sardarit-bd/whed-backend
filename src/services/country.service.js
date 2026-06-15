@@ -1,12 +1,12 @@
 import pool from '../config/db.js';
 
 const ALLOWED_COUNTRY_FIELDS = new Set([
-    "Country", "CountryCode", "StateAlpha", 
-    "ProxyStateID", "Palgrave", "UseCountryCreds", "EdSysLocked", 
+    "Country", "CountryCode", "StateAlpha",
+    "ProxyStateID", "Palgrave", "UseCountryCreds", "EdSysLocked",
     "InstLocked", "Stub", "CredLocked", "Regions", "ISO3", "Public"
 ]);
 
-const getAllCountries = async (limit, offset) => {
+const getAllCountries = async () => {
     const query = `
     SELECT 
         StateID as id,
@@ -14,14 +14,12 @@ const getAllCountries = async (limit, offset) => {
         CountryCode as countryCode,
         StateAlpha as stateAlpha,
         Regions as regions,
-        ISO3 as iso3,
-        Public as public
+        ISO3 as iso3
     FROM whed_state
     WHERE State IS NULL OR State = '' OR StateCode IS NULL OR StateCode = ''
     ORDER BY StateID DESC
-    LIMIT ? OFFSET ?
   `;
-    const [rows] = await pool.query(query, [limit, offset]);
+    const [rows] = await pool.query(query);
     return rows;
 };
 

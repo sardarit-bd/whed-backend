@@ -15,7 +15,7 @@ const ALLOWED_ORG_DP_FIELDS = new Set([
     "iFeesN", "iFeesI", "iLanguagesUsed", "iAccreditingAgency"
 ]);
 
-const getDataProviders = async (limit, offset, status) => {
+const getDataProviders = async (status) => {
     let query = `
     SELECT 
         ProvID as id,
@@ -32,8 +32,7 @@ const getDataProviders = async (limit, offset, status) => {
         query += ` WHERE DPStatus = ?`;
         params.push(status);
     }
-    query += ` ORDER BY ProvID DESC LIMIT ? OFFSET ?`;
-    params.push(limit, offset);
+    query += ` ORDER BY ProvID DESC`;
 
     const [rows] = await pool.query(query, params);
     return rows;

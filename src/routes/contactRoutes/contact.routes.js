@@ -6,16 +6,16 @@ import {
   getSingleContact,
   updateContact
 } from "../../controllers/contactController/contact.controller.js";
-import contactSchema, { updateContactSchema, validate } from "../../validations/Contact.validation.js";
 import { protect } from "../../middlewares/auth.middleware.js";
 import { checkStateResponsibility } from "../../middlewares/responsibility.middleware.js";
+import contactSchema, { updateContactSchema, validate } from "../../validations/Contact.validation.js";
 
 const router = express.Router();
 
-router.get("/contacts", getAllContact);
-router.get("/contact/:id", getSingleContact);
-router.post("/contact", protect, checkStateResponsibility, validate(contactSchema), createContact);
-router.put("/contact/:id", protect, checkStateResponsibility, validate(updateContactSchema), updateContact);
-router.delete("/contact/:id", protect, checkStateResponsibility, deleteContact);
+router.get("/private/contacts", getAllContact);
+router.get("/private/contact/:id", getSingleContact);
+router.post("/private/contact", protect, checkStateResponsibility, validate(contactSchema), createContact);
+router.put("/private/contact/:id", protect, checkStateResponsibility, validate(updateContactSchema), updateContact);
+router.delete("/private/contact/:id", protect, checkStateResponsibility, deleteContact);
 
 export default router;

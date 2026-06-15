@@ -19,15 +19,15 @@ import {
 
 const router = express.Router();
 
-router.get("/dataproviders", getAllDataProviders);
-router.get("/dataprovider/:id", getDataProviderDetails);
-router.post("/dataprovider", validate(dataProviderSchema), createDataProvider);
-router.put("/dataprovider/:id", validate(updateDataProviderSchema), updateDataProvider);
-router.delete("/dataprovider/:id", deleteDataProvider);
+router.get("/private/dataproviders", getAllDataProviders);
+router.get("/private/dataprovider/:id", getDataProviderDetails);
+router.post("/private/dataprovider", validate(dataProviderSchema), createDataProvider);
+router.put("/private/dataprovider/:id", validate(updateDataProviderSchema), updateDataProvider);
+router.delete("/private/dataprovider/:id", deleteDataProvider);
 
 // Workflow tokens
-router.post("/dataprovider/generate-token", validate(generateTokenSchema), generateToken);
-router.get("/dataprovider/verify/:token", verifyToken);
-router.put("/dataprovider/submit/:token", validate(submitUpdateSchema), submitUpdates);
+router.post("/private/dataprovider/generate-token", validate(generateTokenSchema), generateToken);
+router.get("/private/dataprovider/verify/:token", verifyToken);
+router.put("/private/dataprovider/submit/:token", validate(submitUpdateSchema), submitUpdates);
 
 export default router;

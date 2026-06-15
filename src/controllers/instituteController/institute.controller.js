@@ -1,12 +1,8 @@
-import { createInstitute as createInstituteService, deleteInstitute as deleteInstituteService, getAllInstitutes as getAllInstitutesService, getSingleInstitute as getSingleInstituteService, getDetailedInstitutesByState as getDetailedInstitutesByStateService, getTotalInstitutes as getTotalInstitutesService, updateInstitute as updateInstituteService } from '../../services/institute.service.js';
+import { createInstitute as createInstituteService, deleteInstitute as deleteInstituteService, getAllInstitutes as getAllInstitutesService, getSingleInstitute as getSingleInstituteService, getDetailedInstitutesByState as getDetailedInstitutesByStateService, updateInstitute as updateInstituteService } from '../../services/institute.service.js';
 
 /********** get all institutes **********/
 const getAllInstitutes = async (req, res) => {
   try {
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
-    const offset = (page - 1) * limit;
-
     const filters = {
       stateId: req.query.stateId ? parseInt(req.query.stateId) : null,
       countryCode: req.query.countryCode || null,
@@ -14,10 +10,7 @@ const getAllInstitutes = async (req, res) => {
       search: req.query.search || null
     };
 
-    const [rows, total] = await Promise.all([
-      getAllInstitutesService(limit, offset, filters),
-      getTotalInstitutesService(filters)
-    ]);
+    const rows = await getAllInstitutesService(filters);
 
     if (!rows || rows.length === 0) {
       return res.status(404).json({
@@ -29,12 +22,6 @@ const getAllInstitutes = async (req, res) => {
     return res.status(200).json({
       success: true,
       message: "Institutes fetched successfully",
-      pagination: {
-        totalItems: total,
-        totalPages: Math.ceil(total / limit),
-        currentPage: page,
-        limit: limit
-      },
       data: rows
     });
   } catch (error) {
@@ -159,10 +146,6 @@ const getInstitutesByState = async (req, res) => {
       return res.status(400).json({ success: false, message: "Invalid state ID format." });
     }
 
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
-    const offset = (page - 1) * limit;
-
     const filters = {
       stateId: parseInt(stateId),
       countryCode: req.query.countryCode || null,
@@ -170,10 +153,7 @@ const getInstitutesByState = async (req, res) => {
       search: req.query.search || null
     };
 
-    const [rows, total] = await Promise.all([
-      getDetailedInstitutesByStateService(limit, offset, parseInt(stateId), filters),
-      getTotalInstitutesService(filters)
-    ]);
+    const rows = await getDetailedInstitutesByStateService(parseInt(stateId), filters);
 
     if (!rows || rows.length === 0) {
       return res.status(404).json({
@@ -185,12 +165,6 @@ const getInstitutesByState = async (req, res) => {
     return res.status(200).json({
       success: true,
       message: "Institutes fetched successfully",
-      pagination: {
-        totalItems: total,
-        totalPages: Math.ceil(total / limit),
-        currentPage: page,
-        limit: limit
-      },
       data: rows
     });
   } catch (error) {

@@ -16,13 +16,13 @@ import {
 
 const router = express.Router();
 
-router.get("/degrees", getAllDegrees);
-router.get("/degree/:id", getSingleDegree);
-router.post("/degree", validate(degreeSchema), createDegree);
-router.put("/degree/:id", validate(updateDegreeSchema), updateDegree);
-router.delete("/degree/:id", deleteDegree);
+router.get("/private/degrees", getAllDegrees);
+router.get("/private/degree/:id", getSingleDegree);
+router.post("/private/degree", validate(degreeSchema), createDegree);
+router.put("/private/degree/:id", validate(updateDegreeSchema), updateDegree);
+router.delete("/private/degree/:id", deleteDegree);
 
 // FOS link mapping
-router.post("/degree/:id/fos", validate(degreeFosSchema), addDegreeFos);
+router.post("/private/degree/:id/fos", validate(degreeFosSchema), addDegreeFos);
 
 export default router;

@@ -9,7 +9,6 @@ import {
   getInstTypes as getInstTypesService,
   getLanguages as getLanguagesService,
   getStages as getStagesService,
-  getTotalInstTypes as getTotalInstTypesService,
   linkStateLanguage as linkStateLanguageService,
   linkStateStage as linkStateStageService,
   updateInstType as updateInstTypeService
@@ -18,15 +17,9 @@ import {
 /********** get all institution types **********/
 const getInstTypesController = async (req, res) => {
   try {
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
-    const offset = (page - 1) * limit;
     const stateId = req.query.stateId ? parseInt(req.query.stateId) : null;
 
-    const [rows, total] = await Promise.all([
-      getInstTypesService(limit, offset, stateId),
-      getTotalInstTypesService(stateId)
-    ]);
+    const rows = await getInstTypesService(stateId);
 
     if (!rows || rows.length === 0) {
       return res.status(404).json({ success: false, message: "No institution types found" });
@@ -34,12 +27,6 @@ const getInstTypesController = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      pagination: {
-        totalItems: total,
-        totalPages: Math.ceil(total / limit),
-        currentPage: page,
-        limit
-      },
       data: rows
     });
   } catch (error) {

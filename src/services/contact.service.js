@@ -4,7 +4,7 @@ const ALLOWED_CONTACT_FIELDS = new Set([
     "OrgID", "JobTitle", "FirstName", "Surname", "Sex", "JobFunctionCode", "ContactEMail", "EMail"
 ]);
 
-const getAllContacts = async (limit, offset, orgId) => {
+const getAllContacts = async (orgId) => {
     let query = `
     SELECT 
         ContactID as id,
@@ -24,8 +24,7 @@ const getAllContacts = async (limit, offset, orgId) => {
         params.push(orgId);
     }
 
-    query += ` ORDER BY ContactID DESC LIMIT ? OFFSET ?`;
-    params.push(limit, offset);
+    query += ` ORDER BY ContactID DESC`;
 
     const [rows] = await pool.query(query, params);
     return rows;

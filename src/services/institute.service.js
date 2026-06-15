@@ -1,6 +1,6 @@
 import pool from '../config/db.js';
 
-const getAllInstitutes = async (limit, offset, filters = {}) => {
+const getAllInstitutes = async (filters = {}) => {
     const { stateId, countryCode, fundingType, search } = filters;
     let query = `
     SELECT 
@@ -37,8 +37,7 @@ const getAllInstitutes = async (limit, offset, filters = {}) => {
         query += ` WHERE ` + conditions.join(' AND ');
     }
 
-    query += ` ORDER BY OrgID DESC LIMIT ? OFFSET ?`;
-    params.push(limit, offset);
+    query += ` ORDER BY OrgID DESC`;
 
     const [rows] = await pool.query(query, params);
     return rows;
@@ -292,7 +291,7 @@ const getTotalInstitutes = async (filters = {}) => {
     return result[0].total;
 };
 
-const getDetailedInstitutesByState = async (limit, offset, stateId, filters = {}) => {
+const getDetailedInstitutesByState = async (stateId, filters = {}) => {
     const { countryCode, fundingType, search } = filters;
     let query = `
     SELECT 
@@ -366,8 +365,7 @@ const getDetailedInstitutesByState = async (limit, offset, stateId, filters = {}
         params.push(`%${search}%`, `%${search}%`);
     }
 
-    query += ` ORDER BY OrgID DESC LIMIT ? OFFSET ?`;
-    params.push(limit, offset);
+    query += ` ORDER BY OrgID DESC`;
 
     const [rows] = await pool.query(query, params);
     if (rows.length === 0) return [];

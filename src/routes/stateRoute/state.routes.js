@@ -1,24 +1,31 @@
 import express from "express";
-import { createMyState, createState, deleteMyState, deleteState, getAllStates, getMyStates, getSingleState, updateMyState, updateState } from '../../controllers/stateController/state.controller.js';
+import { createState, deleteState, getAllStates, getMyStates, getSingleState, getStatisticsByStateID, updateState } from '../../controllers/stateController/state.controller.js';
 import { authorize, protect } from "../../middlewares/auth.middleware.js";
 import { checkStateResponsibility } from "../../middlewares/responsibility.middleware.js";
-import { logProfileHit } from "../../middlewares/stats.middleware.js";
 import { stateSchema, updateStateSchema, validate } from "../../validations/state.validation.js";
 
 const router = express.Router();
 
-router.get("/states", protect, getAllStates);
-router.get("/state/:id", protect, logProfileHit("State"), getSingleState);
-router.post("/state", protect, authorize(1), validate(stateSchema), createState);
-router.put("/state/:id", protect, checkStateResponsibility, authorize(1), validate(updateStateSchema), updateState);
-router.delete("/state/:id", protect, checkStateResponsibility, authorize(1), deleteState);
+
+// all get routes
+router.get("/private/states", protect, getAllStates);
+router.get("/private/state/my", protect, getMyStates);
+router.get("/private/state/:stateId", protect, getSingleState);
+router.get("/private/state/:stateId/statistics", protect, getStatisticsByStateID);
 
 
-// my update
-router.get("/mystate", protect, authorize(1, 0), getMyStates);
-router.post("/mystate", protect, authorize(1, 0), validate(stateSchema), createMyState);
-router.put("/mystate/:id", protect, authorize(1, 0), checkStateResponsibility, validate(updateStateSchema), updateMyState);
-router.delete("/mystate/:id", protect, authorize(1, 0), checkStateResponsibility, deleteMyState);
+//all post routes,
+router.post("/private/state", protect, authorize(1), validate(stateSchema), createState);
+
+
+// all update routes4
+router.put("/private/state/:stateId", protect, authorize(1), checkStateResponsibility, validate(updateStateSchema), updateState);
+
+
+
+// all delete routes
+router.delete("/private/state/:stateId", protect, authorize(1), deleteState);
+
 
 
 export default router;

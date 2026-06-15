@@ -1,6 +1,6 @@
 import pool from '../config/db.js';
 
-const getUsers = async (limit, offset) => {
+const getUsers = async () => {
     const query = `
     SELECT  UserID, login, mail, reset_pass, connexion, springer, 
             language, role, status, created, access, nom, prenom, 
@@ -10,9 +10,8 @@ const getUsers = async (limit, offset) => {
             must_reset_password, first_time_password, change_password 
     FROM whed_users
     ORDER BY userID DESC
-    LIMIT ? OFFSET ?
   `;
-    const [rows] = await pool.query(query, [limit, offset]);
+    const [rows] = await pool.query(query);
     return rows;
 };
 

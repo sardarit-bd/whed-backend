@@ -3,7 +3,6 @@ import {
   deleteDivision as deleteDivisionService,
   getAllDivisions as getAllDivisionsService,
   getSingleDivision as getSingleDivisionService,
-  getTotalDivisions as getTotalDivisionsService,
   linkDivisionFos as linkDivisionFosService,
   updateDivision as updateDivisionService
 } from "../../services/division.service.js";
@@ -11,15 +10,9 @@ import {
 /********** get all divisions **********/
 const getAllDivisions = async (req, res) => {
   try {
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
-    const offset = (page - 1) * limit;
     const orgId = req.query.orgId ? parseInt(req.query.orgId) : null;
 
-    const [rows, total] = await Promise.all([
-      getAllDivisionsService(limit, offset, orgId),
-      getTotalDivisionsService(orgId)
-    ]);
+    const rows = await getAllDivisionsService(orgId);
 
     if (!rows || rows.length === 0) {
       return res.status(404).json({
@@ -31,12 +24,6 @@ const getAllDivisions = async (req, res) => {
     return res.status(200).json({
       success: true,
       message: "Divisions fetched successfully",
-      pagination: {
-        totalItems: total,
-        totalPages: Math.ceil(total / limit),
-        currentPage: page,
-        limit: limit
-      },
       data: rows
     });
   } catch (error) {

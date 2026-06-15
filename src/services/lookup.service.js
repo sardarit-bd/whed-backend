@@ -1,7 +1,7 @@
 import pool from '../config/db.js';
 
 // Institution Types CRUD
-const getInstTypes = async (limit, offset, stateId) => {
+const getInstTypes = async (stateId) => {
     let query = `
     SELECT 
         sInstTypeID as id,
@@ -17,8 +17,7 @@ const getInstTypes = async (limit, offset, stateId) => {
         query += ` WHERE StateID = ?`;
         params.push(stateId);
     }
-    query += ` ORDER BY sInstTypeID DESC LIMIT ? OFFSET ?`;
-    params.push(limit, offset);
+    query += ` ORDER BY sInstTypeID DESC`;
 
     const [rows] = await pool.query(query, params);
     return rows;

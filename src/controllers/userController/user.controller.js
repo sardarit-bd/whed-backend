@@ -6,15 +6,7 @@ const getAllUsers = async (req, res) => {
 
   try {
 
-    // default page 1 and limit 10 if not provided in query
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
-    const offset = (page - 1) * limit;
-
-    const [allUsers, total] = await Promise.all([
-      getUsers(limit, offset),
-      getTotalUsers()
-    ]);
+    const allUsers = await getUsers();
 
 
     // if no users found, return 404
@@ -29,12 +21,6 @@ const getAllUsers = async (req, res) => {
     res.json({
       success: true,
       message: "Users fetched successfully",
-      pagination: {
-        totalItems: total,
-        totalPages: Math.ceil(total / limit),
-        currentPage: page,
-        limit: limit
-      },
       data: allUsers,
     });
 
@@ -141,9 +127,32 @@ const updateUser = async (req, res) => {
 };
 
 
+
+const deleteUser = async (req, res) => {
+  const { id } = req.params;
+
+
+
+
+  // must be write delete controller here
+  // Befeour delete user must be delete all relational tasks as need
+
+
+
+  res.json({
+    success: true,
+    message: "User Delete successfully"
+  });
+
+
+
+};
+
+
+
 /*********** modules export from here ************/
 export {
-  getAllUsers,
-  getUser,
-  updateUser
+  deleteUser, getAllUsers,
+  getUser, updateUser
 };
+

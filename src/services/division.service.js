@@ -4,7 +4,7 @@ const ALLOWED_DIVISION_FIELDS = new Set([
     "OrgID", "iDivision", "iDivisionTypeCode", "iMoreDetails"
 ]);
 
-const getAllDivisions = async (limit, offset, orgId) => {
+const getAllDivisions = async (orgId) => {
     let query = `
     SELECT 
         iDivisionID as id,
@@ -20,8 +20,7 @@ const getAllDivisions = async (limit, offset, orgId) => {
         params.push(orgId);
     }
 
-    query += ` ORDER BY iDivisionID DESC LIMIT ? OFFSET ?`;
-    params.push(limit, offset);
+    query += ` ORDER BY iDivisionID DESC`;
 
     const [rows] = await pool.query(query, params);
     return rows;

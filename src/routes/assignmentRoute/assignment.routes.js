@@ -20,13 +20,13 @@ const router = express.Router();
 router.use(protect, authorize("admin"));
 
 // Country assignments
-router.get("/admin/assignments/countries", getCountryAssignmentsController);
-router.post("/admin/assignments/country", validate(countryAssignmentSchema), assignCountryController);
-router.delete("/admin/assignments/country", removeCountryAssignmentController);
+router.get("/private/assignments/countries", getCountryAssignmentsController);
+router.post("/private/assignments/country", validate(countryAssignmentSchema), assignCountryController);
+router.delete("/private/assignments/country", removeCountryAssignmentController);
 
 // Institution assignments
-router.get("/admin/assignments/institutions", getInstitutionAssignmentsController);
-router.post("/admin/assignments/institution", validate(institutionAssignmentSchema), assignInstitutionController);
-router.delete("/admin/assignments/institution", removeInstitutionAssignmentController);
+router.get("/private/assignments/institutions", getInstitutionAssignmentsController);
+router.post("/private/assignments/institution", validate(institutionAssignmentSchema), assignInstitutionController);
+router.delete("/private/assignments/institution", removeInstitutionAssignmentController);
 
 export default router;

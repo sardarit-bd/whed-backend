@@ -3,21 +3,13 @@ import {
   deleteCountry as deleteCountryService, 
   getAllCountries as getAllCountriesService, 
   getSingleCountry as getSingleCountryService, 
-  getTotalCountries as getTotalCountriesService, 
   updateCountry as updateCountryService 
 } from '../../services/country.service.js';
 
 /********** get all countries **********/
 const getAllCountries = async (req, res) => {
   try {
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
-    const offset = (page - 1) * limit;
-
-    const [rows, total] = await Promise.all([
-      getAllCountriesService(limit, offset),
-      getTotalCountriesService()
-    ]);
+    const rows = await getAllCountriesService();
 
     if (!rows || rows.length === 0) {
       return res.status(404).json({
@@ -29,12 +21,6 @@ const getAllCountries = async (req, res) => {
     return res.status(200).json({
       success: true,
       message: "Countries fetched successfully",
-      pagination: {
-        totalItems: total,
-        totalPages: Math.ceil(total / limit),
-        currentPage: page,
-        limit: limit
-      },
       data: rows
     });
   } catch (error) {

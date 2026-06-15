@@ -3,22 +3,15 @@ import {
   deleteContact as deleteContactService,
   getAllContacts as getAllContactsService,
   getSingleContact as getSingleContactService,
-  getTotalContacts as getTotalContactsService,
   updateContact as updateContactService
 } from "../../services/contact.service.js";
 
 /********** get all contacts **********/
 const getAllContact = async (req, res) => {
   try {
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
-    const offset = (page - 1) * limit;
     const orgId = req.query.orgId ? parseInt(req.query.orgId) : null;
 
-    const [rows, total] = await Promise.all([
-      getAllContactsService(limit, offset, orgId),
-      getTotalContactsService(orgId)
-    ]);
+    const rows = await getAllContactsService(orgId);
 
     if (!rows || rows.length === 0) {
       return res.status(404).json({
@@ -30,12 +23,6 @@ const getAllContact = async (req, res) => {
     return res.status(200).json({
       success: true,
       message: "Contacts fetched successfully",
-      pagination: {
-        totalItems: total,
-        totalPages: Math.ceil(total / limit),
-        currentPage: page,
-        limit: limit
-      },
       data: rows
     });
   } catch (error) {

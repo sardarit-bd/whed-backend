@@ -4,7 +4,7 @@ const ALLOWED_CRED_FIELDS = new Set([
     "StateID", "Cred", "cDescription", "cAcronym", "cEntryExamNational", "cEntryExamInst", "CredLevelCode"
 ]);
 
-const getAllCredentials = async (limit, offset, stateId, levelCode) => {
+const getAllCredentials = async (stateId, levelCode) => {
     let query = `
     SELECT 
         CredID as id,
@@ -30,8 +30,7 @@ const getAllCredentials = async (limit, offset, stateId, levelCode) => {
         query += ` WHERE ` + conditions.join(' AND ');
     }
 
-    query += ` ORDER BY CredID DESC LIMIT ? OFFSET ?`;
-    params.push(limit, offset);
+    query += ` ORDER BY CredID DESC`;
 
     const [rows] = await pool.query(query, params);
     return rows;

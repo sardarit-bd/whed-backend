@@ -28,24 +28,24 @@ import {
 const router = express.Router();
 
 // Institution Types CRUD
-router.get("/inst-types", getInstTypesController);
-router.get("/inst-type/:id", getInstTypeByIdController);
-router.post("/inst-type", validate(instTypeSchema), createInstTypeController);
-router.put("/inst-type/:id", validate(updateInstTypeSchema), updateInstTypeController);
-router.delete("/inst-type/:id", deleteInstTypeController);
+router.get("/private/inst-types", getInstTypesController);
+router.get("/private/inst-type/:id", getInstTypeByIdController);
+router.post("/private/inst-type", validate(instTypeSchema), createInstTypeController);
+router.put("/private/inst-type/:id", validate(updateInstTypeSchema), updateInstTypeController);
+router.delete("/private/inst-type/:id", deleteInstTypeController);
 
 // Languages
-router.get("/languages", getLanguagesController);
-router.post("/language", validate(languageSchema), createLanguageController);
-router.post("/state/:stateId/languages", validate(stateLanguageLinkSchema), linkStateLanguageController);
+router.get("/private/languages", getLanguagesController);
+router.post("/private/language", validate(languageSchema), createLanguageController);
+router.post("/private/state/:stateId/languages", validate(stateLanguageLinkSchema), linkStateLanguageController);
 
 // Stages
-router.get("/stages", getStagesController);
-router.post("/stage", validate(stageSchema), createStageController);
-router.post("/state/:stateId/stages", validate(stateStageLinkSchema), linkStateStageController);
+router.get("/private/stages", getStagesController);
+router.post("/private/stage", validate(stageSchema), createStageController);
+router.post("/private/state/:stateId/stages", validate(stateStageLinkSchema), linkStateStageController);
 
 // Fields of Study
-router.get("/fields-of-study", getFieldsOfStudyController);
-router.post("/field-of-study", validate(fosSchema), createFieldOfStudyController);
+router.get("/private/fields-of-study", getFieldsOfStudyController);
+router.post("/private/field-of-study", validate(fosSchema), createFieldOfStudyController);
 
 export default router;
