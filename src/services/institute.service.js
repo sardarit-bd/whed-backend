@@ -351,7 +351,7 @@ const getDetailedInstitutesByState = async (stateId, filters = {}) => {
     WHERE StateID = ?
   `;
     const params = [stateId];
-    
+
     if (countryCode) {
         query += ` AND CountryCode = ?`;
         params.push(countryCode);
@@ -437,5 +437,186 @@ const getDetailedInstitutesByState = async (stateId, filters = {}) => {
     }));
 };
 
-export { createInstitute, deleteInstitute, getAllInstitutes, getSingleInstitute, getDetailedInstitutesByState, getTotalInstitutes, updateInstitute };
+const getInstituteByStateAndOrgID = async (stateId, orgId) => {
+    const query = `
+    SELECT 
+        OrgID,
+        GlobalID,
+        iParentOrgID,
+        AliasID,
+        Family,
+        OrgName,
+        iBranchName,
+        InstNameEnglish,
+        iBranchNameEnglish,
+        CountryCode,
+        StateCode,
+        StateID,
+        BranchID,
+        OrgTypeCode,
+        InstNameAlt,
+        InstAcronym,
+        InstClassCode,
+        InstFundingTypeCode,
+        iIAUMembershipOption,
+        iIAULogo,
+        iIAUNews,
+        iAAUMembershipOption,
+        iOtherSites,
+        iHistory,
+        iAdmissionRequirements,
+        iFeesN,
+        iFeesNCurrencyCode,
+        iFeesI,
+        iFeesICurrencyCode,
+        iAcademicYear,
+        iLanguagesUsed,
+        iLibrary,
+        iMainPress,
+        iResidentialFacilities,
+        iCreated,
+        iPresentStatusYear,
+        iStudentTotal,
+        iStudentForeignTotal,
+        iAccreditingAgency,
+        iAccreditationEndDate,
+        ReligionCode,
+        iStudentBody,
+        DPName,
+        DPEMail,
+        Street,
+        City,
+        Province,
+        PostCode,
+        Tel,
+        Fax,
+        WWW,
+        iStaffStatisticsYear,
+        iStaffFullTimeTotal,
+        iStaffFullTimeMale,
+        iStaffFullTimeFemale,
+        iStaffPartTimeTotal,
+        iStaffPartTimeFemale,
+        iStaffPartTimeMale,
+        iStaffDocFullTimeTotal,
+        iStaffDocFullTimeMale,
+        iStaffDocFullTimeFemale,
+        iStudentStatisticsYear,
+        iStudentMale,
+        iStudentFemale,
+        iStudentForeignMale,
+        iStudentForeignFemale,
+        iStudentDistance,
+        iStudentsDisabilities,
+        iDegreeNote
+    FROM whed_org
+    WHERE StateID = ? AND OrgID = ?
+  `;
+    const [rows] = await pool.query(query, [stateId, orgId]);
+    const institute = rows[0];
+    if (!institute) return null;
+
+    // Fetch related faculties (divisions)
+    const [divisions] = await pool.query(`
+      SELECT 
+        iDivisionID as id, 
+        iDivision as name, 
+        iDivisionTypeCode as typeCode, 
+        iMoreDetails as moreDetails 
+      FROM whed_division 
+      WHERE OrgID = ?
+    `, [orgId]);
+
+    // Fetch fields of study for divisions
+    if (divisions.length > 0) {
+        const divisionIds = divisions.map(d => d.id);
+        const [fosRows] = await pool.query(`
+          SELECT 
+            link.iDivisionID as divisionId,
+            f.FOSCode as code, 
+            f.FOSDisplay as display
+          FROM whed_tlidivisionfoslink link
+          JOIN whed_lex_fos f ON link.FOSCode = f.FOSCode
+          WHERE link.iDivisionID IN (?)
+        `, [divisionIds]);
+
+        // Map FOS to divisions
+        const fosMap = {};
+        fosRows.forEach(fos => {
+            if (!fosMap[fos.divisionId]) {
+                fosMap[fos.divisionId] = [];
+            }
+            fosMap[fos.divisionId].push({ code: fos.code, display: fos.display });
+        });
+
+        divisions.forEach(d => {
+            d.fieldsOfStudy = fosMap[d.id] || [];
+        });
+    }
+
+    // Fetch related degrees
+    const [degrees] = await pool.query(`
+      SELECT 
+        d.iDegreeID as id, 
+        d.iDegree as name, 
+        d.CredID as credId, 
+        c.Cred as credentialName, 
+        d.iDegreeOrigine as originalTitle, 
+        d.iDegreeNote as note 
+      FROM whed_degree d
+      LEFT JOIN whed_cred c ON d.CredID = c.CredID
+      WHERE d.OrgID = ?
+    `, [orgId]);
+
+    // Fetch fields of study for degrees
+    if (degrees.length > 0) {
+        const degreeIds = degrees.map(d => d.id);
+        const [fosRows] = await pool.query(`
+          SELECT 
+            link.iDegreeID as degreeId,
+            f.FOSCode as code, 
+            f.FOSDisplay as display
+          FROM whed_tlidegreefoslink link
+          JOIN whed_lex_fos f ON link.FOSCode = f.FOSCode
+          WHERE link.iDegreeID IN (?)
+        `, [degreeIds]);
+
+        // Map FOS to degrees
+        const fosMap = {};
+        fosRows.forEach(fos => {
+            if (!fosMap[fos.degreeId]) {
+                fosMap[fos.degreeId] = [];
+            }
+            fosMap[fos.degreeId].push({ code: fos.code, display: fos.display });
+        });
+
+        degrees.forEach(d => {
+            d.fieldsOfStudy = fosMap[d.id] || [];
+        });
+    }
+
+    // Fetch contacts
+    const [contacts] = await pool.query(`
+      SELECT 
+        ContactID as id,
+        JobTitle as jobTitle,
+        FirstName as firstName,
+        Surname as surname,
+        Sex as sex,
+        JobFunctionCode as jobFunctionCode,
+        ContactEMail as contactEmail
+      FROM whed_contact
+      WHERE OrgID = ?
+    `, [orgId]);
+
+    return {
+        ...institute,
+        divisions,
+        degrees,
+        contacts
+    };
+};
+
+export { createInstitute, deleteInstitute, getAllInstitutes, getDetailedInstitutesByState, getInstituteByStateAndOrgID, getSingleInstitute, getTotalInstitutes, updateInstitute };
+
 

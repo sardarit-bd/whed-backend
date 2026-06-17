@@ -1,4 +1,4 @@
-import { createInstitute as createInstituteService, deleteInstitute as deleteInstituteService, getAllInstitutes as getAllInstitutesService, getSingleInstitute as getSingleInstituteService, getDetailedInstitutesByState as getDetailedInstitutesByStateService, updateInstitute as updateInstituteService } from '../../services/institute.service.js';
+import { createInstitute as createInstituteService, deleteInstitute as deleteInstituteService, getAllInstitutes as getAllInstitutesService, getDetailedInstitutesByState as getDetailedInstitutesByStateService, getSingleInstitute as getSingleInstituteService, updateInstitute as updateInstituteService, getInstituteByStateAndOrgID as getInstituteByStateAndOrgIDService } from '../../services/institute.service.js';
 
 /********** get all institutes **********/
 const getAllInstitutes = async (req, res) => {
@@ -176,4 +176,39 @@ const getInstitutesByState = async (req, res) => {
   }
 };
 
-export { createInstitute, deleteInstitute, getAllInstitutes, getSingleInstitute, getInstitutesByState, updateInstitute };
+
+
+
+/********** get institutes by state ID and Org ID **********/
+const getInstituteByStateAndOrgID = async (req, res) => {
+  try {
+    const { stateId, orgId } = req.params;
+    if (!stateId || isNaN(stateId) || !orgId || isNaN(orgId)) {
+      return res.status(400).json({ success: false, message: "Invalid state ID format or org ID format." });
+    }
+
+    const institute = await getInstituteByStateAndOrgIDService(parseInt(stateId), parseInt(orgId));
+
+    if (!institute) {
+      return res.status(404).json({
+        success: false,
+        message: `No institution found with Org ID ${orgId} under State ID ${stateId}`
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Institute relation data fetched successfully",
+      data: institute
+    });
+  } catch (error) {
+    console.error('Get Institute by State and Org ID Error:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Failed to fetch institution for the specified state and org ID.'
+    });
+  }
+};
+
+export { createInstitute, deleteInstitute, getAllInstitutes, getInstituteByStateAndOrgID, getInstitutesByState, getSingleInstitute, updateInstitute };
+
