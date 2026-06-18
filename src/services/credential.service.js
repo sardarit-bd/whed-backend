@@ -62,13 +62,32 @@ const getSingleCredential = async (id) => {
     const query = `
     SELECT 
         CredID as id,
+          CredID,
         StateID as stateId,
+        StateID,
         Cred as name,
-        cDescription as description,
+        Cred,
         cAcronym as acronym,
+        cAcronym,
+        CredCatCode1,
+        CredCatCode2,
+        CredLevelCode as levelCode,
+        CredLevelCode,
+        cDescription as description,
+        cDescription,
+        cAlternativeQualification,
         cEntryExamNational as entryExamNational,
+        cEntryExamNational,
         cEntryExamInst as entryExamInst,
-        CredLevelCode as levelCode
+        cEntryExamInst,
+        cMajorUpdateDate,
+        cMinorUpdateDate,
+        cMajorUpdateDateDP,
+        cRecordHistory,
+        UserID as userId,
+        UserID,
+        cWarning,
+        cDelete
     FROM whed_cred
     WHERE CredID = ?
   `;
@@ -235,11 +254,9 @@ const getCredentialsByStateId = async (stateId) => {
 export {
     createCredential,
     deleteCredential,
-    getAllCredentials,
-    getSingleCredential,
-    getTotalCredentials,
-    getCredentialsByStateId,
-    linkInstitutionTypes,
+    getAllCredentials, getCredentialsByStateId, getSingleCredential,
+    getTotalCredentials, linkInstitutionTypes,
     linkPrerequisites,
     updateCredential
 };
+
