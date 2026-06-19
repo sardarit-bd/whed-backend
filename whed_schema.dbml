@@ -1,385 +1,1479 @@
-// Database Markup Language (DBML) Specification for WHED
-// You can paste this code directly into https://dbdiagram.io to visualize the ERD.
+// =============================================================================
+//  Ultra-Strict WHED Database Schema (80 Tables)
+//  Includes all unsigned constraints, secondary indices, and full-text keys.
+// =============================================================================
 
-Table whed_users {
-  UserID int [primary key, increment]
-  login varchar(100)
-  pass varchar(100)
-  nom varchar(150)
-  organisme varchar(255)
-  status int
-  language varchar(5)
-  role int
-  mail varchar(150)
-  expire bigint
-  totalexport int
-  access bigint
-  connexion int
-  datepass datetime
-  attente int
+Table whed_action {
+  ActionID "int(10) unsigned" [pk, increment]
+  UserID "int(10) unsigned" [not null, default: 0]
+  created "int(11)" [not null, default: 0]
+  mail "varchar(64)" [not null, default: '']
+  controle "varchar(32)" [not null, default: '']
+  action "varchar(32)" [not null, default: '']
+  requete "text" [not null]
+  success "tinyint(4)" [not null, default: 0]
+  token_hash "varchar(255)" [not null]
+  expires_at "datetime" [not null]
+  created_at "datetime" [default: `current_timestamp()`]
 }
 
-Table whed_state {
-  StateID int [primary key, increment]
-  CountryCode varchar(5)
-  StateCode varchar(5)
-  Country varchar(150)
-  State varchar(150)
-  Regions varchar(255)
-  ProxyStateID int
-  Public int
-}
+Table whed_articles {
+  ArticleID "varchar(30)" [pk, not null, default: '']
+  Statique "tinyint(3) unsigned" [not null, default: 0]
+  Status "tinyint(3) unsigned" [not null, default: 0]
+  Vignette "varchar(30)" [not null, default: '']
+  Titre "varchar(100)"
+  Site "varchar(255)" [not null, default: '']
+  Texte "text"
+  DateCreate "int(11)" [not null, default: 0]
+  DateUpdate "int(11)" [not null, default: 0]
 
-Table whed_statesystem {
-  StateID int [primary key]
-  sAgeOfEntry int
-  sAgeOfExit int
-  sSchoolSystem text
-  sHESystem text
-  sTrainingHETeachers text
-  sDistanceHE text
-  sNULAlternatives text
-  sNULAdmissionTest text
-  sNULNumerusClausus text
-  sNULOtherRequirements text
-  sULAlternatives text
-  sULAdmissionTest text
-  sULNumerusClausus text
-  sULOtherRequirements text
-  sFSDefinition text
-  srFSAdmissionRequirements text
-  sFSQuotas text
-  sFSHealth text
-  sFSLanguageProficiency text
-  sFSEntryRegulations text
-  sFSIndividualInst int
-  sFSCentralBody int
-  sRBSystemDesc text
-  sRBNULStudies text
-  sRBULStudies text
-  sRBPLStudies text
-  sRBProfession text
-  sRBOtherInfoSources text
-  sSSHome int
-  sSSHAmount varchar(100)
-  sSSForeign int
-  sSSFAmount varchar(100)
-  sSSFDetails text
-  sTCRoad int
-  sTCRail int
-  sTCAir int
-  sTCforeign int
-  sFNAvLivingCost text
-  sFNMinTuitionFee varchar(100)
-  sFNMaxTuitionFee varchar(100)
-  sFNMinTuitionFeeForeign varchar(100)
-  sFNMaxTuitionFeeForeign varchar(100)
-  sAcademicYearFrom varchar(50)
-  sAcademicYearTo varchar(50)
-  sSource text
-  sMajorUpdateDate date
-}
-
-Table whed_tcsinsttype {
-  sInstTypeID int [primary key, increment]
-  StateID int
-  sInstTypeSort int
-  sInstType varchar(255)
-  sInstTypeEnglish varchar(255)
-  sInstTypeDescription text
-}
-
-Table whed_tcsschool {
-  StateID int
-  sSchoolLevelCode varchar(10)
-  sLength varchar(50)
-  sAgeFrom int
-  sAgeTo int
-  sDiploma varchar(255)
-  
-  indexes {
-    (StateID, sSchoolLevelCode) [pk]
+  Indexes {
+    ArticleID [name: "ArticleID"]
   }
-}
-
-Table whed_tcsdecree {
-  DecreeID int [primary key, increment]
-  StateID int
-  sDecree varchar(255)
-  sYearDecree int
-  sDecreeDesc text
-}
-
-Table whed_lex_language {
-  LanguageCode varchar(10) [primary key]
-  Language varchar(150)
-}
-
-Table whed_tlsstatelanguagelink {
-  StateID int
-  LanguageCode varchar(10)
-  LanguageSort int
-  
-  indexes {
-    (StateID, LanguageCode) [pk]
-  }
-}
-
-Table whed_lex_stage {
-  StageCode varchar(10) [primary key]
-  Stage varchar(150)
-}
-
-Table whed_tlsstatestagelink {
-  StateID int
-  StageCode varchar(10)
-  sStageName varchar(255)
-  sStageDescription text
-  
-  indexes {
-    (StateID, StageCode) [pk]
-  }
-}
-
-Table whed_org {
-  OrgID int [primary key, increment]
-  AliasID int
-  Family int
-  OrgTypeCode varchar(10)
-  OrgName varchar(255)
-  InstNameEnglish varchar(255)
-  InstAcronym varchar(50)
-  InstNameAlt varchar(255)
-  CountryCode varchar(5)
-  StateCode varchar(5)
-  StateID int
-  Street varchar(255)
-  City varchar(150)
-  Province varchar(150)
-  PostCode varchar(50)
-  Tel varchar(100)
-  Fax varchar(100)
-  WWW varchar(255)
-  iOtherSites text
-  InstFundingTypeCode varchar(10)
-  iIAUMembershipOption int
-  iLogo varchar(255)
-  iIAULogo varchar(255)
-  iHistory text
-  iAcademicYear varchar(255)
-  iAdmissionRequirements text
-  iFeesN varchar(100)
-  iFeesNCurrencyCode varchar(10)
-  iFeesI varchar(100)
-  iFeesICurrencyCode varchar(10)
-  iLanguagesUsed varchar(255)
-  iAccreditingAgency varchar(255)
-  ReligionCode varchar(10)
-  iStudentBody varchar(5)
-  iMainPress varchar(255)
-  iStaffStatisticsYear int
-  iStaffFullTimeMale int
-  iStaffFullTimeFemale int
-  iStaffFullTimeTotal int
-  iStaffDocFullTimeMale int
-  iStaffDocFullTimeFemale int
-  iStaffDocFullTimeTotal int
-  iStudentStatisticsYear int
-  iStudentMale int
-  iStudentFemale int
-  iStudentTotal int
-  iStudentForeignMale int
-  iStudentForeignFemale int
-  iStudentForeignTotal int
-  iStudentPartTime int
-  iStudentDistance int
-  iStudentsDisabilities int
-  iMajorUpdateDate date
-  DateAccredited date
-  GlobalID varchar(100)
-  InstClassCode varchar(10)
-  DPControle varchar(100)
-  DPDateEnvoi bigint
-  DPEMail varchar(150)
-  DPEMailCopie varchar(150)
-  DPName varchar(150)
-  DPNbrRelance int
-  DPStatus int
-  DPTypeContact int
 }
 
 Table whed_contact {
-  ContactID int [primary key, increment]
-  OrgID int
-  JobTitle varchar(255)
-  FirstName varchar(150)
-  Surname varchar(150)
-  Sex varchar(2)
-  JobFunctionCode varchar(10)
-  ContactEMail varchar(150)
-  EMail varchar(150)
-}
+  ContactID "mediumint(8) unsigned" [pk, increment]
+  OrgID "mediumint(8) unsigned"
+  Surname "varchar(60)"
+  FirstName "varchar(60)"
+  JobTitle "varchar(100)"
+  JobFunctionCode "varchar(2)"
+  YearsOfOffice "varchar(45)"
+  ContactTel "varchar(60)"
+  ContactEMail "varchar(100)"
+  Sex "varchar(1)"
 
-Table whed_division {
-  iDivisionID int [primary key, increment]
-  OrgID int
-  iDivision varchar(255)
-  iDivisionTypeCode varchar(10)
-  iMoreDetails text
-}
-
-Table whed_degree {
-  iDegreeID int [primary key, increment]
-  OrgID int
-  iDegree varchar(255)
-  CredID int
-  iDegreeOrigine varchar(255)
-  iDegreeNote text
-}
-
-Table whed_tlidegreefoslink {
-  iDegreeID int
-  FOSCode varchar(10)
-  
-  indexes {
-    (iDegreeID, FOSCode) [pk]
+  Indexes {
+    ContactID [name: "ContactID"]
+    FirstName [name: "FirstName"]
+    JobFunctionCode [name: "JobFunctionCode"]
+    JobTitle [name: "JobTitle"]
+    OrgID [name: "OrgID"]
+    Surname [name: "Surname"]
   }
 }
 
-Table whed_tlidivisionfoslink {
-  iDivisionID int
-  FOSCode varchar(10)
-  
-  indexes {
-    (iDivisionID, FOSCode) [pk]
+Table whed_cred {
+  CredID "mediumint(8) unsigned" [pk, increment]
+  StateID "mediumint(8) unsigned"
+  Cred "varchar(120)" [not null]
+  cAcronym "varchar(20)"
+  CredCatCode1 "varchar(2)"
+  CredCatCode2 "varchar(2)"
+  CredLevelCode "varchar(2)"
+  cDescription "longtext"
+  cAlternativeQualification "longtext"
+  cEntryExamNational "int(11)"
+  cEntryExamInst "int(11)"
+  cMajorUpdateDate "datetime"
+  cMinorUpdateDate "datetime"
+  cMajorUpdateDateDP "timestamp" [not null, default: '0000-00-00 00:00:00']
+  cRecordHistory "longtext" [not null]
+  UserID "mediumint(8) unsigned"
+  cWarning "tinyint(3) unsigned" [not null, default: 0]
+  cDelete "tinyint(3) unsigned" [not null, default: 0]
+
+  Indexes {
+    CredID [unique, name: "CredGUID"]
+    CredLevelCode [name: "CredLevelCode"]
+    StateID [name: "StateID"]
+    UserID [name: "UserID"]
+  }
+}
+
+Table whed_crm {
+  CrmID "mediumint(8) unsigned" [pk, increment]
+  Table "varchar(60)" [not null, default: '']
+  Afaire "varchar(1)" [not null, default: '']
+  PereID "mediumint(8) unsigned" [not null, default: 0]
+  ElementID "mediumint(8) unsigned" [not null, default: 0]
+  Synchro "tinyint(3)" [not null, default: 0]
+  DateOpe "timestamp" [not null, default: '0000-00-00 00:00:00']
+  DateSyn "timestamp" [not null, default: '0000-00-00 00:00:00']
+  Erreur "text" [not null]
+  HTTPCode "varchar(4)" [not null, default: '']
+  UserID "mediumint(8) unsigned" [default: 0]
+}
+
+Table whed_data_provider {
+  ProvID "mediumint(8) unsigned" [pk, increment]
+  StateID "mediumint(8) unsigned"
+  DPTypeContact "tinyint(8) unsigned" [not null, default: 0]
+  DPOrgName "varchar(160)"
+  DPName "varchar(100)"
+  DPStreet "text" [not null]
+  DPCity "varchar(60)"
+  DPProvince "varchar(60)"
+  DPPostCode "varchar(40)"
+  DPEMail "varchar(100)"
+  DPEMailCopie "varchar(100)"
+  DPStatus "tinyint(3) unsigned" [not null, default: 0]
+  DPFlag "tinyint(3) unsigned" [not null, default: 0]
+  DPControle "varchar(32)" [not null, default: '']
+  DPDateEnvoi "int(11)" [not null, default: 0]
+  DPDateLimite "int(11)" [not null, default: 0]
+  DPDateAcces "int(11)" [not null, default: 0]
+  DPDateModif "int(11)" [not null, default: 0]
+  DPDateRelance "int(11)" [not null, default: 0]
+  DPDateRetour "int(11)" [not null, default: 0]
+  DPDateValid "int(11)" [not null, default: 0]
+  DPNbrRelance "tinyint(8) unsigned" [not null, default: 0]
+  DPHistRelance "longtext"
+
+  Indexes {
+    DPControle [unique, name: "DPControle"]
+    StateID [unique, name: "StateID"]
+    ProvID [name: "ProvID"]
+  }
+}
+
+Table whed_degree {
+  iDegreeID "mediumint(8) unsigned" [pk, increment]
+  OrgID "mediumint(8) unsigned"
+  iDegree "varchar(255)"
+  CredID "mediumint(8) unsigned"
+  iDegreeOrigine "varchar(255)"
+
+  Indexes {
+    CredID [name: "CredID"]
+    OrgID [name: "OrgID"]
+  }
+}
+
+Table whed_division {
+  iDivisionID "mediumint(8) unsigned" [pk, increment]
+  OrgID "mediumint(8) unsigned"
+  iDivision "varchar(255)"
+  iDivisionTypeCode "varchar(3)"
+  iMoreDetails "varchar(220)"
+
+  Indexes {
+    iDivisionID [name: "iDivisionID"]
+    iDivisionTypeCode [name: "iDivisionTypeCode"]
+    OrgID [name: "OrgID"]
+  }
+}
+
+Table whed_full_org {
+  OrgID "mediumint(8) unsigned" [pk, not null, default: 0]
+  fDegrees "text" [not null]
+  fDivisions "text" [not null]
+  fDegreesFOS "text" [not null]
+  fDivisionsFOS "text" [not null]
+  fPeriodicals "text" [not null]
+  fOfficers "text" [not null]
+}
+
+Table whed_full_statesystem {
+  StateID "mediumint(8) unsigned" [pk, not null, default: 0]
+  fTypes "text" [not null]
+  fStructure "text" [not null]
+  fLaws "text" [not null]
+  fLanguages "text" [not null]
+  fStages "text" [not null]
+  fGovBodies "text" [not null]
+  fRecBodies "text" [not null]
+  fSsBodies "text" [not null]
+  fSaBodies "text" [not null]
+  fFaBodies "text" [not null]
+  fIcBodies "text" [not null]
+  fCredNUL "text" [not null]
+  fCredUL "text" [not null]
+  fExchange "text" [not null]
+  fMultilateral "text" [not null]
+  fPublications "text" [not null]
+  fContacts "text" [not null]
+  fCred "text" [not null]
+}
+
+Table whed_guides {
+  HelpID "int(10) unsigned" [pk, increment]
+  code "varchar(60)" [not null, default: '']
+  en "text" [not null]
+  fr "text" [not null]
+
+  Indexes {
+    code [unique, name: "code"]
+  }
+}
+
+Table whed_ihu_token {
+  TokenID "mediumint(8) unsigned" [pk, increment]
+  UserID "mediumint(8) unsigned" [not null, default: 0]
+  TokenCode "varchar(30)" [not null, default: '']
+  DateRegister "date" [not null, default: '0000-00-00']
+  DateCreation "date" [not null, default: '0000-00-00']
+
+  Indexes {
+    TokenCode [unique, name: "TokenCode"]
+    UserID [name: "UserID"]
+  }
+}
+
+Table whed_lex_country {
+  CountryCode "varchar(2)" [pk, not null, default: '']
+  Country "varchar(40)" [not null]
+  RegionMap "varchar(40)" [not null, default: '']
+  Clavier "varchar(10)" [default: 'latin']
+  AddressFormat "varchar(100)"
+  DisplayFont "varchar(20)" [default: 'Arial']
+  PostCodePos "varchar(4)"
+  CurrencyCode "varchar(3)"
+  CountryFr "varchar(50)"
+  PrintFundingHeads "tinyint(1)" [default: 0]
+  Public "tinyint(1)" [not null, default: 1]
+  ISO3 "varchar(3)"
+  RegionCRM "varchar(40)" [not null]
+  RegionCodeCRM "varchar(3)" [not null]
+  RegionSiteIAU "varchar(40)" [not null]
+
+  Indexes {
+    Country [unique, name: "Country"]
+    ISO3 [unique, name: "ISO3"]
+    CurrencyCode [name: "CurrencyCode"]
+  }
+}
+
+Table whed_lex_countryregionlink {
+  CountryCode "varchar(2)" [not null]
+  RegionCode "varchar(2)" [not null]
+
+  Indexes {
+    (CountryCode, RegionCode) [pk]
+    CountryCode [name: "CountryCode"]
+    RegionCode [name: "RegionCode"]
+  }
+}
+
+Table whed_lex_credcat {
+  CredCatCode "varchar(2)" [pk, not null, default: '']
+  CredCat "varchar(50)" [not null]
+
+  Indexes {
+    CredCat [unique, name: "CredCat"]
+  }
+}
+
+Table whed_lex_credlevel {
+  CredLevelID "int(3)" [pk, increment]
+  CredLevelCode "varchar(2)" [not null, default: '']
+  CredLevel "varchar(100)" [not null]
+  CredLevelTypeOption "int(11)" [default: 0]
+  CredLevelPublic "tinyint(1)" [not null, default: 1]
+
+  Indexes {
+    CredLevel [unique, name: "CredLevel"]
+    CredLevelCode [unique, name: "CredLevelCode"]
+    CredLevelCode [unique, name: "CredLevelCode_2"]
+  }
+}
+
+Table whed_lex_currency {
+  CurrencyID "int(3)" [pk, increment]
+  CurrencyCode "varchar(3)" [not null, default: '']
+  Currency "varchar(40)" [not null]
+
+  Indexes {
+    Currency [unique, name: "Currency"]
+    CurrencyCode [unique, name: "CurrencyCode"]
+  }
+}
+
+Table whed_lex_divisiontype {
+  DivisionTypeID "int(3)" [pk, increment]
+  DivisionTypeCode "varchar(3)" [not null, default: '']
+  DivisionType "varchar(100)" [not null]
+  MapToCode "varchar(3)"
+  OutputSortOrder "int(11)" [default: 0]
+  Niveau "tinyint(3)" [not null, default: 0]
+
+  Indexes {
+    DivisionType [unique, name: "DivisionType"]
+    DivisionTypeCode [unique, name: "DivisionTypeCode"]
+    OutputSortOrder [unique, name: "OutputSortOrder"]
+    MapToCode [name: "MapToCode"]
+  }
+}
+
+Table whed_lex_examthesistype {
+  ExamThesisTypeCode "varchar(2)" [pk, not null, default: '']
+  ExamThesisType "varchar(50)" [not null]
+
+  Indexes {
+    ExamThesisType [unique, name: "ExamThesisType"]
   }
 }
 
 Table whed_lex_fos {
-  FOSCode varchar(10) [primary key]
-  FOSDisplay varchar(255)
-}
+  FOSCode "varchar(6)" [pk, not null]
+  FOSLevel "int(11)" [default: 0]
+  Valide "tinyint(3) unsigned" [default: 1]
+  FOSLevel1 "varchar(160)"
+  FOSLevel2 "varchar(160)"
+  FOSLevel3 "varchar(160)"
+  FOSDisplay "varchar(60)"
+  FOSCreate "timestamp" [not null, default: '0000-00-00 00:00:00']
+  FOSUpdate "timestamp" [not null, default: '0000-00-00 00:00:00']
 
-Table whed_cred {
-  CredID int [primary key, increment]
-  StateID int
-  Cred varchar(255)
-  cDescription text
-  cAcronym varchar(50)
-  cEntryExamNational varchar(5)
-  cEntryExamInst varchar(5)
-  CredLevelCode varchar(10)
-}
-
-Table whed_tblcredreqcredlink {
-  CredID int
-  CredID_Req int
-  
-  indexes {
-    (CredID, CredID_Req) [pk]
+  Indexes {
+    FOSDisplay [unique, name: "FOSDisplay"]
+    FOSCode [name: "FOSCode"]
   }
 }
 
-Table whed_tblcredtypeinstlink {
-  CredID int
-  sTypeInstID int
-  
-  indexes {
-    (CredID, sTypeInstID) [pk]
+Table whed_lex_frequency {
+  Frequency "varchar(30)"
+  FrequencySortOrder "int(11)"
+}
+
+Table whed_lex_genre {
+  Genre "varchar(50)" [pk, not null]
+  GenreCode "varchar(2)"
+
+  Indexes {
+    GenreCode [unique, name: "GenreCode"]
   }
+}
+
+Table whed_lex_instclass {
+  InstClassCode "varchar(2)" [pk, not null, default: '']
+  InstClass "varchar(100)" [not null]
+  ClassUniversityLevel "tinyint(1)" [default: 0]
+  InstClassSortOrder "int(11)" [default: 0]
+  ExportWHED "tinyint(1)" [default: 0]
+  ExportXML "tinyint(1)" [default: 0]
+
+  Indexes {
+    InstClass [unique, name: "InstClass"]
+  }
+}
+
+Table whed_lex_instfundingtype {
+  InstFundingTypeID "int(3)" [pk, increment]
+  InstFundingTypeCode "varchar(2)" [not null, default: '']
+  InstFundingType "varchar(30)" [not null]
+  InstFundingTypeSortOrder "int(11)" [default: 0]
+  InstFundingNiveau "tinyint(3)" [not null, default: 0]
+  InstFundingDisplay "varchar(100)" [not null]
+
+  Indexes {
+    InstFundingType [unique, name: "InstFundingType"]
+    InstFundingTypeCode [unique, name: "InstFundingTypeCode"]
+    InstFundingTypeCode [unique, name: "InstFundingTypeCode_2"]
+    InstFundingTypeSortOrder [unique, name: "InstFundingTypeSortOrder"]
+  }
+}
+
+Table whed_lex_jobfunction {
+  JobFunctionID "int(3)" [pk, increment]
+  JobFunctionCode "varchar(2)" [not null, default: '']
+  JobFunction "varchar(50)" [not null]
+  PrintJobFunction "varchar(50)"
+
+  Indexes {
+    JobFunction [unique, name: "JobFunction"]
+    JobFunctionCode [unique, name: "JobFunctionCode"]
+  }
+}
+
+Table whed_lex_language {
+  LanguageID "int(3)" [pk, increment]
+  LanguageCode "varchar(3)" [not null, default: '']
+  Language "varchar(50)" [not null]
+
+  Indexes {
+    Language [unique, name: "Language"]
+    LanguageCode [unique, name: "LanguageCode"]
+  }
+}
+
+Table whed_lex_member {
+  Member "varchar(50)" [pk, not null]
+  MemberCode "varchar(2)"
+
+  Indexes {
+    MemberCode [unique, name: "MemberCode"]
+  }
+}
+
+Table whed_lex_month {
+  Month "varchar(3)"
+  MonthNumber "int(11)" [pk, not null, default: 0]
+
+  Indexes {
+    MonthNumber [unique, name: "MonthNumber"]
+  }
+}
+
+Table whed_lex_orgtype {
+  OrgTypeID "int(3)" [pk, increment]
+  OrgTypeCode "varchar(2)" [not null, default: '']
+  OrgType "varchar(100)" [not null]
+
+  Indexes {
+    OrgType [unique, name: "OrgType"]
+    OrgTypeCode [unique, name: "OrgTypeCode"]
+  }
+}
+
+Table whed_lex_region {
+  RegionCode "varchar(2)" [pk, not null, default: '']
+  Region "varchar(50)" [not null]
+
+  Indexes {
+    Region [unique, name: "Region"]
+  }
+}
+
+Table whed_lex_religion {
+  ReligionCode "varchar(2)" [pk, not null, default: '']
+  Religion "varchar(50)" [not null]
+  ReligionSortOrder "tinyint(3)" [not null, default: 0]
+
+  Indexes {
+    Religion [unique, name: "Religion"]
+  }
+}
+
+Table whed_lex_schoollevel {
+  SchoolLevelID "int(3)" [pk, increment]
+  SchoolLevelCode "varchar(2)" [not null, default: '']
+  SchoolLevel "varchar(100)" [not null]
+
+  Indexes {
+    SchoolLevel [unique, name: "SchoolLevel"]
+    SchoolLevelCode [unique, name: "SchoolLevelCode"]
+  }
+}
+
+Table whed_lex_stage {
+  StageCode "varchar(2)" [pk, not null, default: '']
+  Stage "varchar(50)"
+  StageTypeOption "int(11)" [default: 0]
+
+  Indexes {
+    Stage [unique, name: "Stage"]
+  }
+}
+
+Table whed_lex_status {
+  StatusCode "tinyint(2)" [pk, not null, default: 0]
+  Status "varchar(60)" [not null]
+  Aide "text"
+
+  Indexes {
+    StatusCode [unique, name: "StatusCode"]
+  }
+}
+
+Table whed_lex_traduction {
+  TradID "int(10) unsigned" [pk, increment]
+  code "varchar(60)" [not null, default: '']
+  en "text" [not null]
+  fr "text" [not null]
+
+  Indexes {
+    code [unique, name: "code"]
+  }
+}
+
+Table whed_lex_yesno {
+  YesNo "varchar(50)" [pk, not null]
+  YesNoCode "varchar(2)"
+
+  Indexes {
+    YesNoCode [unique, name: "YesNoCode"]
+  }
+}
+
+Table whed_log {
+  LogID "int(10) unsigned" [pk, increment]
+  base "varchar(32)" [not null, default: '']
+  mysql_errno "varchar(32)" [not null, default: '']
+  mysql_error "text" [not null]
+  IP "varchar(50)" [not null, default: '']
+  HOST "varchar(50)" [not null, default: '']
+  requete "text" [not null]
+  page "text" [not null]
+  LogDate "timestamp" [not null, default: `current_timestamp()`]
+}
+
+Table whed_modeles {
+  ModeleID "mediumint(8) unsigned" [pk, increment]
+  Type "tinyint(1) unsigned" [not null, default: 0]
+  Cible "tinyint(1) unsigned" [not null, default: 0]
+  Titre "varchar(100)"
+  Texte "text"
+
+  Indexes {
+    ModeleID [name: "ModeleID"]
+  }
+}
+
+Table whed_org {
+  OrgID "mediumint(8) unsigned" [pk, increment]
+  GlobalID "varchar(17)"
+  iParentOrgID "mediumint(8) unsigned"
+  AliasID "mediumint(8) unsigned" [not null, default: 0]
+  Family "tinyint(1) unsigned" [not null, default: 0]
+  OrgName "varchar(160)" [not null, default: '']
+  iBranchName "varchar(160)" [not null, default: '']
+  InstNameEnglish "varchar(160)" [not null, default: '']
+  iBranchNameEnglish "varchar(160)" [not null, default: '']
+  CountryCode "varchar(2)"
+  StateCode "varchar(2)"
+  StateID "mediumint(8) unsigned"
+  BranchID "mediumint(8) unsigned"
+  OrgTypeCode "varchar(2)"
+  InstNameAlt "varchar(160)"
+  InstAcronym "varchar(50)"
+  InstClassCode "varchar(2)"
+  InstFundingTypeCode "varchar(2)"
+  iIAUMembershipOption "int(11)" [default: 0]
+  iIAULogo "varchar(200)" [default: '']
+  iIAUNews "text"
+  iAAUMembershipOption "int(11)" [default: 0]
+  iOtherSites "longtext"
+  iHistory "longtext"
+  iAdmissionRequirements "longtext"
+  iFeesN "longtext"
+  iFeesNCurrencyCode "varchar(4)"
+  iFeesI "longtext"
+  iFeesICurrencyCode "varchar(4)"
+  iAcademicYear "varchar(243)"
+  iLanguagesUsed "varchar(176)"
+  iLibrary "longtext"
+  iMainPress "varchar(155)"
+  iResidentialFacilities "longtext"
+  iCreated "varchar(18)"
+  iPresentStatusYear "varchar(41)"
+  iStaffStatisticsYear "varchar(10)"
+  iStaffStatisticsApprox "tinyint(1)" [default: 0]
+  iStaffFullTimeTotal "int(11)"
+  iStaffFullTimeMale "int(11)"
+  iStaffFullTimeFemale "int(11)"
+  iStaffPartTimeTotal "int(11)"
+  iStaffPartTimeFemale "int(11)"
+  iStaffPartTimeMale "int(11)"
+  iStaffDocFullTimeTotal "int(11)"
+  iStaffDocFullTimeMale "int(11)"
+  iStaffDocFullTimeFemale "int(11)"
+  iStudentStatisticsYear "varchar(10)"
+  iStudentStatisticsApprox "tinyint(1)" [default: 0]
+  iStudentTotal "int(11)"
+  iStudentMale "int(11)"
+  iStudentFemale "int(11)"
+  iStudentForeignTotal "int(11)"
+  iStudentForeignMale "int(11)"
+  iStudentForeignFemale "int(11)"
+  iStudentPartTime "int(11)"
+  iStudentDistance "int(11)"
+  iStudentsDisabilities "int(11)"
+  iAccreditingAgency "longtext"
+  iAccreditationEndDate "varchar(18)"
+  sInstTypeID "mediumint(8) unsigned"
+  ReligionCode "varchar(2)"
+  iStudentBody "varchar(1)"
+  iSSAcademicCounselling "tinyint(1)" [default: 0]
+  iSSSocialCounselling "tinyint(1)" [default: 0]
+  iSSCareersAdvices "tinyint(1)" [default: 0]
+  iSSNurseryCare "tinyint(1)" [default: 0]
+  iSSCulturalActivities "tinyint(1)" [default: 0]
+  iSSSportsFacilities "tinyint(1)" [default: 0]
+  iSSLanguageLaboratory "tinyint(1)" [default: 0]
+  iSSDisabledFacilities "tinyint(1)" [default: 0]
+  iSSHealthServices "tinyint(1)" [default: 0]
+  iSSCanteen "tinyint(1)" [default: 0]
+  iSSLibrary "tinyint(1)" [default: 0]
+  iSSeLibrary "tinyint(1)" [default: 0]
+  iSSResidentialFacilities "tinyint(1)" [default: 0]
+  iSSITCentre "tinyint(1)" [default: 0]
+  iSSForeignStudiesCentre "tinyint(1)" [default: 0]
+  iSSOnlineDistanceLearning "tinyint(1)" [default: 0]
+  iDegreeNote "longtext"
+  iRecordHistory "longtext" [not null]
+  iInputDate "timestamp" [not null, default: '0000-00-00 00:00:00']
+  iMajorUpdateDate "timestamp" [not null, default: '0000-00-00 00:00:00']
+  iMinorUpdateDate "timestamp" [not null, default: '0000-00-00 00:00:00']
+  iMajorUpdateDateDP "timestamp" [not null, default: '0000-00-00 00:00:00']
+  Street "longtext"
+  City "varchar(60)"
+  Province "varchar(60)"
+  PostCode "varchar(40)"
+  Tel "varchar(60)"
+  Fax "varchar(60)"
+  EMail "varchar(100)"
+  WWW "longtext"
+  UserID "mediumint(8) unsigned"
+  iWarning "tinyint(3) unsigned" [not null, default: 0]
+  iDelete "tinyint(3) unsigned" [not null, default: 0]
+  DPTypeContact "tinyint(8) unsigned" [not null, default: 0]
+  DPName "varchar(100)"
+  DPEMail "varchar(100)"
+  DPEMailCopie "varchar(100)"
+  DPStatus "tinyint(3)" [not null, default: -1]
+  DPFlag "tinyint(3)" [not null, default: 0]
+  DPControle "varchar(32)" [not null, default: '']
+  DPDateEnvoi "int(11)" [not null, default: 0]
+  DPDateLimite "int(11)" [not null, default: 0]
+  DPDateAcces "int(11)" [not null, default: 0]
+  DPDateModif "int(11)" [not null, default: 0]
+  DPDateRelance "int(11)" [not null, default: 0]
+  DPDateRetour "int(11)" [not null, default: 0]
+  DPDateValid "int(11)" [not null, default: 0]
+  DPNbrRelance "tinyint(8) unsigned" [not null, default: 0]
+  DPHistRelance "longtext"
+  iUpdate "tinyint(3) unsigned" [not null, default: 0]
+  iLearning "tinyint(3) unsigned" [not null, default: 0]
+  iLogo "varchar(50)"
+  iWebUpdateDate "datetime" [not null, default: '0000-00-00 00:00:00']
+  iComment "text"
+  iPartnership "varchar(50)"
+  DateAccredited "mediumtext"
+  iOther "tinyint(3)" [not null, default: 0]
+  iInstClassHistory "longtext" [not null]
+
+  Indexes {
+    OrgID [unique, name: "OrgID"]
+    GlobalID [unique, name: "GlobalID"]
+    AliasID [name: "AliasID"]
+    CountryCode [name: "CountryCode"]
+    DPControle [name: "DPControle"]
+    DPStatus [name: "DPStatus"]
+    Family [name: "Family"]
+    InstClassCode [name: "InstClassCode"]
+    InstFundingTypeCode [name: "InstFundingTypeCode"]
+    iParentOrgID [name: "iParentOrgID"]
+    OrgTypeCode [name: "OrgTypeCode"]
+    PostCode [name: "PostCode"]
+    ReligionCode [name: "ReligionCode"]
+    sInstTypeID [name: "sInstTypeID"]
+    StateCode [name: "StateCode"]
+    StateID [name: "StateID"]
+    UserID [name: "UserID"]
+    (OrgName, InstNameEnglish, InstNameAlt, InstAcronym) [type: fulltext, name: "OrgName"]
+  }
+}
+
+Table whed_org_old {
+  OrgID "mediumint(8) unsigned" [pk, increment]
+  iParentOrgID "mediumint(8) unsigned"
+  AliasID "mediumint(8) unsigned" [not null, default: 0]
+  Family "tinyint(1) unsigned" [not null, default: 0]
+  OrgName "varchar(160)" [not null, default: '']
+  iBranchName "varchar(160)" [not null, default: '']
+  InstNameEnglish "varchar(160)" [not null, default: '']
+  iBranchNameEnglish "varchar(160)" [not null, default: '']
+  CountryCode "varchar(2)"
+  StateCode "varchar(2)"
+  StateID "mediumint(8) unsigned"
+  OrgTypeCode "varchar(2)"
+  InstNameAlt "varchar(160)"
+  InstAcronym "varchar(50)"
+  InstClassCode "varchar(2)"
+  InstFundingTypeCode "varchar(2)"
+  iIAUMembershipOption "int(11)" [default: 0]
+  iIAULogo "varchar(10)" [default: '']
+  iIAUNews "text"
+  iAAUMembershipOption "int(11)" [default: 0]
+  iOtherSites "longtext"
+  iHistory "longtext"
+  iAdmissionRequirements "longtext"
+  iFeesN "longtext"
+  iFeesNCurrencyCode "varchar(4)"
+  iFeesI "longtext"
+  iFeesICurrencyCode "varchar(4)"
+  iAcademicYear "varchar(243)"
+  iLanguagesUsed "varchar(176)"
+  iLibrary "longtext"
+  iSpecialFacilities "longtext"
+  iMainPress "varchar(155)"
+  iResidentialFacilities "longtext"
+  iCreated "varchar(18)"
+  iPresentStatusYear "varchar(41)"
+  iStaffStatisticsYear "varchar(10)"
+  iStaffStatisticsApprox "tinyint(1)" [default: 0]
+  iStaffFullTimeTotal "int(11)"
+  iStaffFullTimeMale "int(11)"
+  iStaffFullTimeFemale "int(11)"
+  iStaffPartTimeTotal "int(11)"
+  iStaffPartTimeMale "int(11)"
+  iStaffPartTimeFemale "int(11)"
+  iStaffDocFullTimeTotal "int(11)"
+  iStaffDocFullTimeMale "int(11)"
+  iStaffDocFullTimeFemale "int(11)"
+  iStudentStatisticsYear "varchar(10)"
+  iStudentStatisticsApprox "tinyint(1)" [default: 0]
+  iStudentTotal "int(11)"
+  iStudentMale "int(11)"
+  iStudentFemale "int(11)"
+  iStudentForeignTotal "int(11)"
+  iStudentForeignMale "int(11)"
+  iStudentForeignFemale "int(11)"
+  iStudentPartTime "int(11)"
+  iStudentDistance "int(11)"
+  iStudentsDisabilities "int(11)"
+  iAccreditingAgency "longtext"
+  iAccreditationEndDate "varchar(18)"
+  sInstTypeID "mediumint(8) unsigned"
+  ReligionCode "varchar(2)"
+  iStudentBody "varchar(1)"
+  iSSAcademicCounselling "tinyint(1)" [default: 0]
+  iSSSocialCounselling "tinyint(1)" [default: 0]
+  iSSCareersAdvices "tinyint(1)" [default: 0]
+  iSSNurseryCare "tinyint(1)" [default: 0]
+  iSSCulturalActivities "tinyint(1)" [default: 0]
+  iSSSportsFacilities "tinyint(1)" [default: 0]
+  iSSLanguageLaboratory "tinyint(1)" [default: 0]
+  iSSDisabledFacilities "tinyint(1)" [default: 0]
+  iSSHealthServices "tinyint(1)" [default: 0]
+  iSSCanteen "tinyint(1)" [default: 0]
+  iSSLibrary "tinyint(1)" [default: 0]
+  iSSeLibrary "tinyint(1)" [default: 0]
+  iSSResidentialFacilities "tinyint(1)" [default: 0]
+  iSSITCentre "tinyint(1)" [default: 0]
+  iSSForeignStudiesCentre "tinyint(1)" [default: 0]
+  iDegreeNote "longtext"
+  iRecordHistory "longtext" [not null]
+  iInputDate "timestamp" [not null, default: '0000-00-00 00:00:00']
+  iMajorUpdateDate "timestamp" [not null, default: '0000-00-00 00:00:00']
+  iMinorUpdateDate "timestamp" [not null, default: '0000-00-00 00:00:00']
+  iMajorUpdateDateDP "timestamp" [not null, default: '0000-00-00 00:00:00']
+  Street "longtext"
+  City "varchar(60)"
+  Province "varchar(60)"
+  PostCode "varchar(40)"
+  Tel "varchar(60)"
+  Fax "varchar(60)"
+  EMail "varchar(100)"
+  WWW "longtext"
+  UserID "mediumint(8) unsigned"
+  iWarning "tinyint(3) unsigned" [not null, default: 0]
+  DPTypeContact "tinyint(8) unsigned" [not null, default: 0]
+  DPName "varchar(100)"
+  DPEMail "varchar(100)"
+  DPEMailCopie "varchar(100)"
+  DPStatus "tinyint(3)" [not null, default: -1]
+  DPFlag "tinyint(3)" [not null, default: 0]
+  DPControle "varchar(32)" [not null, default: '']
+  DPDateEnvoi "int(11)" [not null, default: 0]
+  DPDateLimite "int(11)" [not null, default: 0]
+  DPDateAcces "int(11)" [not null, default: 0]
+  DPDateModif "int(11)" [not null, default: 0]
+  DPDateRelance "int(11)" [not null, default: 0]
+  DPDateRetour "int(11)" [not null, default: 0]
+  DPDateValid "int(11)" [not null, default: 0]
+  DPNbrRelance "tinyint(8) unsigned" [not null, default: 0]
+  DPHistRelance "longtext"
+
+  Indexes {
+    OrgID [unique, name: "OrgID"]
+    AliasID [name: "AliasID"]
+    CountryCode [name: "CountryCode"]
+    DPControle [name: "DPControle"]
+    DPStatus [name: "DPStatus"]
+    Family [name: "Family"]
+    InstClassCode [name: "InstClassCode"]
+    InstFundingTypeCode [name: "InstFundingTypeCode"]
+    iParentOrgID [name: "iParentOrgID"]
+    OrgTypeCode [name: "OrgTypeCode"]
+    PostCode [name: "PostCode"]
+    ReligionCode [name: "ReligionCode"]
+    sInstTypeID [name: "sInstTypeID"]
+    StateCode [name: "StateCode"]
+    StateID [name: "StateID"]
+    UserID [name: "UserID"]
+    (OrgName, InstNameEnglish, InstNameAlt, InstAcronym) [type: fulltext, name: "OrgName"]
+  }
+}
+
+Table whed_orgfinaidbody {
+  OrgID "mediumint(8) unsigned" [pk, increment]
+  faGrants "tinyint(1)" [default: 0]
+  faLoans "tinyint(1)" [default: 0]
+  faStudentCat "longtext"
+  faRole "longtext"
+  SortOrder "int(11)" [not null, default: 0]
+  faAcademic "tinyint(1)" [default: 0]
+  faInternational "tinyint(1)" [default: 0]
+  faIAUMembership "tinyint(1)" [default: 0]
+
+  Indexes {
+    OrgID [unique, name: "OrgID"]
+    SortOrder [name: "SortOrder"]
+  }
+}
+
+Table whed_orggovbody {
+  OrgID "mediumint(8) unsigned" [pk, increment]
+  GovBodyRole "longtext"
+  SortOrder "int(11)" [not null, default: 0]
+  GovBodyAcademic "tinyint(1)" [default: 0]
+  GovBodyInternational "tinyint(1)" [default: 0]
+  GovBodyIAUMembership "tinyint(1)" [default: 0]
+
+  Indexes {
+    OrgID [unique, name: "OrgID"]
+    SortOrder [name: "SortOrder"]
+  }
+}
+
+Table whed_orgintcoop {
+  OrgID "mediumint(8) unsigned" [pk, increment]
+  icRole "longtext"
+  SortOrder "int(11)" [not null, default: 0]
+  icAcademic "tinyint(1)" [default: 0]
+  icInternational "tinyint(1)" [default: 0]
+  icIAUMembership "tinyint(1)" [default: 0]
+
+  Indexes {
+    OrgID [unique, name: "OrgID"]
+    SortOrder [name: "SortOrder"]
+  }
+}
+
+Table whed_orgrecbody {
+  OrgID "mediumint(8) unsigned" [pk, increment]
+  rbForeignCredInstitution "int(11)" [default: 0]
+  rbForeignCredProfession "int(11)" [default: 0]
+  rbRecServices "longtext"
+  rbRole "longtext"
+  SortOrder "int(11)" [not null, default: 0]
+  rbAcademic "tinyint(1)" [default: 0]
+  rbInternational "tinyint(1)" [default: 0]
+  rbIAUMembership "tinyint(1)" [default: 0]
+
+  Indexes {
+    OrgID [unique, name: "OrgID"]
+    SortOrder [name: "SortOrder"]
+  }
+}
+
+Table whed_orgstudentassoc {
+  OrgID "mediumint(8) unsigned" [pk, increment]
+  saRole "longtext"
+  SortOrder "int(11)" [not null, default: 0]
+  saAcademic "tinyint(1)" [default: 0]
+  saInternational "tinyint(1)" [default: 0]
+  saIAUMembership "tinyint(1)" [default: 0]
+
+  Indexes {
+    OrgID [unique, name: "OrgID"]
+    SortOrder [name: "SortOrder"]
+  }
+}
+
+Table whed_orgstudentservice {
+  OrgID "mediumint(8) unsigned" [pk, increment]
+  ssRole "longtext"
+  SortOrder "int(11)" [not null, default: 0]
+  ssAcademic "tinyint(1)" [default: 0]
+  ssInternational "tinyint(1)" [default: 0]
+  ssIAUMembership "tinyint(1)" [default: 0]
+
+  Indexes {
+    OrgID [unique, name: "OrgID"]
+    SortOrder [name: "SortOrder"]
+  }
+}
+
+Table whed_pages {
+  PageID "mediumint(8) unsigned" [pk, increment]
+  TypePage "tinyint(8) unsigned" [not null, default: 0]
+  Titre "varchar(100)"
+  Texte "text"
+  Aide "text"
+  TypeAcces "tinyint(3) unsigned" [not null, default: 0]
+
+  Indexes {
+    PageID [name: "PageID"]
+  }
+}
+
+Table whed_paypal {
+  PaiementID "mediumint(8) unsigned" [pk, increment]
+  UserID "mediumint(8) unsigned" [not null, default: 0]
+  txn_id "varchar(200)" [not null, default: '']
+  receiver_id "varchar(200)" [not null, default: '']
+  payer_email "varchar(50)" [not null, default: '']
+  payment_date "varchar(100)" [not null, default: '']
+  payment_status "varchar(100)" [not null, default: '']
+  residence_country "varchar(3)" [not null, default: '']
+  mc_currency "varchar(3)" [not null, default: '']
+  variables "text" [not null]
+  DatePaiement "timestamp" [not null, default: '0000-00-00 00:00:00']
+
+  Indexes {
+    UserID [name: "UserID"]
+  }
+}
+
+Table whed_periodical {
+  iPeriodicalID "mediumint(8) unsigned" [pk, increment]
+  OrgID "mediumint(8) unsigned"
+  iPeriodical "longtext"
+
+  Indexes {
+    iPeriodicalID [name: "iPeriodicalID"]
+    OrgID [name: "OrgID"]
+  }
+}
+
+Table whed_requetes {
+  RequeteID "int(10) unsigned" [pk, increment]
+  acces "tinyint(1) unsigned" [not null, default: 0]
+  groupe "varchar(100)" [not null, default: '']
+  nom "varchar(100)" [not null, default: '']
+  selection "tinyint(1)" [not null, default: 0]
+  sqlspe "text" [not null]
+  sqlgen "text" [not null]
+  vedette "varchar(50)" [not null]
 }
 
 Table whed_resp_country {
-  UserID int
-  StateID int
-  
-  indexes {
-    (UserID, StateID) [pk]
+  StateID "mediumint(8) unsigned" [pk, increment]
+  UserID "mediumint(8) unsigned"
+
+  Indexes {
+    UserID [name: "UserID"]
   }
 }
 
 Table whed_resp_institution {
-  UserID int
-  StateID int
-  Exclusif int
-  
-  indexes {
-    (UserID, StateID) [pk]
+  StateID "mediumint(8) unsigned" [not null, default: 0]
+  UserID "mediumint(8) unsigned" [not null, default: 0]
+  Exclusif "tinyint(8) unsigned" [not null, default: 0]
+
+  Indexes {
+    (StateID, UserID) [pk]
+    UserID [name: "UserID"]
   }
 }
 
-Table whed_data_provider {
-  ProvID int [primary key, increment]
-  StateID int
-  DPTypeContact int
-  DPControle varchar(100)
-  DPOrgName varchar(255)
-  DPName varchar(150)
-  DPStreet varchar(255)
-  DPCity varchar(150)
-  DPProvince varchar(150)
-  DPPostCode varchar(50)
-  DPEMail varchar(150)
-  DPEMailCopie varchar(150)
-  DPStatus int
-  DPFlag int
-  DPDateEnvoi bigint
-  DPDateRelance bigint
-  DPDateLimite bigint
-  DPDateRetour bigint
-  DPDateValid bigint
-  DPDateAcces bigint
-  DPDateModif bigint
-  DPHistRelance text
+Table whed_sauvegardes {
+  SaveID "mediumint(8) unsigned" [pk, increment]
+  LinkID "mediumint(8) unsigned" [not null, default: 0]
+  TypeSave "varchar(15)" [not null, default: '']
+  DateSave "int(11)" [not null, default: 0]
+  Auto "tinyint(3) unsigned" [not null, default: 0]
+  XML "longtext"
+
+  Indexes {
+    LinkID [name: "LinkID"]
+    SaveID [name: "SaveID"]
+    TypeSave [name: "TypeSave"]
+  }
 }
 
-Table whed_lex_status {
-  StatusCode int [primary key]
-  Status varchar(100)
+Table whed_state {
+  StateID "mediumint(8) unsigned" [pk, increment]
+  Country "varchar(40)" [not null]
+  State "varchar(50)" [not null, default: '']
+  CountryCode "varchar(2)"
+  StateCode "varchar(2)" [default: '00']
+  StateAlpha "varchar(2)" [default: '00']
+  ProxyStateID "mediumint(8) unsigned"
+  Palgrave "tinyint(1) unsigned" [not null, default: 1]
+  UseCountryCreds "tinyint(1)" [default: 0]
+  EdSysLocked "tinyint(1)" [default: 0]
+  InstLocked "tinyint(1)" [default: 0]
+  Stub "tinyint(1)" [default: 0]
+  CredLocked "int(11)" [default: 0]
+  Regions "text"
+  ISO3 "varchar(3)"
+
+  Indexes {
+    StateID [unique, name: "StateID"]
+    (CountryCode, StateCode, StateID) [unique, name: "CountryCode_2"]
+    CountryCode [name: "CountryCode"]
+    ProxyStateID [name: "ProxyStateID"]
+    StateCode [name: "StateCode"]
+  }
 }
 
-// Relationships and Foreign Keys
+Table whed_statesystem {
+  StateID "mediumint(8) unsigned" [pk, increment]
+  sAcademicYearFrom "int(11)" [default: 0]
+  sAcademicYearTo "int(11)" [default: 0]
+  sAgeOfEntry "varchar(30)"
+  sAgeOfExit "varchar(30)"
+  sSchoolSystem "longtext"
+  sHESystem "longtext"
+  sSource "longtext"
+  sInCharge "text"
+  sNULAlternatives "longtext"
+  sNULAdmissionTest "longtext"
+  sNULOtherRequirements "longtext"
+  sNULNumerusClausus "longtext"
+  sULAlternatives "longtext"
+  sULAdmissionTest "longtext"
+  sULOtherRequirements "longtext"
+  sULNumerusClausus "longtext"
+  sFSDefinition "longtext"
+  sFSQuotas "longtext"
+  srFSAdmissionRequirements "longtext"
+  sFSEntryRegulations "longtext"
+  sFSHealth "longtext"
+  sFSLanguageProficiency "longtext"
+  sFSIndividualInst "int(11)" [default: 0]
+  sFSCentralBody "int(11)" [default: 0]
+  sRBSystemDesc "longtext"
+  sRBOtherInfoSources "longtext"
+  sRBNULStudies "longtext"
+  sRBULStudies "longtext"
+  sRBPLStudies "longtext"
+  sRBProfession "longtext"
+  sSSHome "int(11)" [default: 0]
+  sSSHAmount "double" [default: 0]
+  sSSHCurrencyCode "varchar(4)"
+  sSSForeign "int(11)" [default: 0]
+  sSSFAmount "double" [default: 0]
+  sSSFCurrencyCode "varchar(4)"
+  sSSFDetails "longtext"
+  sTCRoad "int(11)" [default: 0]
+  sTCRail "int(11)" [default: 0]
+  sTCAir "int(11)" [default: 0]
+  sTCforeign "int(11)" [default: 0]
+  sFNAvLivingCost "int(11)" [default: 0]
+  sFNALCCurrencyCode "varchar(4)"
+  sFNMinTuitionFee "int(11)" [default: 0]
+  sFNMTFCCurrencyCode "varchar(4)"
+  sFNMaxTuitionFee "int(11)" [default: 0]
+  sFNMxTFCCurrencyCode "varchar(4)"
+  sFNMinTuitionFeeForeign "int(11)" [default: 0]
+  sFNMTFCfCurrencyCode "varchar(4)"
+  sFNMaxTuitionFeeForeign "int(11)" [default: 0]
+  sFNMxTFCfCurrencyCode "varchar(4)"
+  sInputDate "timestamp" [not null, default: '0000-00-00 00:00:00']
+  sMajorUpdateDate "timestamp" [not null, default: '0000-00-00 00:00:00']
+  sMinorUpdateDate "timestamp" [not null, default: '0000-00-00 00:00:00']
+  sMajorUpdateDateDP "timestamp" [not null, default: '0000-00-00 00:00:00']
+  sRecordHistory "longtext" [not null]
+  UserID "mediumint(8) unsigned"
+  sTrainingHETeachers "text"
+  sDistanceHE "text"
+  sUpdate "tinyint(3) unsigned" [not null, default: 0]
+  sWebUpdateDate "datetime" [not null, default: '0000-00-00 00:00:00']
+  sComment "text"
+  sBodiesUpdated "date" [not null, default: '0000-00-00']
 
-Ref: whed_state.ProxyStateID > whed_state.StateID
-Ref: whed_statesystem.StateID - whed_state.StateID
-Ref: whed_tcsinsttype.StateID > whed_state.StateID
-Ref: whed_tcsschool.StateID > whed_state.StateID
-Ref: whed_tcsdecree.StateID > whed_state.StateID
+  Indexes {
+    UserID [name: "UserID"]
+  }
+}
 
-Ref: whed_tlsstatelanguagelink.StateID > whed_state.StateID
-Ref: whed_tlsstatelanguagelink.LanguageCode > whed_lex_language.LanguageCode
+Table whed_statistique {
+  StatID "int(11)" [pk, increment]
+  AAAA "varchar(4)" [not null, default: '']
+  MM "varchar(2)" [not null, default: '']
+  JJ "varchar(2)" [not null, default: '']
+  InstRequeteOK "mediumint(8) unsigned" [not null, default: 0]
+  InstRequeteERR "mediumint(8) unsigned" [not null, default: 0]
+  InstDetail "mediumint(8) unsigned" [not null, default: 0]
+  InstPDF "mediumint(8) unsigned" [not null, default: 0]
+  SystRequeteOK "mediumint(8) unsigned" [not null, default: 0]
+  SystRequeteERR "mediumint(8) unsigned" [not null, default: 0]
+  SystDetail "mediumint(8) unsigned" [not null, default: 0]
+  SystPDF "mediumint(8) unsigned" [not null, default: 0]
+  IP "mediumint(8) unsigned" [not null, default: 0]
+  Membre "mediumint(8) unsigned" [not null, default: 0]
+  Visiteur "mediumint(8) unsigned" [not null, default: 0]
+  Src_I_Map "mediumint(8) unsigned" [not null, default: 0]
+  Src_I_Quick "mediumint(8) unsigned" [not null, default: 0]
+  Src_I_Advanced "mediumint(8) unsigned" [not null, default: 0]
+  Src_S_Map "mediumint(8) unsigned" [not null, default: 0]
+  Src_S_Advanced "mediumint(8) unsigned" [not null, default: 0]
+  Flag "tinyint(3) unsigned" [not null, default: 0]
+  Src_Json "mediumint(8) unsigned" [not null, default: 0]
+  Src_Permalink "mediumint(8) unsigned" [not null, default: 0]
+  Src_Other "mediumint(8) unsigned" [not null, default: 0]
+  Src_I_Other "mediumint(8) unsigned" [not null, default: 0]
+  Src_S_Other "mediumint(8) unsigned" [not null, default: 0]
 
-Ref: whed_tlsstatestagelink.StateID > whed_state.StateID
-Ref: whed_tlsstatestagelink.StageCode > whed_lex_stage.StageCode
+  Indexes {
+    (AAAA, MM, JJ) [unique, name: "AAAA_1"]
+    AAAA [name: "AAAA"]
+    MM [name: "MM"]
+  }
+}
+
+Table whed_tblcredreqcredlink {
+  CredID "mediumint(8) unsigned" [not null, default: 0]
+  CredID_Req "mediumint(8) unsigned" [not null, default: 0]
+
+  Indexes {
+    (CredID, CredID_Req) [pk]
+    CredID [name: "CredID"]
+    CredID_Req [name: "CredID_Req"]
+  }
+}
+
+Table whed_tblcredtypeinstlink {
+  CredID "mediumint(8) unsigned" [not null, default: 0]
+  sTypeInstID "mediumint(8) unsigned" [not null, default: 0]
+
+  Indexes {
+    (CredID, sTypeInstID) [pk]
+    CredID [name: "CredID"]
+    sTypeInstID [name: "sTypeInstID"]
+  }
+}
+
+Table whed_tcsadmissionreq {
+  sAdmissionReqID "mediumint(8) unsigned" [pk, increment]
+  StateID "mediumint(8) unsigned"
+  CredID_AdmissionReq "mediumint(8) unsigned"
+  sRequirementLevelOption "int(11)" [default: 0]
+  sMinMark "varchar(250)"
+  sRequirementFor "longtext"
+
+  Indexes {
+    CredID_AdmissionReq [name: "CredID_AdmissionReq"]
+    StateID [name: "StateID"]
+  }
+}
+
+Table whed_tcsagreement {
+  sAgreementID "mediumint(8) unsigned" [pk, increment]
+  StateID "mediumint(8) unsigned"
+  sAgreement "varchar(250)"
+  sAgreementYear "int(11)"
+
+  Indexes {
+    sAgreementID [unique, name: "sAgreementID"]
+    StateID [name: "StateID"]
+  }
+}
+
+Table whed_tcsdecree {
+  sDecreeID "mediumint(8) unsigned" [pk, increment]
+  StateID "mediumint(8) unsigned"
+  sDecree "varchar(160)"
+  sYearDecree "int(11)" [default: 0]
+  sDecreeDesc "varchar(160)"
+
+  Indexes {
+    sDecreeID [unique, name: "sDecreeID"]
+    StateID [name: "StateID"]
+  }
+}
+
+Table whed_tcsexchangeprogram {
+  sExchangeProgramID "mediumint(8) unsigned" [pk, increment]
+  StateID "mediumint(8) unsigned"
+  sExchangeProgram "varchar(160)"
+
+  Indexes {
+    sExchangeProgramID [unique, name: "sExchangeProgramID"]
+    StateID [name: "StateID"]
+  }
+}
+
+Table whed_tcsinsttype {
+  sInstTypeID "mediumint(8) unsigned" [pk, increment]
+  StateID "mediumint(8) unsigned"
+  sInstType "varchar(160)"
+  sInstTypeEnglish "varchar(160)"
+  sInstTypeSort "int(11)" [default: 0]
+  sInstTypeDescription "text"
+
+  Indexes {
+    sInstTypeID [unique, name: "sInstTypeID"]
+    StateID [name: "StateID"]
+  }
+}
+
+Table whed_tcsrefinfo {
+  sRefInfoID "mediumint(8) unsigned" [pk, increment]
+  StateID "mediumint(8) unsigned"
+  sRefInfo "varchar(200)"
+  sRefInfoAuthor "varchar(80)"
+  sRefInfoPublisher "varchar(80)"
+  sRefInfoYear "int(11)" [default: 0]
+  sRefInfoLink "varchar(200)" [default: '']
+
+  Indexes {
+    sRefInfoID [unique, name: "sRefInfoID"]
+    StateID [name: "StateID"]
+  }
+}
+
+Table whed_tcsschool {
+  sSchoolID "mediumint(8) unsigned" [pk, increment]
+  StateID "mediumint(8) unsigned"
+  sSchool "varchar(160)"
+  sSchoolLevelCode "varchar(4)"
+  sLength "varchar(30)"
+  sAgeFrom "int(11)" [default: 0]
+  sAgeTo "int(11)" [default: 0]
+  sDiploma "varchar(250)"
+
+  Indexes {
+    sSchoolID [name: "sSchoolID"]
+    sSchoolLevelCode [name: "sSchoolLevelCode"]
+    StateID [name: "StateID"]
+  }
+}
+
+Table whed_tcsstage {
+  sStageID "mediumint(8) unsigned" [pk, increment]
+  StateID "mediumint(8) unsigned"
+  sStage "varchar(160)"
+  sStageDescription "longtext"
+  sStageUniversity "tinyint(1)" [default: 0]
+  sStageLevel "int(11)" [default: 0]
+  OldLEVEL_HED "int(11)" [default: 0]
+
+  Indexes {
+    sStageID [unique, name: "sStageID"]
+    StateID [name: "StateID"]
+  }
+}
+
+Table whed_tlidegreefoslink {
+  iDegreeID "mediumint(8) unsigned" [not null, default: 0]
+  FOSCode "varchar(6)" [not null]
+
+  Indexes {
+    (iDegreeID, FOSCode) [pk]
+    FOSCode [name: "FOSCode"]
+    iDegreeID [name: "iDegreeID"]
+  }
+}
+
+Table whed_tlidivisionfoslink {
+  iDivisionID "mediumint(8) unsigned" [not null, default: 0]
+  FOSCode "varchar(6)" [not null]
+
+  Indexes {
+    (iDivisionID, FOSCode) [pk]
+    FOSCode [name: "FOSCode"]
+    iDivisionID [name: "iDivisionID"]
+  }
+}
+
+Table whed_tlsstatelanguagelink {
+  StateID "mediumint(8) unsigned" [not null, default: 0]
+  LanguageCode "varchar(2)" [not null]
+  LanguageSort "int(11)" [default: 0]
+
+  Indexes {
+    (StateID, LanguageCode) [pk]
+    LanguageCode [name: "LanguageCode"]
+    StateID [name: "StateID"]
+  }
+}
+
+Table whed_tlsstatestagelink {
+  StateID "mediumint(8) unsigned" [not null, default: 0]
+  StageCode "varchar(50)" [not null, default: '']
+  sStageName "varchar(160)"
+  sStageDescription "longtext"
+
+  Indexes {
+    (StateID, StageCode) [pk]
+    StageCode [name: "StageCode"]
+    StateID [name: "StateID"]
+  }
+}
+
+Table whed_trace {
+  TraceID "mediumint(8) unsigned" [pk, increment]
+  DateLance "timestamp" [not null, default: '0000-00-00 00:00:00']
+  Titre "varchar(160)" [not null, default: '']
+  LancePar "varchar(160)" [not null, default: '']
+  DetailSys "text" [not null]
+  TotalSys "smallint(4) unsigned" [not null, default: 0]
+  DetailIns "text" [not null]
+  TotalIns "smallint(4) unsigned" [not null, default: 0]
+  ErrorSQL "text" [not null]
+  Succes "tinyint(1) unsigned" [not null, default: 0]
+  Base "tinyint(1) unsigned" [not null, default: 0]
+  TotalEff "smallint(5) unsigned" [not null, default: 0]
+  TotalSta "smallint(5) unsigned" [not null, default: 0]
+  DetailSta "text" [not null]
+}
+
+Table whed_users {
+  UserID "mediumint(8) unsigned" [pk, increment]
+  login "varchar(60)" [not null, default: '']
+  pass "varchar(255)" [not null]
+  reset_pass "int(10) unsigned" [not null, default: 0]
+  connexion "int(11) unsigned" [not null, default: 0]
+  springer "int(11) unsigned" [not null, default: 0]
+  mail "varchar(64)" [not null, default: '']
+  language "varchar(2)" [not null, default: 'en']
+  role "tinyint(3) unsigned" [not null, default: 0]
+  status "tinyint(3) unsigned" [not null, default: 0]
+  created "int(11)" [not null, default: 0]
+  access "int(11)" [not null, default: 0]
+  nom "varchar(100)" [not null, default: '']
+  prenom "varchar(100)" [not null, default: '']
+  organisme "varchar(100)" [not null, default: '']
+  adresse "text" [not null]
+  cp "varchar(30)" [not null, default: '']
+  ville "varchar(100)" [not null, default: '']
+  pays "varchar(100)" [not null, default: '']
+  tel "varchar(50)" [not null, default: '']
+  fax "varchar(50)" [not null, default: '']
+  web "varchar(100)" [not null, default: '']
+  titre "varchar(100)" [not null, default: '']
+  fonction "varchar(100)" [not null, default: '']
+  expire "int(11)" [not null, default: 0]
+  payment "tinyint(1)" [not null, default: 0]
+  attente "tinyint(3) unsigned" [not null, default: 0]
+  IHUBuyer "tinyint(1) unsigned" [not null, default: 0]
+  datepass "timestamp" [not null, default: '0000-00-00 00:00:00']
+  totalexport "int(11) unsigned" [not null, default: 0]
+  json "int(11)" [not null, default: 0]
+  count_error_password "int(11)" [not null, default: 0]
+  must_reset_password "tinyint(4)" [default: 0]
+  first_time_password "tinyint(4)" [default: 0]
+  change_password "timestamp" [not null, default: '0000-00-00 00:00:00']
+
+  Indexes {
+    login [unique, name: "login"]
+    mail [unique, name: "mail"]
+    access [name: "access"]
+    attente [name: "attente"]
+    created [name: "created"]
+    status [name: "status"]
+  }
+}
+
+Table whed_xml_credlevel {
+  CredLevelID "int(3)" [pk, increment]
+  CredLevelCode "varchar(2)" [not null, default: '']
+  CredLevel "varchar(100)" [not null]
+  CredLevelTypeOption "int(11)" [default: 0]
+
+  Indexes {
+    CredLevel [unique, name: "CredLevel"]
+    CredLevelCode [unique, name: "CredLevelCode"]
+    CredLevelCode [unique, name: "CredLevelCode_2"]
+  }
+}
+
+Table whed_xml_currency {
+  CurrencyID "int(3)" [pk, increment]
+  CurrencyCode "varchar(3)" [not null, default: '']
+  Currency "varchar(40)" [not null]
+
+  Indexes {
+    Currency [unique, name: "Currency"]
+    CurrencyCode [unique, name: "CurrencyCode"]
+  }
+}
+
+Table whed_xml_divisiontype {
+  DivisionTypeID "int(3)" [pk, increment]
+  DivisionTypeCode "varchar(3)" [not null, default: '']
+  DivisionType "varchar(100)" [not null]
+  MapToCode "varchar(3)"
+  OutputSortOrder "int(11)" [default: 0]
+
+  Indexes {
+    DivisionType [unique, name: "DivisionType"]
+    DivisionTypeCode [unique, name: "DivisionTypeCode"]
+    OutputSortOrder [unique, name: "OutputSortOrder"]
+    MapToCode [name: "MapToCode"]
+  }
+}
+
+Table whed_xml_instfundingtype {
+  InstFundingTypeID "int(3)" [pk, increment]
+  InstFundingTypeCode "varchar(2)" [not null, default: '']
+  InstFundingType "varchar(30)" [not null]
+  InstFundingTypeSortOrder "int(11)" [default: 0]
+
+  Indexes {
+    InstFundingType [unique, name: "InstFundingType"]
+    InstFundingTypeCode [unique, name: "InstFundingTypeCode"]
+    InstFundingTypeCode [unique, name: "InstFundingTypeCode_2"]
+    InstFundingTypeSortOrder [unique, name: "InstFundingTypeSortOrder"]
+  }
+}
+
+Table whed_xml_jobfunction {
+  JobFunctionID "int(3)" [pk, increment]
+  JobFunctionCode "varchar(2)" [not null, default: '']
+  JobFunction "varchar(50)" [not null]
+  PrintJobFunction "varchar(50)"
+
+  Indexes {
+    JobFunction [unique, name: "JobFunction"]
+    JobFunctionCode [unique, name: "JobFunctionCode"]
+  }
+}
+
+Table whed_xml_language {
+  loID "int(3)" [pk, increment]
+  LanguageCode "varchar(2)" [not null, default: '']
+  Language "varchar(50)" [not null]
+
+  Indexes {
+    Language [unique, name: "Language"]
+    LanguageCode [unique, name: "LanguageCode"]
+  }
+}
+
+Table whed_xml_orgtype {
+  OrgTypeID "int(3)" [pk, increment]
+  OrgTypeCode "varchar(2)" [not null, default: '']
+  OrgType "varchar(100)" [not null]
+
+  Indexes {
+    OrgType [unique, name: "OrgType"]
+    OrgTypeCode [unique, name: "OrgTypeCode"]
+  }
+}
+
+Table whed_xml_schoollevel {
+  SchoolLevelID "int(3)" [pk, increment]
+  SchoolLevelCode "varchar(2)" [not null, default: '']
+  SchoolLevel "varchar(100)" [not null]
+
+  Indexes {
+    SchoolLevel [unique, name: "SchoolLevel"]
+    SchoolLevelCode [unique, name: "SchoolLevelCode"]
+  }
+}
+
+// =============================================================================
+//  Core Relationships & Linkages
+// =============================================================================
 
 Ref: whed_org.StateID > whed_state.StateID
-Ref: whed_org.AliasID > whed_org.OrgID
-Ref: whed_org.DPStatus > whed_lex_status.StatusCode
-
+Ref: whed_org.CountryCode > whed_lex_country.CountryCode
 Ref: whed_contact.OrgID > whed_org.OrgID
-Ref: whed_division.OrgID > whed_org.OrgID
 Ref: whed_degree.OrgID > whed_org.OrgID
 Ref: whed_degree.CredID > whed_cred.CredID
-
+Ref: whed_division.OrgID > whed_org.OrgID
+Ref: whed_cred.StateID > whed_state.StateID
+Ref: whed_statesystem.StateID - whed_state.StateID
+Ref: whed_orgfinaidbody.OrgID - whed_org.OrgID
+Ref: whed_orggovbody.OrgID - whed_org.OrgID
+Ref: whed_orgintcoop.OrgID - whed_org.OrgID
+Ref: whed_orgrecbody.OrgID - whed_org.OrgID
+Ref: whed_orgstudentassoc.OrgID - whed_org.OrgID
+Ref: whed_orgstudentservice.OrgID - whed_org.OrgID
+Ref: whed_periodical.OrgID > whed_org.OrgID
 Ref: whed_tlidegreefoslink.iDegreeID > whed_degree.iDegreeID
 Ref: whed_tlidegreefoslink.FOSCode > whed_lex_fos.FOSCode
-
 Ref: whed_tlidivisionfoslink.iDivisionID > whed_division.iDivisionID
 Ref: whed_tlidivisionfoslink.FOSCode > whed_lex_fos.FOSCode
-
-Ref: whed_cred.StateID > whed_state.StateID
-
-Ref: whed_tblcredreqcredlink.CredID > whed_cred.CredID
-Ref: whed_tblcredreqcredlink.CredID_Req > whed_cred.CredID
-
-Ref: whed_tblcredtypeinstlink.CredID > whed_cred.CredID
-Ref: whed_tblcredtypeinstlink.sTypeInstID > whed_tcsinsttype.sInstTypeID
-
-Ref: whed_resp_country.UserID > whed_users.UserID
-Ref: whed_resp_country.StateID > whed_state.StateID
-
-Ref: whed_resp_institution.UserID > whed_users.UserID
-Ref: whed_resp_institution.StateID > whed_state.StateID
-
-Ref: whed_data_provider.StateID > whed_state.StateID
-Ref: whed_data_provider.DPStatus > whed_lex_status.StatusCode
+Ref: whed_tcsadmissionreq.StateID > whed_state.StateID
+Ref: whed_tcsagreement.StateID > whed_state.StateID
+Ref: whed_tcsdecree.StateID > whed_state.StateID
+Ref: whed_tcsexchangeprogram.StateID > whed_state.StateID
+Ref: whed_tcsinsttype.StateID > whed_state.StateID
+Ref: whed_tcsrefinfo.StateID > whed_state.StateID
+Ref: whed_tcsschool.StateID > whed_state.StateID
+Ref: whed_tcsstage.StateID > whed_state.StateID
+Ref: whed_tlsstatelanguagelink.StateID > whed_state.StateID
+Ref: whed_tlsstatelanguagelink.LanguageCode > whed_lex_language.LanguageCode
+Ref: whed_tlsstatestagelink.StateID > whed_state.StateID
+Ref: whed_lex_countryregionlink.CountryCode > whed_lex_country.CountryCode
+Ref: whed_lex_countryregionlink.RegionCode > whed_lex_region.RegionCode

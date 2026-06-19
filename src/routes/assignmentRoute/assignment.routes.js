@@ -16,17 +16,15 @@ import {
 
 const router = express.Router();
 
-// Only admin users can manage editorial workspace assignments
-router.use(protect, authorize("admin"));
 
 // Country assignments
-router.get("/private/assignments/countries", getCountryAssignmentsController);
-router.post("/private/assignments/country", validate(countryAssignmentSchema), assignCountryController);
-router.delete("/private/assignments/country", removeCountryAssignmentController);
+router.get("/private/assignments/countries", protect, authorize(1), getCountryAssignmentsController);
+router.post("/private/assignments/country", protect, authorize(1), validate(countryAssignmentSchema), assignCountryController);
+router.delete("/private/assignments/country", protect, authorize(1), removeCountryAssignmentController);
 
 // Institution assignments
-router.get("/private/assignments/institutions", getInstitutionAssignmentsController);
-router.post("/private/assignments/institution", validate(institutionAssignmentSchema), assignInstitutionController);
-router.delete("/private/assignments/institution", removeInstitutionAssignmentController);
+router.get("/private/assignments/institutions", protect, authorize(1), getInstitutionAssignmentsController);
+router.post("/private/assignments/institution", protect, authorize(1), validate(institutionAssignmentSchema), assignInstitutionController);
+router.delete("/private/assignments/institution", protect, authorize(1), removeInstitutionAssignmentController);
 
 export default router;

@@ -562,11 +562,86 @@ const getInstituteByStateAndOrgID = async (stateId, orgId) => {
         d.CredID as credId, 
         c.Cred as credentialName, 
         d.iDegreeOrigine as originalTitle, 
-        d.iDegreeNote as note 
+        d.iDegreeNote as note,
+        c.CredID as c_CredID,
+        c.StateID as c_StateID,
+        c.Cred as c_Cred,
+        c.cAcronym as c_cAcronym,
+        c.CredCatCode1 as c_CredCatCode1,
+        c.CredCatCode2 as c_CredCatCode2,
+        c.CredLevelCode as c_CredLevelCode,
+        c.cDescription as c_cDescription,
+        c.cAlternativeQualification as c_cAlternativeQualification,
+        c.cEntryExamNational as c_cEntryExamNational,
+        c.cEntryExamInst as c_cEntryExamInst,
+        c.cMajorUpdateDate as c_cMajorUpdateDate,
+        c.cMinorUpdateDate as c_cMinorUpdateDate,
+        c.cMajorUpdateDateDP as c_cMajorUpdateDateDP,
+        c.cRecordHistory as c_cRecordHistory,
+        c.UserID as c_UserID,
+        c.cWarning as c_cWarning,
+        c.cDelete as c_cDelete
       FROM whed_degree d
       LEFT JOIN whed_cred c ON d.CredID = c.CredID
       WHERE d.OrgID = ?
     `, [orgId]);
+
+    // Map credential data and clean up temporary prefixed columns
+    degrees.forEach(d => {
+        if (d.c_CredID !== null && d.c_CredID !== undefined) {
+            d.credientionalData = {
+                id: d.c_CredID,
+                CredID: d.c_CredID,
+                stateId: d.c_StateID,
+                StateID: d.c_StateID,
+                name: d.c_Cred,
+                Cred: d.c_Cred,
+                acronym: d.c_cAcronym,
+                cAcronym: d.c_cAcronym,
+                CredCatCode1: d.c_CredCatCode1,
+                CredCatCode2: d.c_CredCatCode2,
+                levelCode: d.c_CredLevelCode,
+                CredLevelCode: d.c_CredLevelCode,
+                description: d.c_cDescription,
+                cDescription: d.c_cDescription,
+                cAlternativeQualification: d.c_cAlternativeQualification,
+                entryExamNational: d.c_cEntryExamNational,
+                cEntryExamNational: d.c_cEntryExamNational,
+                entryExamInst: d.c_cEntryExamInst,
+                cEntryExamInst: d.c_cEntryExamInst,
+                cMajorUpdateDate: d.c_cMajorUpdateDate,
+                cMinorUpdateDate: d.c_cMinorUpdateDate,
+                cMajorUpdateDateDP: d.c_cMajorUpdateDateDP,
+                cRecordHistory: d.c_cRecordHistory,
+                userId: d.c_UserID,
+                UserID: d.c_UserID,
+                cWarning: d.c_cWarning,
+                cDelete: d.c_cDelete
+            };
+        } else {
+            d.credientionalData = null;
+        }
+
+        // Clean up temporary fields
+        delete d.c_CredID;
+        delete d.c_StateID;
+        delete d.c_Cred;
+        delete d.c_cAcronym;
+        delete d.c_CredCatCode1;
+        delete d.c_CredCatCode2;
+        delete d.c_CredLevelCode;
+        delete d.c_cDescription;
+        delete d.c_cAlternativeQualification;
+        delete d.c_cEntryExamNational;
+        delete d.c_cEntryExamInst;
+        delete d.c_cMajorUpdateDate;
+        delete d.c_cMinorUpdateDate;
+        delete d.c_cMajorUpdateDateDP;
+        delete d.c_cRecordHistory;
+        delete d.c_UserID;
+        delete d.c_cWarning;
+        delete d.c_cDelete;
+    });
 
     // Fetch fields of study for degrees
     if (degrees.length > 0) {
@@ -608,6 +683,14 @@ const getInstituteByStateAndOrgID = async (stateId, orgId) => {
       FROM whed_contact
       WHERE OrgID = ?
     `, [orgId]);
+
+
+
+    console.log(degrees);
+
+
+
+
 
     return {
         ...institute,

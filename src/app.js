@@ -15,6 +15,7 @@ import dataProviderRoute from './routes/dataProviderRoute/dataProvider.routes.js
 import degreeRoute from './routes/degreeRoute/degree.routes.js';
 import divisionRoute from './routes/divisionRoute/division.routes.js';
 import educationSystem from './routes/educationSystemRoute/educationSystem.routes.js';
+import glossaryRoutes from "./routes/glossaryRoutes/glossary.route.js";
 import healthRoutes from "./routes/health/health.route.js";
 import instituteRoute from "./routes/instituteRoute/institute.route.js";
 import lookupRoute from './routes/lookupRoute/lookup.routes.js';
@@ -102,8 +103,20 @@ app.use("/api/v1", contactRoutes);
 
 
 
+/********** Glossary Management Routes Define Here *********/
+app.use('/api/v1', glossaryRoutes);
+
+
+
 /********** health check Routes Define Here *********/
 app.use("/api/v1", healthRoutes);
+
+
+
+
+
+
+
 
 
 
