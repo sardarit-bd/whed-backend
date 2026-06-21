@@ -689,12 +689,6 @@ const getInstituteByStateAndOrgID = async (stateId, orgId) => {
 
 
 
-    console.log(degrees);
-
-
-
-
-
     return {
         ...institute,
         divisions,

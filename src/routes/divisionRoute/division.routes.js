@@ -1,6 +1,5 @@
 import express from "express";
 import {
-  addDivisionFos,
   createDivision,
   deleteDivision,
   getAllDivisions,
@@ -8,7 +7,6 @@ import {
   updateDivision
 } from "../../controllers/divisionController/division.controller.js";
 import {
-  divisionFosSchema,
   divisionSchema,
   updateDivisionSchema,
   validate
@@ -16,13 +14,13 @@ import {
 
 const router = express.Router();
 
-router.get("/divisions", getAllDivisions);
-router.get("/division/:id", getSingleDivision);
-router.post("/division", validate(divisionSchema), createDivision);
-router.put("/division/:id", validate(updateDivisionSchema), updateDivision);
-router.delete("/division/:id", deleteDivision);
+router.get("/private/divisions", getAllDivisions);
+router.get("/private/division/:id", getSingleDivision);
+router.post("/private/division", validate(divisionSchema), createDivision);
+router.put("/private/division/:id", validate(updateDivisionSchema), updateDivision);
+router.delete("/private/division/:id", deleteDivision);
 
 // FOS link mapping
-router.post("/division/:id/fos", validate(divisionFosSchema), addDivisionFos);
+// router.post("/private/division/:id/fos", validate(divisionFosSchema), addDivisionFos);
 
 export default router;
