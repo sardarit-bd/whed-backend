@@ -674,12 +674,15 @@ const getInstituteByStateAndOrgID = async (stateId, orgId) => {
     const [contacts] = await pool.query(`
       SELECT 
         ContactID as id,
+        OrgID as orgId,
         JobTitle as jobTitle,
+        YearsOfOffice as yearsOfOffice,
         FirstName as firstName,
         Surname as surname,
         Sex as sex,
         JobFunctionCode as jobFunctionCode,
-        ContactEMail as contactEmail
+        ContactEMail as contactEmail,
+        ContactTel as contactTel
       FROM whed_contact
       WHERE OrgID = ?
     `, [orgId]);

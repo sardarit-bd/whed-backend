@@ -14,6 +14,8 @@ const router = express.Router();
 
 router.get("/private/contacts", getAllContact);
 router.get("/private/contact/:id", getSingleContact);
+
+// very need routes below
 router.post("/private/contact", protect, checkStateResponsibility, validate(contactSchema), createContact);
 router.put("/private/contact/:id", protect, checkStateResponsibility, validate(updateContactSchema), updateContact);
 router.delete("/private/contact/:id", protect, checkStateResponsibility, deleteContact);

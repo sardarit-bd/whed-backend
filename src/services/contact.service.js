@@ -1,7 +1,7 @@
 import pool from '../config/db.js';
 
 const ALLOWED_CONTACT_FIELDS = new Set([
-    "OrgID", "JobTitle", "FirstName", "Surname", "Sex", "JobFunctionCode", "ContactEMail", "EMail"
+    "OrgID", "JobTitle", "FirstName", "Surname", "Sex", "JobFunctionCode", "ContactEMail"
 ]);
 
 const getAllContacts = async (orgId) => {
@@ -10,12 +10,13 @@ const getAllContacts = async (orgId) => {
         ContactID as id,
         OrgID as orgId,
         JobTitle as jobTitle,
+        YearsOfOffice as yearsOfOffice,
         FirstName as firstName,
         Surname as surname,
         Sex as sex,
         JobFunctionCode as jobFunctionCode,
         ContactEMail as contactEmail,
-        EMail as email
+        ContactTel as contactTel
     FROM whed_contact
   `;
     const params = [];
@@ -60,6 +61,9 @@ const getSingleContact = async (id) => {
     return rows[0];
 };
 
+
+
+
 const createContact = async (contactData) => {
     const keys = Object.keys(contactData).filter(key => ALLOWED_CONTACT_FIELDS.has(key));
     const values = keys.map(key => contactData[key]);
@@ -75,6 +79,8 @@ const createContact = async (contactData) => {
     const [result] = await pool.query(query, values);
     return { id: result.insertId };
 };
+
+
 
 const updateContact = async (id, updateData) => {
     const keys = Object.keys(updateData).filter(key => ALLOWED_CONTACT_FIELDS.has(key));

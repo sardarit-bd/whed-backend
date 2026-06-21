@@ -5,24 +5,34 @@ const contactSchema = Joi.object({
         "number.base": "OrgID must be a number",
         "any.required": "OrgID is required",
     }),
-    JobTitle: Joi.string().max(255).optional().allow(""),
-    FirstName: Joi.string().max(150).required().messages({
+
+    FirstName: Joi.string().max(60).required().messages({
         "string.empty": "First name is required",
-        "string.max": "First name cannot exceed 150 characters",
+        "string.max": "First name cannot exceed 60 characters",
+        "any.required": "First name is required",
     }),
-    Surname: Joi.string().max(150).required().messages({
+
+    Surname: Joi.string().max(60).required().messages({
         "string.empty": "Surname is required",
-        "string.max": "Surname cannot exceed 150 characters",
+        "string.max": "Surname cannot exceed 60 characters",
+        "any.required": "Surname is required",
     }),
-    Sex: Joi.string().max(2).optional().allow(""),
-    JobFunctionCode: Joi.string().max(10).optional().allow(""),
-    ContactEMail: Joi.string().email().max(150).optional().allow("").messages({
+
+    JobTitle: Joi.string().max(100).optional().allow(""),
+
+    JobFunctionCode: Joi.string().max(2).optional().allow(""),
+
+    YearsOfOffice: Joi.string().max(45).optional().allow(""),
+
+    ContactTel: Joi.string().max(60).optional().allow(""),
+
+    ContactEMail: Joi.string().email().max(100).optional().allow("").messages({
         "string.email": "Invalid contact email format",
     }),
-    EMail: Joi.string().email().max(150).optional().allow("").messages({
-        "string.email": "Invalid email format",
-    }),
+
+    Sex: Joi.string().max(1).optional().allow(""),
 });
+
 
 export const updateContactSchema = Joi.object({
     OrgID: Joi.number().integer().optional(),
