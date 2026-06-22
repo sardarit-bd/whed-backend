@@ -508,6 +508,7 @@ const getInstituteByStateAndOrgID = async (stateId, orgId) => {
         iStudentForeignFemale,
         iStudentDistance,
         iStudentsDisabilities,
+        iRecordHistory,
         iDegreeNote
     FROM whed_org
     WHERE StateID = ? AND OrgID = ?
