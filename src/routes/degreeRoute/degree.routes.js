@@ -3,6 +3,7 @@ import {
   addDegreeFos,
   createDegree,
   deleteDegree,
+  deleteDegreeFos,
   getAllDegrees,
   getSingleDegree,
   updateDegree
@@ -23,6 +24,7 @@ router.put("/private/degree/:id", validate(updateDegreeSchema), updateDegree);
 router.delete("/private/degree/:id", deleteDegree);
 
 // FOS link mapping
-router.post("/private/degree/:id/fos", validate(degreeFosSchema), addDegreeFos);
+router.post("/private/degree/fos", validate(degreeFosSchema), addDegreeFos);
+router.delete("/private/degree/:degreeId/fos/:fieldCode", deleteDegreeFos);
 
 export default router;

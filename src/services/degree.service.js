@@ -133,20 +133,26 @@ const deleteDegree = async (id) => {
     return result;
 };
 
-const linkDegreeFos = async (degreeId, fosCodes) => {
+const linkDegreeFos = async (degreeArrayData) => {
     let connection;
     try {
         connection = await pool.getConnection();
         await connection.beginTransaction();
 
-        // Delete old links
-        await connection.query(`DELETE FROM whed_tlidegreefoslink WHERE iDegreeID = ?`, [degreeId]);
-
-        // Insert new ones
-        if (fosCodes && fosCodes.length > 0) {
-            const values = fosCodes.map(code => [degreeId, code]);
-            await connection.query(`INSERT INTO whed_tlidegreefoslink (iDegreeID, FOSCode) VALUES ?`, [values]);
+        if (!degreeArrayData?.length) {
+            throw new Error("No data provided.");
         }
+
+        const values = degreeArrayData.map(item => [
+            item.iDegreeID,
+            item.FOSCode,
+        ]);
+
+        await connection.query(
+            `INSERT INTO whed_tlidegreefoslink (iDegreeID, FOSCode)
+             VALUES ?`,
+            [values]
+        );
 
         await connection.commit();
         return { success: true };
@@ -158,12 +164,20 @@ const linkDegreeFos = async (degreeId, fosCodes) => {
     }
 };
 
+
+const deleteDegreeFosService = async (id, fieldCode) => {
+    const query = `DELETE FROM whed_tlidegreefoslink WHERE iDegreeID = ? AND FOSCode = ?`;
+    const [result] = await pool.query(query, [id, fieldCode]);
+    return result;
+}
+
+
 export {
     createDegree,
-    deleteDegree,
-    getAllDegrees,
+    deleteDegree, deleteDegreeFosService, getAllDegrees,
     getSingleDegree,
     getTotalDegrees,
     linkDegreeFos,
     updateDegree
 };
+

@@ -4,7 +4,8 @@ import {
   getAllDegrees as getAllDegreesService,
   getSingleDegree as getSingleDegreeService,
   linkDegreeFos as linkDegreeFosService,
-  updateDegree as updateDegreeService
+  updateDegree as updateDegreeService,
+  deleteDegreeFosService
 } from "../../services/degree.service.js";
 
 /********** get all degrees **********/
@@ -144,24 +145,62 @@ const deleteDegree = async (req, res) => {
 /********** link degree FOS **********/
 const addDegreeFos = async (req, res) => {
   try {
-    const { id } = req.params;
-    const { fosCodes } = req.validatedBody;
-
-    await linkDegreeFosService(id, fosCodes);
+    const result = await linkDegreeFosService(req.validatedBody);
     res.status(200).json({
       success: true,
-      message: "Degree fields of study updated successfully!"
+      message: "Degree fields of study updated successfully!",
+      data: result
     });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
 };
 
+
+
+/*************** degree fos delete ********************/
+const deleteDegreeFos = async(req,res) => {
+  try {
+
+    const { degreeId, fieldCode } = req.params;
+    if (!degreeId || !fieldCode) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid ID format.",
+      });
+    }
+
+    const result = await deleteDegreeFosService(degreeId, fieldCode);
+    if (result.affectedRows === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "Degree FOS not found.",
+      });
+    }
+    res.status(200).json({
+      success: true,
+      message: "Degree FOS deleted successfully!",
+    });
+
+  } catch (error) {
+    console.error("Error deleting Degree FOS:", error.message);
+    res.status(500).json({
+      success: false,
+      message: "Something went wrong while deleting the Degree FOS.",
+    });
+  }
+
+}
+
+
+
+
+
 export {
   addDegreeFos,
   createDegree,
-  deleteDegree,
-  getAllDegrees,
+  deleteDegree, deleteDegreeFos, getAllDegrees,
   getSingleDegree,
   updateDegree
 };
+

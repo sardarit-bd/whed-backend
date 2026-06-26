@@ -22,12 +22,14 @@ export const updateDivisionSchema = Joi.object({
     "object.min": "At least one field must be provided to update",
 });
 
-export const divisionFosSchema = Joi.object({
-    fosCodes: Joi.array().items(Joi.string().max(10)).required().messages({
-        "array.base": "fosCodes must be an array of field of study codes",
-        "any.required": "fosCodes array is required",
-    }),
-});
+export const divisionFosSchema = Joi.array()
+    .items(
+        Joi.object({
+            iDivisionID: Joi.number().integer().required(),
+            FOSCode: Joi.number().integer().required(),
+        })
+    ).min(1).required();
+
 
 export const validate = (schema) => (req, res, next) => {
     const { error, value } = schema.validate(req.body, {

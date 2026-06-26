@@ -4,7 +4,8 @@ import {
   getAllDivisions as getAllDivisionsService,
   getSingleDivision as getSingleDivisionService,
   linkDivisionFos as linkDivisionFosService,
-  updateDivision as updateDivisionService
+  updateDivision as updateDivisionService,
+  deleteDivisionFosService
 } from "../../services/division.service.js";
 
 /********** get all divisions **********/
@@ -143,10 +144,8 @@ const deleteDivision = async (req, res) => {
 /********** link division FOS **********/
 const addDivisionFos = async (req, res) => {
   try {
-    const { id } = req.params;
-    const { fosCodes } = req.validatedBody;
 
-    await linkDivisionFosService(id, fosCodes);
+    await linkDivisionFosService(req.validatedBody);
     res.status(200).json({
       success: true,
       message: "Division fields of study updated successfully!"
@@ -156,11 +155,48 @@ const addDivisionFos = async (req, res) => {
   }
 };
 
+
+/*********** division fos delete ************/
+const deleteDivisionFos = async (req, res) => {
+
+  try {
+
+    const { divisionId, fieldCode } = req.params;
+    if (!divisionId || !fieldCode) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid ID format.",
+      });
+    }
+
+    const result = await deleteDivisionFosService(divisionId, fieldCode);
+    if (result.affectedRows === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "Division FOS not found.",
+      });
+    }
+    res.status(200).json({
+      success: true,
+      message: "Division FOS deleted successfully!",
+    });
+
+  } catch (error) {
+    console.error("Error deleting division FOS:", error.message);
+    res.status(500).json({
+      success: false,
+      message: "Something went wrong while deleting the division FOS.",
+    });
+  }
+
+
+}
+
 export {
   addDivisionFos,
   createDivision,
-  deleteDivision,
-  getAllDivisions,
+  deleteDivision, deleteDivisionFos, getAllDivisions,
   getSingleDivision,
   updateDivision
 };
+

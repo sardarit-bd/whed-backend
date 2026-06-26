@@ -106,22 +106,31 @@ const deleteDivision = async (id) => {
     return result;
 };
 
-const linkDivisionFos = async (divisionId, fosCodes) => {
+
+const linkDivisionFos = async (divisionArrayData) => {
     let connection;
+
     try {
         connection = await pool.getConnection();
         await connection.beginTransaction();
 
-        // Delete old links
-        await connection.query(`DELETE FROM whed_tlidivisionfoslink WHERE iDivisionID = ?`, [divisionId]);
-
-        // Insert new ones
-        if (fosCodes && fosCodes.length > 0) {
-            const values = fosCodes.map(code => [divisionId, code]);
-            await connection.query(`INSERT INTO whed_tlidivisionfoslink (iDivisionID, FOSCode) VALUES ?`, [values]);
+        if (!divisionArrayData?.length) {
+            throw new Error("No data provided.");
         }
 
+        const values = divisionArrayData.map(item => [
+            item.iDivisionID,
+            item.FOSCode,
+        ]);
+
+        await connection.query(
+            `INSERT INTO whed_tlidivisionfoslink (iDivisionID, FOSCode)
+             VALUES ?`,
+            [values]
+        );
+
         await connection.commit();
+
         return { success: true };
     } catch (error) {
         if (connection) await connection.rollback();
@@ -131,12 +140,22 @@ const linkDivisionFos = async (divisionId, fosCodes) => {
     }
 };
 
+
+
+const deleteDivisionFosService = async (id, fieldCode) => {
+    const query = `DELETE FROM whed_tlidivisionfoslink WHERE iDivisionID = ? AND FOSCode = ?`;
+    const [result] = await pool.query(query, [id, fieldCode]);
+    return result;
+
+}
+
+
 export {
     createDivision,
-    deleteDivision,
-    getAllDivisions,
+    deleteDivision, deleteDivisionFosService, getAllDivisions,
     getSingleDivision,
     getTotalDivisions,
     linkDivisionFos,
     updateDivision
 };
+
