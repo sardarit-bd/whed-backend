@@ -490,6 +490,7 @@ const getInstituteByStateAndOrgID = async (stateId, orgId) => {
         PostCode,
         Tel,
         Fax,
+        EMail,
         WWW,
         iStaffStatisticsYear,
         iStaffFullTimeTotal,

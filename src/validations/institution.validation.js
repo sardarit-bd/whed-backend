@@ -1,6 +1,7 @@
 import Joi from "joi";
 
 export const instituteSchema = Joi.object({
+    
     nameInEnglish: Joi.string().min(2).max(100).required().messages({
         "string.base": "Institution Name in English must be a text",
         "string.empty": "Institution Name in English is required",
