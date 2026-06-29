@@ -138,45 +138,180 @@ const getSingleInstitute = async (id) => {
 };
 
 const createInstitute = async (instituteData) => {
-    // Map form fields to whed_org schema columns
+
+
+
     const mappedData = {};
-    if (instituteData.name) mappedData.OrgName = instituteData.name;
-    if (instituteData.nameInEnglish) mappedData.InstNameEnglish = instituteData.nameInEnglish;
-    if (instituteData.branchof) mappedData.iBranchName = instituteData.branchof;
-    if (instituteData.acronym) mappedData.InstAcronym = instituteData.acronym;
-    if (instituteData.street) mappedData.Street = instituteData.street;
-    if (instituteData.city) mappedData.City = instituteData.city;
-    if (instituteData.province) mappedData.Province = instituteData.province;
-    if (instituteData.postalCode) mappedData.PostCode = instituteData.postalCode;
-    if (instituteData.tel) mappedData.Tel = instituteData.tel;
-    if (instituteData.fax) mappedData.Fax = instituteData.fax;
-    if (instituteData.email) mappedData.EMail = instituteData.email;
-    if (instituteData.website) mappedData.WWW = instituteData.website;
-    if (instituteData.logo) mappedData.iLogo = instituteData.logo;
-    if (instituteData.typeofInstitute) mappedData.OrgTypeCode = instituteData.typeofInstitute;
-    if (instituteData.religion) mappedData.ReligionCode = instituteData.religion;
-    if (instituteData.news) mappedData.iIAUNews = instituteData.news;
-    if (instituteData.yearofcreation) mappedData.iCreated = String(instituteData.yearofcreation);
-    if (instituteData.admissionrequirements) mappedData.iAdmissionRequirements = instituteData.admissionrequirements;
-    if (instituteData.tuitionfees) mappedData.iFeesN = instituteData.tuitionfees;
-    if (instituteData.nationalstudents) mappedData.iStudentTotal = instituteData.nationalstudents;
-    if (instituteData.internationalstudents) mappedData.iStudentForeignTotal = instituteData.internationalstudents;
-    if (instituteData.languageofinstruction) mappedData.iLanguagesUsed = instituteData.languageofinstruction;
-    if (instituteData.nameofyournationalcompetentaccreditationbody) mappedData.iAccreditingAgency = instituteData.nameofyournationalcompetentaccreditationbody;
-    if (instituteData.dateoftheaccreditationlastused) mappedData.iAccreditationEndDate = String(instituteData.dateoftheaccreditationlastused);
-    if (instituteData.studentbody) mappedData.iStudentBody = instituteData.studentbody;
 
-    // State & Classifications
-    if (instituteData.StateID) mappedData.StateID = instituteData.StateID;
-    if (instituteData.CountryCode) mappedData.CountryCode = instituteData.CountryCode;
-    if (instituteData.StateCode) mappedData.StateCode = instituteData.StateCode;
-    if (instituteData.fundingType) mappedData.InstFundingTypeCode = instituteData.fundingType;
-    if (instituteData.classCode) mappedData.InstClassCode = instituteData.classCode;
+    // ==========================================
+    // ১. রিকোয়ার্ড ফিল্ডস (Null = NO & No Default)
+    // ==========================================
+    mappedData.OrgName = instituteData.name ? instituteData.name.trim() : '';
+    mappedData.InstNameEnglish = instituteData.nameInEnglish ? instituteData.nameInEnglish.trim() : '';
+    mappedData.iBranchName = instituteData.branchof ? instituteData.branchof.trim() : 'Main Branch';
+    mappedData.iBranchNameEnglish = instituteData.branchof ? instituteData.branchof.trim() : 'Main Branch';
+    mappedData.iRecordHistory = instituteData.recordHistory ? instituteData.recordHistory.trim() : 'Record created via system API.';
 
-    // Officers
-    if (instituteData.fullName) mappedData.DPName = instituteData.fullName;
-    if (instituteData.contactemail) mappedData.DPEMail = instituteData.contactemail;
+    // ==========================================
+    // ২. কোর আইডেন্টিফায়ার এবং কোডস
+    // ==========================================
+    if (instituteData.GlobalID) mappedData.GlobalID = instituteData.GlobalID.trim();
+    if (instituteData.iParentOrgID) mappedData.iParentOrgID = parseInt(instituteData.iParentOrgID, 10);
+    if (instituteData.AliasID !== undefined) mappedData.AliasID = parseInt(instituteData.AliasID, 10);
+    if (instituteData.Family !== undefined) mappedData.Family = parseInt(instituteData.Family, 10);
+    if (instituteData.BranchID) mappedData.BranchID = parseInt(instituteData.BranchID, 10);
+    if (instituteData.UserID) mappedData.UserID = parseInt(instituteData.UserID, 10);
 
+    if (instituteData.CountryCode) mappedData.CountryCode = instituteData.CountryCode.trim();
+    if (instituteData.StateCode) mappedData.StateCode = instituteData.StateCode.trim();
+    if (instituteData.StateID) mappedData.StateID = parseInt(instituteData.StateID, 10);
+    if (instituteData.typeofInstitute) mappedData.OrgTypeCode = instituteData.typeofInstitute.trim();
+    if (instituteData.classCode) mappedData.InstClassCode = instituteData.classCode.trim();
+    if (instituteData.fundingType) mappedData.InstFundingTypeCode = instituteData.fundingType.trim();
+    if (instituteData.religion) mappedData.ReligionCode = instituteData.religion.trim();
+
+    // ==========================================
+    // ৩. মেম্বারশিপ, মিডিয়া এবং টেক্সট ফিল্ডস
+    // ==========================================
+    if (instituteData.acronym) mappedData.InstAcronym = instituteData.acronym.trim();
+    if (instituteData.alternativeName) mappedData.InstNameAlt = instituteData.alternativeName.trim();
+    if (instituteData.iauMembershipOption !== undefined) mappedData.iIAUMembershipOption = parseInt(instituteData.iauMembershipOption, 10);
+    if (instituteData.iauLogo) mappedData.iIAULogo = instituteData.iauLogo.trim();
+    if (instituteData.news) mappedData.iIAUNews = instituteData.news.trim();
+    if (instituteData.aauMembershipOption !== undefined) mappedData.iAAUMembershipOption = parseInt(instituteData.aauMembershipOption, 10);
+    if (instituteData.otherSites) mappedData.iOtherSites = instituteData.otherSites.trim();
+    if (instituteData.history) mappedData.iHistory = instituteData.history.trim();
+    if (instituteData.admissionrequirements) mappedData.iAdmissionRequirements = instituteData.admissionrequirements.trim();
+    if (instituteData.tuitionfees) mappedData.iFeesN = instituteData.tuitionfees.trim();
+    if (instituteData.feesNCurrencyCode) mappedData.iFeesNCurrencyCode = instituteData.feesNCurrencyCode.trim();
+    if (instituteData.feesI) mappedData.iFeesI = instituteData.feesI.trim();
+    if (instituteData.feesICurrencyCode) mappedData.iFeesICurrencyCode = instituteData.feesICurrencyCode.trim();
+    if (instituteData.academicYear) mappedData.iAcademicYear = instituteData.academicYear.trim();
+    if (instituteData.languageofinstruction) mappedData.iLanguagesUsed = instituteData.languageofinstruction.trim();
+    if (instituteData.library) mappedData.iLibrary = instituteData.library.trim();
+    if (instituteData.mainPress) mappedData.iMainPress = instituteData.mainPress.trim();
+    if (instituteData.residentialFacilities) mappedData.iResidentialFacilities = instituteData.residentialFacilities.trim();
+    if (instituteData.yearofcreation) mappedData.iCreated = String(instituteData.yearofcreation).trim();
+    if (instituteData.presentStatusYear) mappedData.iPresentStatusYear = instituteData.presentStatusYear.trim();
+    if (instituteData.degreeNote) mappedData.iDegreeNote = instituteData.degreeNote.trim();
+    if (instituteData.comment) mappedData.iComment = instituteData.comment.trim();
+    if (instituteData.partnership) mappedData.iPartnership = instituteData.partnership.trim();
+    if (instituteData.instClassHistory) mappedData.iInstClassHistory = instituteData.instClassHistory.trim();
+
+    // ==========================================
+    // ৪. স্টাফ স্ট্যাটিস্টিকস (Staff Stats)
+    // ==========================================
+    if (instituteData.staffStatisticsYear) mappedData.iStaffStatisticsYear = instituteData.staffStatisticsYear.trim();
+    if (instituteData.staffStatisticsApprox !== undefined) mappedData.iStaffStatisticsApprox = instituteData.staffStatisticsApprox ? 1 : 0;
+    if (instituteData.staffFullTimeTotal !== undefined) mappedData.iStaffFullTimeTotal = parseInt(instituteData.staffFullTimeTotal, 10);
+    if (instituteData.staffFullTimeMale !== undefined) mappedData.iStaffFullTimeMale = parseInt(instituteData.staffFullTimeMale, 10);
+    if (instituteData.staffFullTimeFemale !== undefined) mappedData.iStaffFullTimeFemale = parseInt(instituteData.staffFullTimeFemale, 10);
+    if (instituteData.staffPartTimeTotal !== undefined) mappedData.iStaffPartTimeTotal = parseInt(instituteData.staffPartTimeTotal, 10);
+    if (instituteData.staffPartTimeFemale !== undefined) mappedData.iStaffPartTimeFemale = parseInt(instituteData.staffPartTimeFemale, 10);
+    if (instituteData.staffPartTimeMale !== undefined) mappedData.iStaffPartTimeMale = parseInt(instituteData.staffPartTimeMale, 10);
+    if (instituteData.staffDocFullTimeTotal !== undefined) mappedData.iStaffDocFullTimeTotal = parseInt(instituteData.staffDocFullTimeTotal, 10);
+    if (instituteData.staffDocFullTimeMale !== undefined) mappedData.iStaffDocFullTimeMale = parseInt(instituteData.staffDocFullTimeMale, 10);
+    if (instituteData.staffDocFullTimeFemale !== undefined) mappedData.iStaffDocFullTimeFemale = parseInt(instituteData.staffDocFullTimeFemale, 10);
+
+    // ==========================================
+    // ৫. স্টুডেন্ট স্ট্যাটিস্টিকস (Student Stats)
+    // ==========================================
+    if (instituteData.studentStatisticsYear) mappedData.iStudentStatisticsYear = instituteData.studentStatisticsYear.trim();
+    if (instituteData.studentStatisticsApprox !== undefined) mappedData.iStudentStatisticsApprox = instituteData.studentStatisticsApprox ? 1 : 0;
+    if (instituteData.nationalstudents !== undefined) mappedData.iStudentTotal = parseInt(instituteData.nationalstudents, 10);
+    if (instituteData.studentMale !== undefined) mappedData.iStudentMale = parseInt(instituteData.studentMale, 10);
+    if (instituteData.studentFemale !== undefined) mappedData.iStudentFemale = parseInt(instituteData.studentFemale, 10);
+    if (instituteData.internationalstudents !== undefined) mappedData.iStudentForeignTotal = parseInt(instituteData.internationalstudents, 10);
+    if (instituteData.studentForeignMale !== undefined) mappedData.iStudentForeignMale = parseInt(instituteData.studentForeignMale, 10);
+    if (instituteData.studentForeignFemale !== undefined) mappedData.iStudentForeignFemale = parseInt(instituteData.studentForeignFemale, 10);
+    if (instituteData.studentPartTime !== undefined) mappedData.iStudentPartTime = parseInt(instituteData.studentPartTime, 10);
+    if (instituteData.studentDistance !== undefined) mappedData.iStudentDistance = parseInt(instituteData.studentDistance, 10);
+    if (instituteData.studentsDisabilities !== undefined) mappedData.iStudentsDisabilities = parseInt(instituteData.studentsDisabilities, 10);
+
+    // ==========================================
+    // ৬. অ্যাক্রেডিটেশন ও এফিলিয়েশন
+    // ==========================================
+    if (instituteData.nameofyournationalcompetentaccreditationbody) mappedData.iAccreditingAgency = instituteData.nameofyournationalcompetentaccreditationbody.trim();
+    if (instituteData.dateoftheaccreditationlastused) mappedData.iAccreditationEndDate = String(instituteData.dateoftheaccreditationlastused).trim();
+    if (instituteData.dateAccredited) mappedData.DateAccredited = instituteData.dateAccredited.trim();
+    if (instituteData.sInstTypeID) mappedData.sInstTypeID = parseInt(instituteData.sInstTypeID, 10);
+    if (instituteData.studentbody) mappedData.iStudentBody = instituteData.studentbody.trim();
+
+    // ==========================================
+    // ৭. স্টুডেন্ট সার্ভিস ফ্ল্যাগস (iSS Fields)
+    // ==========================================
+    const issFields = [
+        'iSSAcademicCounselling', 'iSSSocialCounselling', 'iSSCareersAdvices',
+        'iSSNurseryCare', 'iSSCulturalActivities', 'iSSSportsFacilities',
+        'iSSLanguageLaboratory', 'iSSDisabledFacilities', 'iSSHealthServices',
+        'iSSCanteen', 'iSSLibrary', 'iSSeLibrary', 'iSSResidentialFacilities',
+        'iSSITCentre', 'iSSForeignStudiesCentre', 'iSSOnlineDistanceLearning'
+    ];
+    issFields.forEach(field => {
+        // ফ্রন্টএন্ড থেকে উটের পিঠের মতো (camelCase) নাম আশা করা হচ্ছে (যেমন: iSSAcademicCounselling -> academicCounselling)
+        const frontendKey = field.charAt(3).toLowerCase() + field.slice(4);
+        if (instituteData[frontendKey] !== undefined) {
+            mappedData[field] = instituteData[frontendKey] ? 1 : 0;
+        }
+    });
+
+    // ==========================================
+    // ৮. কন্টাক্ট এবং অ্যাড্রেস
+    // ==========================================
+    if (instituteData.street) mappedData.Street = instituteData.street.trim();
+    if (instituteData.city) mappedData.City = instituteData.city.trim();
+    if (instituteData.province) mappedData.Province = instituteData.province.trim();
+    if (instituteData.postalCode) mappedData.PostCode = instituteData.postalCode.trim();
+    if (instituteData.tel) mappedData.Tel = instituteData.tel.trim();
+    if (instituteData.fax) mappedData.Fax = instituteData.fax.trim();
+    if (instituteData.email) mappedData.EMail = instituteData.email.trim();
+    if (instituteData.website) mappedData.WWW = instituteData.website.trim();
+    if (instituteData.logo) mappedData.iLogo = instituteData.logo.trim();
+
+    // ==========================================
+    // ৯. সিস্টেম ফ্ল্যাগস ও ডেটা প্রসেসিং (DP) ট্র্যাকিং
+    // ==========================================
+    if (instituteData.iWarning !== undefined) mappedData.iWarning = parseInt(instituteData.iWarning, 10);
+    if (instituteData.iDelete !== undefined) mappedData.iDelete = parseInt(instituteData.iDelete, 10);
+    if (instituteData.iUpdate !== undefined) mappedData.iUpdate = parseInt(instituteData.iUpdate, 10);
+    if (instituteData.iLearning !== undefined) mappedData.iLearning = parseInt(instituteData.iLearning, 10);
+    if (instituteData.iOther !== undefined) mappedData.iOther = parseInt(instituteData.iOther, 10);
+
+    if (instituteData.dpTypeContact !== undefined) mappedData.DPTypeContact = parseInt(instituteData.dpTypeContact, 10);
+    if (instituteData.fullName) mappedData.DPName = instituteData.fullName.trim();
+    if (instituteData.contactemail) mappedData.DPEMail = instituteData.contactemail.trim();
+    if (instituteData.dpEmailCopie) mappedData.DPEMailCopie = instituteData.dpEmailCopie.trim();
+    if (instituteData.dpStatus !== undefined) mappedData.DPStatus = parseInt(instituteData.dpStatus, 10);
+    if (instituteData.dpFlag !== undefined) mappedData.DPFlag = parseInt(instituteData.dpFlag, 10);
+    if (instituteData.dpControle) mappedData.DPControle = instituteData.dpControle.trim();
+    if (instituteData.dpHistRelance) mappedData.DPHistRelance = instituteData.dpHistRelance.trim();
+
+    // DP Unix Epoch Timestamps
+    const dpTimestamps = [
+        'DPDateEnvoi', 'DPDateLimite', 'DPDateAcces', 'DPDateModif',
+        'DPDateRelance', 'DPDateRetour', 'DPDateValid', 'DPNbrRelance'
+    ];
+    dpTimestamps.forEach(tsField => {
+        const frontendTsKey = tsField.charAt(0).toLowerCase() + tsField.slice(1);
+        if (instituteData[frontendTsKey] !== undefined) {
+            mappedData[tsField] = parseInt(instituteData[frontendTsKey], 10);
+        }
+    });
+
+    // ==========================================
+    // ১০. সিস্টেম ডেট অ্যান্ড টাইমস্ট্যাম্পস
+    // ==========================================
+    // ইনসার্ট এর সময় কারেন্ট টাইম স্ট্যাম্প সেট করা হচ্ছে
+    mappedData.iInputDate = new Date();
+    mappedData.iWebUpdateDate = new Date();
+
+
+
+    console.log(mappedData);
+
+    // ==========================================
+    // ১১. ডাটাবেজ ট্রানজেকশন এক্সিকিউশন
+    // ==========================================
     let connection;
     try {
         connection = await pool.getConnection();
@@ -186,7 +321,7 @@ const createInstitute = async (instituteData) => {
         const values = Object.values(mappedData);
 
         if (keys.length === 0) {
-            throw new Error("No valid institute fields provided");
+            throw new Error("No valid fields provided for database insertion.");
         }
 
         const placeholders = keys.map(() => "?").join(", ");
@@ -195,17 +330,19 @@ const createInstitute = async (instituteData) => {
 
         const [result] = await connection.query(query, values);
         await connection.commit();
-        return { id: result.insertId };
+
+        const insertId = Array.isArray(result) ? result[0].insertId : result.insertId;
+        return { id: insertId || null };
+
     } catch (error) {
-        if (connection) {
-            await connection.rollback();
-        }
+        if (connection) await connection.rollback();
+        console.error("Database Service Transaction Error:", error.message);
         throw error;
     } finally {
-        if (connection) {
-            connection.release();
-        }
+        if (connection) connection.release();
     }
+
+
 };
 
 const ALLOWED_ORG_FIELDS = new Set([

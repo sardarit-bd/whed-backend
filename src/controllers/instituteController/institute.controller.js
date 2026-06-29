@@ -1,4 +1,4 @@
-import { createInstitute as createInstituteService, deleteInstitute as deleteInstituteService, getAllInstitutes as getAllInstitutesService, getDetailedInstitutesByState as getDetailedInstitutesByStateService, getSingleInstitute as getSingleInstituteService, updateInstitute as updateInstituteService, getInstituteByStateAndOrgID as getInstituteByStateAndOrgIDService } from '../../services/institute.service.js';
+import { createInstitute as createInstituteService, deleteInstitute as deleteInstituteService, getAllInstitutes as getAllInstitutesService, getDetailedInstitutesByState as getDetailedInstitutesByStateService, getInstituteByStateAndOrgID as getInstituteByStateAndOrgIDService, getSingleInstitute as getSingleInstituteService, updateInstitute as updateInstituteService } from '../../services/institute.service.js';
 
 /********** get all institutes **********/
 const getAllInstitutes = async (req, res) => {
@@ -60,7 +60,11 @@ const getSingleInstitute = async (req, res) => {
 /********** create institute **********/
 const createInstitute = async (req, res) => {
   try {
+
+
     const result = await createInstituteService(req.validatedBody);
+
+
     res.status(201).json({
       success: true,
       message: "Institution created successfully!",
