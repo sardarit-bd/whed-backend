@@ -84,7 +84,11 @@ import {
   updateReligion,
   updateSchoolLevel,
   updateStage,
-  updateStatus
+  updateStatus,
+  getAllYesNo,
+  getAllGenres,
+  getAllMembers,
+  getAllMonths
 } from "../../controllers/glossaryController/glossary.controller.js";
 import { authorize, protect } from "../../middlewares/auth.middleware.js";
 import {
@@ -122,7 +126,7 @@ import {
   updateStageSchema,
   updateStatusSchema,
   updateTraductionSchema,
-  validate
+  validate,
 } from "../../validations/glossary.validation.js";
 
 const router = express.Router();
@@ -245,5 +249,19 @@ router.get("/private/glossary/org-type/:id", protect, authorize(1), getSingleOrg
 router.post("/private/glossary/org-type", protect, authorize(1), validate(orgTypeSchema), createOrgType);
 router.put("/private/glossary/org-type/:id", protect, authorize(1), validate(updateOrgTypeSchema), updateOrgType);
 router.delete("/private/glossary/org-type/:id", protect, authorize(1), deleteOrgType);
+
+
+
+//whed_lex_yesno
+router.get("/private/glossary/yesnos", protect, authorize(1), getAllYesNo);
+
+//whed_lex_genre
+router.get("/private/glossary/genres", protect, authorize(1), getAllGenres);
+
+//whed_lex-member
+router.get("/private/glossary/members", protect, authorize(1), getAllMembers);
+
+//whed_lex_month
+router.get("/private/glossary/months", protect, authorize(1), getAllMonths);
 
 export default router;

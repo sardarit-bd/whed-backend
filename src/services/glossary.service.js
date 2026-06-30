@@ -226,3 +226,20 @@ export const getSingleOrgType = (id) => getById("whed_lex_orgtype", "OrgTypeID",
 export const createOrgType = (data) => create("whed_lex_orgtype", "OrgTypeID", ALLOWED_ORGTYPE_FIELDS, data);
 export const updateOrgType = (id, data) => update("whed_lex_orgtype", "OrgTypeID", id, ALLOWED_ORGTYPE_FIELDS, data);
 export const deleteOrgType = (id) => remove("whed_lex_orgtype", "OrgTypeID", id);
+
+// 18. YesNo (whed_lex_yesno)
+const YESNO_FIELDS = ["YesNo", "YesNoCode"];
+export const getAllYesNo = () => getAll("whed_lex_yesno", YESNO_FIELDS, "YesNo");
+
+// 19. Genre (whed_lex_genre)
+const GENRE_FIELDS = ["Genre", "GenreCode"];
+export const getAllGenres = () => getAll("whed_lex_genre", GENRE_FIELDS, "Genre");
+
+// 20. Member (whed_lex_member)
+const MEMBER_FIELDS = ["Member", "MemberCode"];
+export const getAllMembers = () => getAll("whed_lex_member", MEMBER_FIELDS, "Member");
+
+// 21. Month (whed_lex_month)
+const MONTH_FIELDS = ["Month", "MonthNumber"];
+export const getAllMonths = () => getAll("whed_lex_month", MONTH_FIELDS, "MonthNumber");
+

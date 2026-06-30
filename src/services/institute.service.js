@@ -137,23 +137,46 @@ const getSingleInstitute = async (id) => {
     };
 };
 
-const createInstitute = async (instituteData) => {
+const createInstitute = async (instituteData, stateId) => {
 
+
+
+
+    //  get all state Information by stateID Frist
+    const query = `
+    SELECT 
+        StateID as id,
+        Country as country,
+        State as state,
+        CountryCode as countryCode,
+        StateCode as stateCode,
+        StateAlpha as stateAlpha,
+        ProxyStateID as proxyStateId,
+        Palgrave as palgrave,
+        UseCountryCreds as useCountryCreds,
+        EdSysLocked as edSysLocked,
+        InstLocked as instLocked,
+        Stub as stub,
+        CredLocked as credLocked,
+        Regions as regions,
+        ISO3 as iso3
+    FROM whed_state
+    WHERE StateID = ?
+  `;
+    const [rows] = await pool.query(query, [stateId]);
+    const stateInfo = rows[0];
 
 
     const mappedData = {};
 
     // ==========================================
-    // ১. রিকোয়ার্ড ফিল্ডস (Null = NO & No Default)
-    // ==========================================
-    mappedData.OrgName = instituteData.name ? instituteData.name.trim() : '';
-    mappedData.InstNameEnglish = instituteData.nameInEnglish ? instituteData.nameInEnglish.trim() : '';
-    mappedData.iBranchName = instituteData.branchof ? instituteData.branchof.trim() : 'Main Branch';
-    mappedData.iBranchNameEnglish = instituteData.branchof ? instituteData.branchof.trim() : 'Main Branch';
-    mappedData.iRecordHistory = instituteData.recordHistory ? instituteData.recordHistory.trim() : 'Record created via system API.';
+    mappedData.OrgName = instituteData.OrgName ? instituteData.OrgName.trim() : '';
+    mappedData.InstNameEnglish = instituteData.OrgName ? instituteData.OrgName.trim() : '';
+    mappedData.iBranchName = instituteData.branchof ? instituteData.branchof.trim() : '';
+    mappedData.iBranchNameEnglish = instituteData.branchof ? instituteData.branchof.trim() : '';
+    mappedData.iRecordHistory = instituteData.recordHistory ? instituteData.recordHistory.trim() : '';
+    mappedData.iInstClassHistory = instituteData.iInstClassHistory ? instituteData.iInstClassHistory.trim() : '';
 
-    // ==========================================
-    // ২. কোর আইডেন্টিফায়ার এবং কোডস
     // ==========================================
     if (instituteData.GlobalID) mappedData.GlobalID = instituteData.GlobalID.trim();
     if (instituteData.iParentOrgID) mappedData.iParentOrgID = parseInt(instituteData.iParentOrgID, 10);
@@ -162,9 +185,11 @@ const createInstitute = async (instituteData) => {
     if (instituteData.BranchID) mappedData.BranchID = parseInt(instituteData.BranchID, 10);
     if (instituteData.UserID) mappedData.UserID = parseInt(instituteData.UserID, 10);
 
-    if (instituteData.CountryCode) mappedData.CountryCode = instituteData.CountryCode.trim();
-    if (instituteData.StateCode) mappedData.StateCode = instituteData.StateCode.trim();
-    if (instituteData.StateID) mappedData.StateID = parseInt(instituteData.StateID, 10);
+
+    if (stateInfo) mappedData.StateID = parseInt(stateInfo?.id, 10);
+    if (stateInfo) mappedData.CountryCode = stateInfo?.countryCode;
+    if (stateInfo) mappedData.StateCode = stateInfo?.stateCode;
+
     if (instituteData.typeofInstitute) mappedData.OrgTypeCode = instituteData.typeofInstitute.trim();
     if (instituteData.classCode) mappedData.InstClassCode = instituteData.classCode.trim();
     if (instituteData.fundingType) mappedData.InstFundingTypeCode = instituteData.fundingType.trim();
@@ -196,7 +221,7 @@ const createInstitute = async (instituteData) => {
     if (instituteData.degreeNote) mappedData.iDegreeNote = instituteData.degreeNote.trim();
     if (instituteData.comment) mappedData.iComment = instituteData.comment.trim();
     if (instituteData.partnership) mappedData.iPartnership = instituteData.partnership.trim();
-    if (instituteData.instClassHistory) mappedData.iInstClassHistory = instituteData.instClassHistory.trim();
+    if (instituteData.instClassHistory) mappedData.iInstClassHistory = instituteData.instClassHistory ? instituteData.instClassHistory.trim() : '';
 
     // ==========================================
     // ৪. স্টাফ স্ট্যাটিস্টিকস (Staff Stats)
@@ -286,6 +311,10 @@ const createInstitute = async (instituteData) => {
     if (instituteData.dpControle) mappedData.DPControle = instituteData.dpControle.trim();
     if (instituteData.dpHistRelance) mappedData.DPHistRelance = instituteData.dpHistRelance.trim();
 
+
+
+
+
     // DP Unix Epoch Timestamps
     const dpTimestamps = [
         'DPDateEnvoi', 'DPDateLimite', 'DPDateAcces', 'DPDateModif',
@@ -307,8 +336,6 @@ const createInstitute = async (instituteData) => {
 
 
 
-    console.log(mappedData);
-
     // ==========================================
     // ১১. ডাটাবেজ ট্রানজেকশন এক্সিকিউশন
     // ==========================================
@@ -329,9 +356,23 @@ const createInstitute = async (instituteData) => {
         const query = `INSERT INTO whed_org (${columns}) VALUES (${placeholders})`;
 
         const [result] = await connection.query(query, values);
-        await connection.commit();
+
 
         const insertId = Array.isArray(result) ? result[0].insertId : result.insertId;
+
+        const globalId = `IAU-${String(insertId).padStart(6, "0")}`;
+
+        await connection.query(
+            `UPDATE whed_org
+                SET GlobalID = ?
+                WHERE OrgID = ?`,
+            [globalId, insertId]
+        );
+
+
+        await connection.commit();
+
+
         return { id: insertId || null };
 
     } catch (error) {
@@ -573,6 +614,159 @@ const getDetailedInstitutesByState = async (stateId, filters = {}) => {
         degrees: degreesMap[row.id] || []
     }));
 };
+
+
+
+
+const getDetailedInstitutesByCountryCodeService = async (cntryCode, filters = {}) => {
+    const { countryCode, fundingType, search } = filters;
+    let query = `
+    SELECT 
+        OrgID as id,
+        GlobalID,
+        iParentOrgID,
+        AliasID,
+        Family,
+        OrgName as name,
+        iBranchName as branchof,
+        InstNameEnglish as nameInEnglish,
+        iBranchNameEnglish,
+        CountryCode,
+        StateCode,
+        StateID,
+        BranchID,
+        OrgTypeCode as typeofInstitute,
+        InstNameAlt as alternativeName,
+        InstAcronym as acronym,
+        InstClassCode,
+        InstFundingTypeCode,
+        iIAUMembershipOption as iauMembership,
+        iIAULogo as logo,
+        iIAUNews as news,
+        iAAUMembershipOption,
+        iOtherSites,
+        iHistory,
+        iAdmissionRequirements as admissionrequirements,
+        iFeesN as tuitionfees,
+        iFeesNCurrencyCode,
+        iFeesI,
+        iFeesICurrencyCode,
+        iAcademicYear,
+        iLanguagesUsed as languageofinstruction,
+        iLibrary,
+        iMainPress,
+        iResidentialFacilities,
+        iCreated as yearofcreation,
+        iPresentStatusYear,
+        iStudentTotal as nationalstudents,
+        iStudentForeignTotal as internationalstudents,
+        iAccreditingAgency as nameofyournationalcompetentaccreditationbody,
+        iAccreditationEndDate as dateoftheaccreditationlastused,
+        ReligionCode as religion,
+        iStudentBody as studentbody,
+        DPName as fullName,
+        DPEMail as contactemail,
+        Street as street,
+        City as city,
+        Province as province,
+        PostCode as postalCode,
+        Tel as tel,
+        Fax as fax,
+        EMail as email,
+        WWW as website
+    FROM whed_org
+    WHERE CountryCode = ?
+  `;
+    const params = [cntryCode];
+
+    if (cntryCode) {
+        query += ` AND CountryCode = ?`;
+        params.push(cntryCode);
+    }
+    if (fundingType) {
+        query += ` AND InstFundingTypeCode = ?`;
+        params.push(fundingType);
+    }
+    if (search) {
+        query += ` AND (OrgName LIKE ? OR InstNameEnglish LIKE ?)`;
+        params.push(`%${search}%`, `%${search}%`);
+    }
+
+    query += ` ORDER BY OrgID DESC`;
+
+    const [rows] = await pool.query(query, params);
+    if (rows.length === 0) return [];
+
+    const orgIds = rows.map(r => r.id);
+
+    // Fetch related divisions
+    const [divisions] = await pool.query(`
+      SELECT 
+        iDivisionID as id, 
+        iDivision as name, 
+        iDivisionTypeCode as typeCode, 
+        iMoreDetails as moreDetails,
+        OrgID
+      FROM whed_division 
+      WHERE OrgID IN (?)
+    `, [orgIds]);
+
+    // Fetch related degrees
+    const [degrees] = await pool.query(`
+      SELECT 
+        d.iDegreeID as id, 
+        d.iDegree as name, 
+        d.CredID as credId, 
+        c.Cred as credentialName, 
+        d.iDegreeOrigine as originalTitle, 
+        d.iDegreeNote as note,
+        d.OrgID
+      FROM whed_degree d
+      LEFT JOIN whed_cred c ON d.CredID = c.CredID
+      WHERE d.OrgID IN (?)
+    `, [orgIds]);
+
+    const divisionsMap = {};
+    const degreesMap = {};
+    orgIds.forEach(id => {
+        divisionsMap[id] = [];
+        degreesMap[id] = [];
+    });
+
+    divisions.forEach(div => {
+        if (divisionsMap[div.OrgID]) {
+            divisionsMap[div.OrgID].push({
+                id: div.id,
+                name: div.name,
+                typeCode: div.typeCode,
+                moreDetails: div.moreDetails
+            });
+        }
+    });
+
+    degrees.forEach(deg => {
+        if (degreesMap[deg.OrgID]) {
+            degreesMap[deg.OrgID].push({
+                id: deg.id,
+                name: deg.name,
+                credId: deg.credId,
+                credentialName: deg.credentialName,
+                originalTitle: deg.originalTitle,
+                note: deg.note
+            });
+        }
+    });
+
+    return rows.map(row => ({
+        ...row,
+        divisions: divisionsMap[row.id] || [],
+        degrees: degreesMap[row.id] || []
+    }));
+};
+
+
+
+
 
 const getInstituteByStateAndOrgID = async (stateId, orgId) => {
     const query = `
@@ -836,6 +1030,6 @@ const getInstituteByStateAndOrgID = async (stateId, orgId) => {
     };
 };
 
-export { createInstitute, deleteInstitute, getAllInstitutes, getDetailedInstitutesByState, getInstituteByStateAndOrgID, getSingleInstitute, getTotalInstitutes, updateInstitute };
+export { createInstitute, deleteInstitute, getAllInstitutes, getDetailedInstitutesByCountryCodeService, getDetailedInstitutesByState, getInstituteByStateAndOrgID, getSingleInstitute, getTotalInstitutes, updateInstitute };
 
 

@@ -1,5 +1,5 @@
 import express from "express";
-import { createInstitute, getAllInstitutes, getInstituteByStateAndOrgID, getInstitutesByState } from '../../controllers/instituteController/institute.controller.js';
+import { createInstitute, getAllInstitutes, getInstituteByStateAndOrgID, getInstitutesByCountryCode, getInstitutesByState } from '../../controllers/instituteController/institute.controller.js';
 import { authorize, protect } from "../../middlewares/auth.middleware.js";
 import { checkStateResponsibility } from "../../middlewares/responsibility.middleware.js";
 import { instituteSchema, validate } from "../../validations/institution.validation.js";
@@ -11,6 +11,7 @@ const router = express.Router();
 //all get route
 router.get("/private/institutes", protect, getAllInstitutes);
 router.get("/private/state/:stateId/institutes", protect, getInstitutesByState);
+router.get("/private/country/:countryCode/institutes", protect, getInstitutesByCountryCode);
 router.get("/private/state/:stateId/institute/:orgId", protect, getInstituteByStateAndOrgID);
 
 

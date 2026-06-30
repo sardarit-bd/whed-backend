@@ -83,7 +83,11 @@ import {
   updateReligion as updateReligionService,
   updateSchoolLevel as updateSchoolLevelService,
   updateStage as updateStageService,
-  updateStatus as updateStatusService
+  updateStatus as updateStatusService,
+  getAllYesNo as getAllYesNoService,
+  getAllGenres as getAllGenresService,
+  getAllMembers as getAllMembersService,
+  getAllMonths as getAllMonthsService,
 } from "../../services/glossary.service.js";
 
 // ==========================================
@@ -342,3 +346,16 @@ export const getSingleOrgType = makeGetSingle(getSingleOrgTypeService, "Org Type
 export const createOrgType = makeCreate(createOrgTypeService, "Org Type");
 export const updateOrgType = makeUpdate(updateOrgTypeService, "Org Type", true);
 export const deleteOrgType = makeDelete(deleteOrgTypeService, "Org Type", true);
+
+// 18. YesNo
+export const getAllYesNo = makeGetAll(getAllYesNoService, "YesNo", "YesNo");
+
+// 19. Genre
+export const getAllGenres = makeGetAll(getAllGenresService, "Genre", "Genres");
+
+// 20. Member
+export const getAllMembers = makeGetAll(getAllMembersService, "Member", "Members");
+
+// 21. Month
+export const getAllMonths = makeGetAll(getAllMonthsService, "Month", "Months");
+

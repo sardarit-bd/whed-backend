@@ -1,4 +1,4 @@
-import { createInstitute as createInstituteService, deleteInstitute as deleteInstituteService, getAllInstitutes as getAllInstitutesService, getDetailedInstitutesByState as getDetailedInstitutesByStateService, getInstituteByStateAndOrgID as getInstituteByStateAndOrgIDService, getSingleInstitute as getSingleInstituteService, updateInstitute as updateInstituteService } from '../../services/institute.service.js';
+import { createInstitute as createInstituteService, deleteInstitute as deleteInstituteService, getAllInstitutes as getAllInstitutesService, getDetailedInstitutesByCountryCodeService, getDetailedInstitutesByState as getDetailedInstitutesByStateService, getInstituteByStateAndOrgID as getInstituteByStateAndOrgIDService, getSingleInstitute as getSingleInstituteService, updateInstitute as updateInstituteService } from '../../services/institute.service.js';
 
 /********** get all institutes **********/
 const getAllInstitutes = async (req, res) => {
@@ -61,8 +61,9 @@ const getSingleInstitute = async (req, res) => {
 const createInstitute = async (req, res) => {
   try {
 
+    const { stateId } = req.params;
 
-    const result = await createInstituteService(req.validatedBody);
+    const result = await createInstituteService(req.validatedBody, stateId);
 
 
     res.status(201).json({
@@ -182,6 +183,45 @@ const getInstitutesByState = async (req, res) => {
 
 
 
+/********** get institutes by state **********/
+const getInstitutesByCountryCode = async (req, res) => {
+  try {
+    const { countryCode } = req.params;
+    if (!countryCode) {
+      return res.status(400).json({ success: false, message: "Invalid state ID format." });
+    }
+
+    const filters = {
+      countryCode: req.query.countryCode || null,
+      fundingType: req.query.fundingType || null,
+      search: req.query.search || null
+    };
+
+    const rows = await getDetailedInstitutesByCountryCodeService(countryCode, filters);
+
+    if (!rows || rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: `No institutions found for State ID ${stateId}`
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Institutes fetched successfully",
+      data: rows
+    });
+  } catch (error) {
+    console.error('Get Institutes by State Error:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Failed to fetch institutions for the specified state.'
+    });
+  }
+};
+
+
+
 
 /********** get institutes by state ID and Org ID **********/
 const getInstituteByStateAndOrgID = async (req, res) => {
@@ -214,5 +254,5 @@ const getInstituteByStateAndOrgID = async (req, res) => {
   }
 };
 
-export { createInstitute, deleteInstitute, getAllInstitutes, getInstituteByStateAndOrgID, getInstitutesByState, getSingleInstitute, updateInstitute };
+export { createInstitute, deleteInstitute, getAllInstitutes, getInstituteByStateAndOrgID, getInstitutesByCountryCode, getInstitutesByState, getSingleInstitute, updateInstitute };
 
