@@ -8,12 +8,7 @@ export const credentialSchema = Joi.object({
     Cred: Joi.string().max(255).required().messages({
         "string.empty": "Credential name is required",
         "string.max": "Credential name cannot exceed 255 characters",
-    }),
-    cDescription: Joi.string().optional().allow(""),
-    cAcronym: Joi.string().max(50).optional().allow(""),
-    cEntryExamNational: Joi.string().max(5).optional().allow(""),
-    cEntryExamInst: Joi.string().max(5).optional().allow(""),
-    CredLevelCode: Joi.string().max(10).optional().allow(""),
+    })
 });
 
 export const updateCredentialSchema = Joi.object({

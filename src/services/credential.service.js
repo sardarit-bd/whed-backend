@@ -126,21 +126,77 @@ const getSingleCredential = async (id) => {
     };
 };
 
-const createCredential = async (credData) => {
-    const keys = Object.keys(credData).filter(key => ALLOWED_CRED_FIELDS.has(key));
-    const values = keys.map(key => credData[key]);
+
+const createCredential = async (credentialData) => {
+    const mappedData = {};
+
+    // ==========================
+    // Mapping
+    // ==========================
+    if (credentialData)
+        mappedData.StateID = parseInt(credentialData.StateID, 10);
+
+    if (credentialData)
+        mappedData.Cred = credentialData.Cred?.trim();
+
+    if (credentialData)
+        mappedData.cAcronym = credentialData.cAcronym?.trim();
+
+    if (credentialData)
+        mappedData.CredCatCode1 = credentialData.CredCatCode1?.trim();
+
+    if (credentialData)
+        mappedData.CredCatCode2 = credentialData.CredCatCode2?.trim();
+
+    if (credentialData)
+        mappedData.CredLevelCode = credentialData.CredLevelCode?.trim();
+
+    if (credentialData)
+        mappedData.cDescription = credentialData.cDescription?.trim();
+
+    if (credentialData)
+        mappedData.cAlternativeQualification =
+            credentialData.cAlternativeQualification?.trim();
+
+    if (credentialData)
+        mappedData.cEntryExamNational = credentialData.cEntryExamNational ? parseInt(credentialData.cEntryExamNational, 10) : null;
+
+    if (credentialData)
+        mappedData.cEntryExamInst = credentialData.cEntryExamInst ? parseInt(credentialData.cEntryExamInst, 10) : null;
+
+    if (credentialData) mappedData.UserID = credentialData.UserID ? credentialData.UserID : null;
+
+    if (credentialData)
+        mappedData.cRecordHistory = credentialData.cRecordHistory ? credentialData.cRecordHistory?.trim() : " ";
+
+    mappedData.cMajorUpdateDate = null;
+    mappedData.cMinorUpdateDate = null;
+    mappedData.cMajorUpdateDateDP = new Date();
+    mappedData.cWarning = 0;
+    mappedData.cDelete = 0;
+
+    // ==========================
+    // Insert
+    // ==========================
+    const keys = Object.keys(mappedData);
+    const values = Object.values(mappedData);
 
     if (keys.length === 0) {
-        throw new Error("No valid credential fields provided");
+        throw new Error("No valid credential fields provided.");
     }
 
-    const placeholders = keys.map(() => "?").join(", ");
     const columns = keys.join(", ");
+    const placeholders = keys.map(() => "?").join(", ");
+
     const query = `INSERT INTO whed_cred (${columns}) VALUES (${placeholders})`;
 
     const [result] = await pool.query(query, values);
-    return { id: result.insertId };
+
+    return {
+        id: result.insertId,
+    };
 };
+
 
 const updateCredential = async (id, updateData) => {
     const keys = Object.keys(updateData).filter(key => ALLOWED_CRED_FIELDS.has(key));
