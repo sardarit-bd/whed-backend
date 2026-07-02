@@ -1,8 +1,8 @@
 import express from "express";
-import { createInstitute, getAllInstitutes, getInstituteByStateAndOrgID, getInstitutesByCountryCode, getInstitutesByState } from '../../controllers/instituteController/institute.controller.js';
+import { createInstitute, createResearchJournalsForInstitute, getAllInstitutes, getInstituteByStateAndOrgID, getInstitutesByCountryCode, getInstitutesByState, updateInstitute,DeleteResearchJournalsForInstitute } from '../../controllers/instituteController/institute.controller.js';
 import { authorize, protect } from "../../middlewares/auth.middleware.js";
 import { checkStateResponsibility } from "../../middlewares/responsibility.middleware.js";
-import { instituteSchema, validate } from "../../validations/institution.validation.js";
+import { instituteSchema, ResearchJournalSchema, updateInstituteSchema, validate } from "../../validations/institution.validation.js";
 
 
 const router = express.Router();
@@ -17,16 +17,18 @@ router.get("/private/state/:stateId/institute/:orgId", protect, getInstituteBySt
 
 //all post route
 router.post("/private/state/:stateId/institute", protect, authorize(1, 0), checkStateResponsibility, validate(instituteSchema), createInstitute);
+router.post("/private/state/:stateId/institute/:orgId/researchJournals", protect, authorize(1, 0), checkStateResponsibility, validate(ResearchJournalSchema), createResearchJournalsForInstitute);
 
 
 //all put route
-// router.put("/private/state/:stateId/institute/:id", protect, authorize(1, 0), checkStateResponsibility, validate(updateInstituteSchema), updateInstitute);
+router.put("/private/state/:stateId/institute/:orgId", protect, authorize(1, 0), checkStateResponsibility, validate(updateInstituteSchema), updateInstitute);
 
 
 
 //all delete route
-// router.delete("/private/state/:stateId/institute/:id", protect, authorize(1, 0), checkStateResponsibility, deleteInstitute);
+// router.delete("/private/state/:stateId/institute/:id", protect, authorize(1, 0), checkStateResponsibility, deleteInstitute@g87
 
+router.delete("/private/state/:stateId/institute/:orgId/researchJournals/:journalId", protect, authorize(1, 0), checkStateResponsibility, DeleteResearchJournalsForInstitute);
 
 
 

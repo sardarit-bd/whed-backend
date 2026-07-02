@@ -1,4 +1,4 @@
-import { createInstitute as createInstituteService, deleteInstitute as deleteInstituteService, getAllInstitutes as getAllInstitutesService, getDetailedInstitutesByCountryCodeService, getDetailedInstitutesByState as getDetailedInstitutesByStateService, getInstituteByStateAndOrgID as getInstituteByStateAndOrgIDService, getSingleInstitute as getSingleInstituteService, updateInstitute as updateInstituteService } from '../../services/institute.service.js';
+import { createInstitute as createInstituteService, createResearchJournalsForInstituteService, deleteInstitute as deleteInstituteService, deleteResearchJournalsForInstituteService, getAllInstitutes as getAllInstitutesService, getDetailedInstitutesByCountryCodeService, getDetailedInstitutesByState as getDetailedInstitutesByStateService, getInstituteByStateAndOrgID as getInstituteByStateAndOrgIDService, getSingleInstitute as getSingleInstituteService, updateInstitute as updateInstituteService } from '../../services/institute.service.js';
 
 /********** get all institutes **********/
 const getAllInstitutes = async (req, res) => {
@@ -83,8 +83,8 @@ const createInstitute = async (req, res) => {
 /********** update institute **********/
 const updateInstitute = async (req, res) => {
   try {
-    const { id } = req.params;
-    if (!id || isNaN(id)) {
+    const { stateId, orgId } = req.params;
+    if (!orgId || isNaN(orgId) || !stateId || isNaN(stateId)) {
       return res.status(400).json({
         success: false,
         message: "Invalid ID format.",
@@ -93,7 +93,7 @@ const updateInstitute = async (req, res) => {
 
     const updateData = { ...req.validatedBody };
 
-    const result = await updateInstituteService(id, updateData);
+    const result = await updateInstituteService(orgId, updateData);
     if (result.affectedRows === 0) {
       return res.status(404).json({
         success: false,
@@ -254,5 +254,71 @@ const getInstituteByStateAndOrgID = async (req, res) => {
   }
 };
 
-export { createInstitute, deleteInstitute, getAllInstitutes, getInstituteByStateAndOrgID, getInstitutesByCountryCode, getInstitutesByState, getSingleInstitute, updateInstitute };
+
+
+
+
+
+
+/********** create createResearchJournalsForInstitute  **********/
+const createResearchJournalsForInstitute = async (req, res) => {
+  try {
+
+    const { stateId } = req.params;
+    const { orgId } = req.params;
+
+    const result = await createResearchJournalsForInstituteService(req.validatedBody, stateId, orgId);
+
+
+    res.status(201).json({
+      success: true,
+      message: "Research journals Added successfully!",
+      data: result
+    });
+  } catch (error) {
+    console.error("Transaction Error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to create research journals. Database rolled back."
+    });
+  }
+};
+
+
+
+/********** delete research journals for institute **********/
+const DeleteResearchJournalsForInstitute = async (req, res) => {
+  try {
+    const { stateId, orgId, journalId } = req.params;
+    if (!stateId || isNaN(stateId) || !orgId || isNaN(orgId) || !journalId || isNaN(journalId)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid ID format.",
+      });
+    }
+    const result = await deleteResearchJournalsForInstituteService(orgId, journalId);
+    if (result.affectedRows === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "Research journal not found.",
+      });
+    }
+    res.status(200).json({
+      success: true,
+      message: "Research journal deleted successfully!",
+    });
+  } catch (err) {
+    console.error("Error deleting research journal:", err.message);
+    res.status(500).json({
+      success: false,
+      message: "Something went wrong while deleting the research journal.",
+    });
+  }
+};
+
+
+
+
+
+export { createInstitute, createResearchJournalsForInstitute, deleteInstitute, DeleteResearchJournalsForInstitute, getAllInstitutes, getInstituteByStateAndOrgID, getInstitutesByCountryCode, getInstitutesByState, getSingleInstitute, updateInstitute };
 

@@ -14,9 +14,8 @@ export const instituteSchema = Joi.object({
 
 /************** Update Institute Schema ****************/
 export const updateInstituteSchema = Joi.object({
-    // --- Identifiers (OrgID is usually passed in req.params, but kept here if needed in body) ---
-    OrgID: Joi.number().integer().positive().optional(),
-    GlobalID: Joi.string().max(17).allow("", null).optional(),
+
+
     iParentOrgID: Joi.number().integer().positive().allow(null).optional(),
     AliasID: Joi.number().integer().optional(),
     Family: Joi.number().integer().min(0).max(255).optional(),
@@ -39,9 +38,6 @@ export const updateInstituteSchema = Joi.object({
     }),
 
     // --- Location & Codes ---
-    CountryCode: Joi.string().max(2).allow("", null).optional(),
-    StateCode: Joi.string().max(2).allow("", null).optional(),
-    StateID: Joi.number().integer().positive().allow(null).optional(),
     BranchID: Joi.number().integer().positive().allow(null).optional(),
     OrgTypeCode: Joi.string().max(2).allow("", null).optional(),
     InstNameAlt: Joi.string().max(160).allow("", null).optional(),
@@ -172,11 +168,21 @@ export const updateInstituteSchema = Joi.object({
     DateAccredited: Joi.string().allow("", null).optional(),
     iOther: Joi.number().integer().optional(),
     iInstClassHistory: Joi.string().allow(null).optional()
+
 }).min(1).messages({
     "object.min": "At least one field must be provided to update",
 });
 
 
+
+/************** ResearchJournalSchema *************/
+export const ResearchJournalSchema = Joi.object({
+    iPeriodical: Joi.string().max(255).required().messages({
+        "string.empty": "iPeriodical Journal name is required", // error message
+        "string.max": "iPeriodical Journal name cannot exceed 255 characters", // error message
+        "any.required": "iPeriodical Journal name is required", // error message
+    }),
+});
 
 
 

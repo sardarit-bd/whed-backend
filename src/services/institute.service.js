@@ -130,10 +130,23 @@ const getSingleInstitute = async (id) => {
       WHERE d.OrgID = ?
     `, [id]);
 
+
+
+    // --- Notun add kora holo: Periodicals fetch korar jonno ---
+    const [periodicals] = await pool.query(`
+      SELECT 
+        iPeriodicalID as id,
+        iPeriodical as name
+      FROM whed_periodical
+      WHERE OrgID = ?
+    `, [id]);
+
+
     return {
         ...institute,
         divisions,
-        degrees
+        degrees,
+        periodicals
     };
 };
 
@@ -387,31 +400,122 @@ const createInstitute = async (instituteData, stateId) => {
 };
 
 const ALLOWED_ORG_FIELDS = new Set([
-    "GlobalID", "iParentOrgID", "AliasID", "Family", "OrgName", "iBranchName",
-    "InstNameEnglish", "iBranchNameEnglish", "CountryCode", "StateCode", "StateID",
-    "BranchID", "OrgTypeCode", "InstNameAlt", "InstAcronym", "InstClassCode",
-    "InstFundingTypeCode", "iIAUMembershipOption", "iIAULogo", "iIAUNews",
-    "iAAUMembershipOption", "iOtherSites", "iHistory", "iAdmissionRequirements",
-    "iFeesN", "iFeesNCurrencyCode", "iFeesI", "iFeesICurrencyCode", "iAcademicYear",
-    "iLanguagesUsed", "iLibrary", "iMainPress", "iResidentialFacilities", "iCreated",
-    "iPresentStatusYear", "iStaffStatisticsYear", "iStaffStatisticsApprox", "iStaffFullTimeTotal",
-    "iStaffFullTimeMale", "iStaffFullTimeFemale", "iStaffPartTimeTotal", "iStaffPartTimeFemale",
-    "iStaffPartTimeMale", "iStaffDocFullTimeTotal", "iStaffDocFullTimeMale", "iStaffDocFullTimeFemale",
-    "iStudentStatisticsYear", "iStudentStatisticsApprox", "iStudentTotal", "iStudentMale",
-    "iStudentFemale", "iStudentForeignTotal", "iStudentForeignMale", "iStudentForeignFemale",
-    "iStudentPartTime", "iStudentDistance", "iStudentsDisabilities", "iAccreditingAgency",
-    "iAccreditationEndDate", "sInstTypeID", "ReligionCode", "iStudentBody",
-    "iSSAcademicCounselling", "iSSSocialCounselling", "iSSCareersAdvices", "iSSNurseryCare",
-    "iSSCulturalActivities", "iSSSportsFacilities", "iSSLanguageLaboratory", "iSSDisabledFacilities",
-    "iSSHealthServices", "iSSCanteen", "iSSLibrary", "iSSeLibrary", "iSSResidentialFacilities",
-    "iSSITCentre", "iSSForeignStudiesCentre", "iSSOnlineDistanceLearning", "iDegreeNote",
-    "iRecordHistory", "iInputDate", "iMajorUpdateDate", "iMinorUpdateDate", "iMajorUpdateDateDP",
-    "Street", "City", "Province", "PostCode", "Tel", "Fax", "EMail", "WWW", "UserID",
-    "iWarning", "iDelete", "DPTypeContact", "DPName", "DPEMail", "DPEMailCopie", "DPStatus",
-    "DPFlag", "DPControle", "DPDateEnvoi", "DPDateLimite", "DPDateAcces", "DPDateModif",
-    "DPDateRelance", "DPDateRetour", "DPDateValid", "DPNbrRelance", "DPHistRelance",
-    "iUpdate", "iLearning", "iLogo", "iWebUpdateDate", "iComment", "iPartnership",
-    "DateAccredited", "iOther", "iInstClassHistory"
+    "iParentOrgID",
+    "AliasID",
+    "Family",
+    "OrgName",
+    "iBranchName",
+    "InstNameEnglish",
+    "iBranchNameEnglish",
+    "iRecordHistory",
+    "BranchID",
+    "OrgTypeCode",
+    "InstNameAlt",
+    "InstAcronym",
+    "InstClassCode",
+    "InstFundingTypeCode",
+    "iIAUMembershipOption",
+    "iIAULogo",
+    "iIAUNews",
+    "iAAUMembershipOption",
+    "iOtherSites",
+    "iHistory",
+    "iAdmissionRequirements",
+    "iFeesN",
+    "iFeesNCurrencyCode",
+    "iFeesI",
+    "iFeesICurrencyCode",
+    "iAcademicYear",
+    "iLanguagesUsed",
+    "iLibrary",
+    "iMainPress",
+    "iResidentialFacilities",
+    "iCreated",
+    "iPresentStatusYear",
+    "iStaffStatisticsYear",
+    "iStaffStatisticsApprox",
+    "iStaffFullTimeTotal",
+    "iStaffFullTimeMale",
+    "iStaffFullTimeFemale",
+    "iStaffPartTimeTotal",
+    "iStaffPartTimeFemale",
+    "iStaffPartTimeMale",
+    "iStaffDocFullTimeTotal",
+    "iStaffDocFullTimeMale",
+    "iStaffDocFullTimeFemale",
+    "iStudentStatisticsYear",
+    "iStudentStatisticsApprox",
+    "iStudentTotal",
+    "iStudentMale",
+    "iStudentFemale",
+    "iStudentForeignTotal",
+    "iStudentForeignMale",
+    "iStudentForeignFemale",
+    "iStudentPartTime",
+    "iStudentDistance",
+    "iStudentsDisabilities",
+    "iAccreditingAgency",
+    "iAccreditationEndDate",
+    "sInstTypeID",
+    "ReligionCode",
+    "iStudentBody",
+    "iSSAcademicCounselling",
+    "iSSSocialCounselling",
+    "iSSCareersAdvices",
+    "iSSNurseryCare",
+    "iSSCulturalActivities",
+    "iSSSportsFacilities",
+    "iSSLanguageLaboratory",
+    "iSSDisabledFacilities",
+    "iSSHealthServices",
+    "iSSCanteen",
+    "iSSLibrary",
+    "iSSeLibrary",
+    "iSSResidentialFacilities",
+    "iSSITCentre",
+    "iSSForeignStudiesCentre",
+    "iSSOnlineDistanceLearning",
+    "iDegreeNote",
+    "iInputDate",
+    "iMajorUpdateDate",
+    "iMinorUpdateDate",
+    "iMajorUpdateDateDP",
+    "Street",
+    "City",
+    "Province",
+    "PostCode",
+    "Tel",
+    "Fax",
+    "EMail",
+    "WWW",
+    "UserID",
+    "iWarning",
+    "iDelete",
+    "DPTypeContact",
+    "DPName",
+    "DPEMail",
+    "DPEMailCopie",
+    "DPStatus",
+    "DPFlag",
+    "DPControle",
+    "DPDateEnvoi",
+    "DPDateLimite",
+    "DPDateAcces",
+    "DPDateModif",
+    "DPDateRelance",
+    "DPDateRetour",
+    "DPDateValid",
+    "DPNbrRelance",
+    "DPHistRelance",
+    "iUpdate",
+    "iLearning",
+    "iLogo",
+    "iWebUpdateDate",
+    "iComment",
+    "iPartnership",
+    "DateAccredited",
+    "iOther",
+    "iInstClassHistory"
 ]);
 
 const updateInstitute = async (id, updateData) => {
@@ -1022,14 +1126,101 @@ const getInstituteByStateAndOrgID = async (stateId, orgId) => {
 
 
 
+    // --- Notun add kora holo: Periodicals fetch korar jonno ---
+    const [periodicals] = await pool.query(`
+      SELECT 
+        iPeriodicalID as id,
+        iPeriodical as name
+      FROM whed_periodical
+      WHERE OrgID = ?
+    `, [orgId]);
+
+
+
     return {
         ...institute,
         divisions,
         degrees,
-        contacts
+        contacts,
+        periodicals
     };
 };
 
-export { createInstitute, deleteInstitute, getAllInstitutes, getDetailedInstitutesByCountryCodeService, getDetailedInstitutesByState, getInstituteByStateAndOrgID, getSingleInstitute, getTotalInstitutes, updateInstitute };
+
+
+
+
+
+
+const createResearchJournalsForInstituteService = async (iPeriodicalData, stateId, orgId) => {
+
+
+
+    const mappedData = {};
+
+    // ==========================================
+    mappedData.iPeriodical = iPeriodicalData.iPeriodical ? iPeriodicalData.iPeriodical.trim() : '';
+    mappedData.OrgID = orgId;
+
+
+
+    // ==========================================
+    // ১১. ডাটাবেজ ট্রানজেকশন এক্সিকিউশন
+    // ==========================================
+    let connection;
+    try {
+        connection = await pool.getConnection();
+        await connection.beginTransaction();
+
+        const keys = Object.keys(mappedData);
+        const values = Object.values(mappedData);
+
+        if (keys.length === 0) {
+            throw new Error("No valid fields provided for database insertion.");
+        }
+
+        const placeholders = keys.map(() => "?").join(", ");
+        const columns = keys.join(", ");
+        const query = `INSERT INTO whed_periodical (${columns}) VALUES (${placeholders})`;
+
+        const [result] = await connection.query(query, values);
+
+
+        const insertId = Array.isArray(result) ? result[0].insertId : result.insertId;
+
+        await connection.commit();
+
+
+        return { id: insertId || null };
+
+    } catch (error) {
+        if (connection) await connection.rollback();
+        console.error("Database Service Transaction Error:", error.message);
+        throw error;
+    } finally {
+        if (connection) connection.release();
+    }
+
+
+};
+
+
+
+
+
+
+const deleteResearchJournalsForInstituteService = async (orgId, journalId) => {
+    const query = `DELETE FROM whed_periodical WHERE OrgID = ? and iPeriodicalID = ?`;
+    const [result] = await pool.query(query, [orgId, journalId]);
+    return result;
+};
+
+
+
+
+
+
+
+export { createInstitute, createResearchJournalsForInstituteService, deleteInstitute, deleteResearchJournalsForInstituteService, getAllInstitutes, getDetailedInstitutesByCountryCodeService, getDetailedInstitutesByState, getInstituteByStateAndOrgID, getSingleInstitute, getTotalInstitutes, updateInstitute };
 
 
