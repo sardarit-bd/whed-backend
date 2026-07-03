@@ -97,7 +97,8 @@ const getSingleInstitute = async (id) => {
         Tel as tel,
         Fax as fax,
         EMail as email,
-        WWW as website
+        WWW as website,
+        iLearning,
     FROM whed_org
     WHERE OrgID = ?
   `;
