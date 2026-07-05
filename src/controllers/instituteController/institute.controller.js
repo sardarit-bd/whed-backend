@@ -3,6 +3,7 @@ import { createInstitute as createInstituteService, createResearchJournalsForIns
 /********** get all institutes **********/
 const getAllInstitutes = async (req, res) => {
   try {
+
     const filters = {
       stateId: req.query.stateId ? parseInt(req.query.stateId) : null,
       countryCode: req.query.countryCode || null,
@@ -36,6 +37,7 @@ const getAllInstitutes = async (req, res) => {
 /********** get single institute **********/
 const getSingleInstitute = async (req, res) => {
   try {
+
     const { id } = req.params;
     if (!id || isNaN(id)) {
       return res.status(400).json({ error: "Invalid ID format." });
@@ -93,7 +95,7 @@ const updateInstitute = async (req, res) => {
 
     const updateData = { ...req.validatedBody };
 
-    const result = await updateInstituteService(orgId, updateData);
+    const result = await updateInstituteService(orgId, updateData, req.user);
     if (result.affectedRows === 0) {
       return res.status(404).json({
         success: false,
@@ -226,6 +228,8 @@ const getInstitutesByCountryCode = async (req, res) => {
 /********** get institutes by state ID and Org ID **********/
 const getInstituteByStateAndOrgID = async (req, res) => {
   try {
+
+
     const { stateId, orgId } = req.params;
     if (!stateId || isNaN(stateId) || !orgId || isNaN(orgId)) {
       return res.status(400).json({ success: false, message: "Invalid state ID format or org ID format." });

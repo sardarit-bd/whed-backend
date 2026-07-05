@@ -132,7 +132,7 @@ export const updateInstituteSchema = Joi.object({
     PostCode: Joi.string().max(40).allow("", null).optional(),
     Tel: Joi.string().max(60).allow("", null).optional(),
     Fax: Joi.string().max(60).allow("", null).optional(),
-    EMail: Joi.string().email().max(100).allow("", null).optional(),
+    EMail: Joi.string().max(100).allow("", null).optional(),
     WWW: Joi.string().uri().allow("", null).optional(),
     UserID: Joi.number().integer().positive().allow(null).optional(),
 

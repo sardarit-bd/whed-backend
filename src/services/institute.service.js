@@ -1,4 +1,5 @@
 import pool from '../config/db.js';
+import addHistoryLogforOrg from '../utils/addHistoryLogforOrg.js';
 
 const getAllInstitutes = async (filters = {}) => {
     const { stateId, countryCode, fundingType, search } = filters;
@@ -519,22 +520,50 @@ const ALLOWED_ORG_FIELDS = new Set([
     "iInstClassHistory"
 ]);
 
-const updateInstitute = async (id, updateData) => {
-    // Whitelist and sanitize fields to prevent SQL column name injection
-    const keys = Object.keys(updateData).filter(key => ALLOWED_ORG_FIELDS.has(key));
+const updateInstitute = async (id, updateData, user) => {
+    const connection = await pool.getConnection();
 
-    if (keys.length === 0) {
-        return { affectedRows: 0 };
+    try {
+        await connection.beginTransaction();
+
+        // Whitelist and sanitize fields
+        const keys = Object.keys(updateData).filter(key =>
+            ALLOWED_ORG_FIELDS.has(key)
+        );
+
+        if (keys.length === 0) {
+            await connection.rollback();
+            return { affectedRows: 0 };
+        }
+
+        const values = keys.map(key => updateData[key]);
+
+        // Update Query
+        const setClause = keys.map(key => `${key} = ?`).join(", ");
+        const query = `UPDATE whed_org SET ${setClause} WHERE OrgID = ?`;
+
+        const [result] = await connection.query(query, [...values, id]);
+
+        // Add History
+        await addHistoryLogforOrg({
+            db: connection, // connection pass করো, pool না
+            tableName: "whed_org",
+            id,
+            idColumn: "OrgID",
+            historyColumn: "iRecordHistory",
+            action: "MINOR update",
+            user: user?.name,
+        });
+
+        await connection.commit();
+
+        return result;
+    } catch (error) {
+        await connection.rollback();
+        throw error;
+    } finally {
+        connection.release();
     }
-
-    const values = keys.map(key => updateData[key]);
-
-    // Construct dynamic SQL query with SET clause
-    const setClause = keys.map(key => `${key} = ?`).join(', ');
-    const query = `UPDATE whed_org SET ${setClause} WHERE OrgID = ?`;
-
-    const [result] = await pool.query(query, [...values, id]);
-    return result;
 };
 
 const deleteInstitute = async (id) => {
