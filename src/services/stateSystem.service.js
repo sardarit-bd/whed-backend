@@ -57,10 +57,6 @@ const getEducationSystemByStateIdService = async (stateId) => {
 
 
 
-
-
-
-
     // Fetch related school levels
     const schoolQuery = `SELECT * FROM whed_tcsschool WHERE StateID = ?`;
     const [schoolRows] = await pool.query(schoolQuery, [stateId]);

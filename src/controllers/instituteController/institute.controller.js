@@ -65,7 +65,7 @@ const createInstitute = async (req, res) => {
 
     const { stateId } = req.params;
 
-    const result = await createInstituteService(req.validatedBody, stateId);
+    const result = await createInstituteService(req.validatedBody, stateId, req.user);
 
 
     res.status(201).json({

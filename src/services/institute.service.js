@@ -152,9 +152,7 @@ const getSingleInstitute = async (id) => {
     };
 };
 
-const createInstitute = async (instituteData, stateId) => {
-
-
+const createInstitute = async (instituteData, stateId, user) => {
 
 
     //  get all state Information by stateID Frist
@@ -185,6 +183,7 @@ const createInstitute = async (instituteData, stateId) => {
     const mappedData = {};
 
     // ==========================================
+    mappedData.UserID = user ? user.UserID : null;
     mappedData.OrgName = instituteData.OrgName ? instituteData.OrgName.trim() : '';
     mappedData.InstNameEnglish = instituteData.OrgName ? instituteData.OrgName.trim() : '';
     mappedData.iBranchName = instituteData.branchof ? instituteData.branchof.trim() : '';
