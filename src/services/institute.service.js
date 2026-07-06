@@ -922,6 +922,7 @@ const getInstituteByStateAndOrgID = async (stateId, orgId) => {
         InstNameAlt,
         InstAcronym,
         InstClassCode,
+        sInstTypeID,
         InstFundingTypeCode,
         iIAUMembershipOption,
         iIAULogo,

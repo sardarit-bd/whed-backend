@@ -243,3 +243,17 @@ export const getAllMembers = () => getAll("whed_lex_member", MEMBER_FIELDS, "Mem
 const MONTH_FIELDS = ["Month", "MonthNumber"];
 export const getAllMonths = () => getAll("whed_lex_month", MONTH_FIELDS, "MonthNumber");
 
+
+
+
+export const getAllTcsIntTypesService = async () => {
+  const query = `SELECT * FROM whed_tcsinsttype ORDER BY sInstTypeSort`;
+  const [rows] = await pool.query(query);
+  return rows;
+};
+
+export const getAllTcsIntTypesByStateIdService = async (stateId) => {
+  const query = `SELECT * FROM whed_tcsinsttype WHERE StateID = ? ORDER BY sInstTypeSort`;
+  const [rows] = await pool.query(query, [stateId]);
+  return rows;
+};

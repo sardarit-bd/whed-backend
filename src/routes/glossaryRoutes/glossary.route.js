@@ -40,17 +40,23 @@ import {
   getAllCurrencies,
   getAllDivisionTypes,
   getAllFieldsOfStudy,
+  getAllGenres,
   getAllInstitutionClasses,
   getAllInstitutionFundingSources,
   getAllJobFunctions,
   getAllLanguages,
+  getAllMembers,
   getAllMessages,
+  getAllMonths,
   getAllOrgTypes,
   getAllRegions,
   getAllReligions,
   getAllSchoolLevels,
   getAllStages,
   getAllStatuses,
+  getAllTcsIntTypes,
+  getAllTcsIntTypesByStateId,
+  getAllYesNo,
   getSingleCountry,
   getSingleCredentialCategory,
   getSingleCredentialLevel,
@@ -84,11 +90,7 @@ import {
   updateReligion,
   updateSchoolLevel,
   updateStage,
-  updateStatus,
-  getAllYesNo,
-  getAllGenres,
-  getAllMembers,
-  getAllMonths
+  updateStatus
 } from "../../controllers/glossaryController/glossary.controller.js";
 import { authorize, protect } from "../../middlewares/auth.middleware.js";
 import {
@@ -263,5 +265,14 @@ router.get("/private/glossary/members", protect, authorize(1), getAllMembers);
 
 //whed_lex_month
 router.get("/private/glossary/months", protect, authorize(1), getAllMonths);
+
+
+
+
+
+// whed_tcsinttype
+router.get("/private/glossary/tcsinttypes", protect, authorize(1, 0), getAllTcsIntTypes);
+router.get("/private/glossary/tcsinttypes/state/:stateId", protect, authorize(1, 0), getAllTcsIntTypesByStateId);
+
 
 export default router;

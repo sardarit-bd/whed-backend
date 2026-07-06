@@ -39,17 +39,23 @@ import {
   getAllCurrencies as getAllCurrenciesService,
   getAllDivisionTypes as getAllDivisionTypesService,
   getAllFieldsOfStudy as getAllFieldsOfStudyService,
+  getAllGenres as getAllGenresService,
   getAllInstitutionClasses as getAllInstitutionClassesService,
   getAllInstitutionFundingSources as getAllInstitutionFundingSourcesService,
   getAllJobFunctions as getAllJobFunctionsService,
   getAllLanguages as getAllLanguagesService,
+  getAllMembers as getAllMembersService,
   getAllMessages as getAllMessagesService,
+  getAllMonths as getAllMonthsService,
   getAllOrgTypes as getAllOrgTypesService,
   getAllRegions as getAllRegionsService,
   getAllReligions as getAllReligionsService,
   getAllSchoolLevels as getAllSchoolLevelsService,
   getAllStages as getAllStagesService,
   getAllStatuses as getAllStatusesService,
+  getAllTcsIntTypesByStateIdService,
+  getAllTcsIntTypesService,
+  getAllYesNo as getAllYesNoService,
   getSingleCountry as getSingleCountryService,
   getSingleCredentialCategory as getSingleCredentialCategoryService,
   getSingleCredentialLevel as getSingleCredentialLevelService,
@@ -83,11 +89,7 @@ import {
   updateReligion as updateReligionService,
   updateSchoolLevel as updateSchoolLevelService,
   updateStage as updateStageService,
-  updateStatus as updateStatusService,
-  getAllYesNo as getAllYesNoService,
-  getAllGenres as getAllGenresService,
-  getAllMembers as getAllMembersService,
-  getAllMonths as getAllMonthsService,
+  updateStatus as updateStatusService
 } from "../../services/glossary.service.js";
 
 // ==========================================
@@ -224,6 +226,43 @@ const makeDelete = (serviceFn, entityNameSingular, isIntKey) => async (req, res)
   }
 };
 
+
+
+
+const makeGetAllByStateID = (serviceFn, entityNameSingular, entityNamePlural) => async (req, res) => {
+  try {
+
+    const { stateId } = req.params;
+    if (!stateId || isNaN(stateId)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid state ID format. Must be a number."
+      });
+    }
+
+    const data = await serviceFn(stateId);
+    if (!data || data.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: `No ${entityNamePlural.toLowerCase()} found`
+      });
+    }
+    return res.status(200).json({
+      success: true,
+      message: `${entityNamePlural} fetched successfully`,
+      data
+    });
+  } catch (error) {
+    console.error(`Get All ${entityNamePlural} Error:`, error);
+    return res.status(500).json({
+      success: false,
+      message: `Failed to fetch ${entityNamePlural.toLowerCase()}.`
+    });
+  }
+};
+
+
+
 // ==========================================
 //  Entity Controller Implementations
 // ==========================================
@@ -359,3 +398,8 @@ export const getAllMembers = makeGetAll(getAllMembersService, "Member", "Members
 // 21. Month
 export const getAllMonths = makeGetAll(getAllMonthsService, "Month", "Months");
 
+
+
+
+export const getAllTcsIntTypes = makeGetAll(getAllTcsIntTypesService, "TcsIntType", "TcsIntTypes");
+export const getAllTcsIntTypesByStateId = makeGetAllByStateID(getAllTcsIntTypesByStateIdService, "TcsIntTypeByStateID", "TcsIntTypeByStateIDs");

@@ -50,17 +50,27 @@ const getEducationSystemByStateIdService = async (stateId) => {
     const system = systemRows[0];
     if (!system) return null;
 
-    
+
+    // Fetch related state type of hei
+    const typeOfHeiQuery = `SELECT * FROM whed_tcsinsttype WHERE StateID = ?`;
+    const [typeOfHeiRows] = await pool.query(typeOfHeiQuery, [stateId]);
+
+
+
+
+
+
+
     // Fetch related school levels
     const schoolQuery = `SELECT * FROM whed_tcsschool WHERE StateID = ?`;
     const [schoolRows] = await pool.query(schoolQuery, [stateId]);
 
-    
+
     // Fetch related decrees
     const decreeQuery = `SELECT * FROM whed_tcsdecree WHERE StateID = ?`;
     const [decreeRows] = await pool.query(decreeQuery, [stateId]);
 
-    
+
     // Fetch stages linked
     const stageQuery = `
     SELECT 
@@ -74,7 +84,7 @@ const getEducationSystemByStateIdService = async (stateId) => {
   `;
     const [stageRows] = await pool.query(stageQuery, [stateId]);
 
-    
+
     // Fetch languages linked
     const languageQuery = `
     SELECT 
@@ -87,13 +97,112 @@ const getEducationSystemByStateIdService = async (stateId) => {
   `;
     const [languageRows] = await pool.query(languageQuery, [stateId]);
 
-    return {
-        ...system,
-        schools: schoolRows,
-        decrees: decreeRows,
-        stages: stageRows,
-        languages: languageRows
-    };
+
+
+
+
+
+
+
+    const responseObject = {
+        StateID: system.StateID,
+
+        TypeOfHEI: typeOfHeiRows,
+
+        PreHigherEducationSystem: {
+            ageOf: {
+                entry: system.sAgeOfEntry,
+                exit: system.sAgeOfExit
+            },
+            stuctureOfSchoolSystem: schoolRows,
+            descriptionOfSchoolSystem: system.sSchoolSystem
+        },
+
+        HigherEducationSystem: {
+            stucture: system.sHESystem,
+            lowsAndDecrees: decreeRows,
+            languageOfInstruction: languageRows,
+            stagesOfHigherEducation: stageRows,
+            trainingOfHigherEducationTeachers: system.sTrainingHETeachers,
+            distanceHigherEducation: system.sDistanceHE,
+            educationExchangePrograms: '',
+        },
+
+
+        Bodis: {
+            governmentBodiesAndOthersOrgAccociations: {},
+            bodiesReponsibleForRecognition: {},
+            bodyiesResponsibleForStudentServices: {},
+            studentAssociation: {},
+            bodiesResponsibleForFinancialAid: {},
+            bodiesResponsibleForInternationalCooperation: {},
+        },
+
+        AdmissionToHigherEducation: {
+
+            secondarySchoolCredentialsRequiredForNonUniversityLevelAdmission: {},
+            alternatives: {},
+            admissionTest: {},
+            numerusClauses: {},
+            otherRequirements: {},
+            secondarySchoolCredentialsRequiredForUniversityLevelAdmission: {},
+            alternatives: {},
+            admissionTest: {},
+            numerusClauses: {},
+            otherRequirements: {},
+            foreignStudentsAdmission: {},
+        },
+
+        RecongnitionOfStudies: {
+            systemOfReconignition: system.sRBSystemDesc,
+            specialprovisionForRecognition: {},
+            multilateralAgreements: {},
+            otherInformationSources: system.sRBOtherInfoSources,
+        },
+
+        StudentLife: {
+            socialSecurityOrHealthInsuranceForHomeStudents: {},
+            socialSecurityOrHealthInsuranceForForeignStudents: {},
+            specialtravelConcessions: {},
+            studentExpensesAndAid: {
+                livingCost: system.sFNAvLivingCost,
+                tuitionFees: {
+                    minTuitionFee: system.sFNMinTuitionFee,
+                    maxTuitionFee: system.sFNMaxTuitionFee,
+                    minTuitionFeeForeign: system.sFNMinTuitionFeeForeign,
+                    maxTuitionFeeForeign: system.sFNMaxTuitionFeeForeign
+                }
+            },
+            publicationsListingFinancialAid: {},
+
+        },
+
+
+        DataProvidedBy: {
+
+            academicyear: {
+                from: system.sAcademicYearFrom,
+                to: system.sAcademicYearTo
+            },
+            source: system.sSource,
+            personInchargeOfUpdate: '',
+        },
+
+        Management: {
+            inputDate: system.sInputDate,
+            majorUpdateDate: system.sMajorUpdateDate,
+            majorUpdateDateDO: system.sMajorUpdateDateDP,
+            minirUpdateDate: system.sMinorUpdateDate,
+            RecordHistory: system.sRecordHistory,
+            comment: system.sComment,
+            bodiesUpdate: system.sBodiesUpdated,
+        }
+    }
+
+
+
+
+    return responseObject;
 };
 
 const createStateSystem = async (systemData) => {

@@ -16,6 +16,10 @@ router.get("/private/state/:stateId/educationsystem", protect, authorize(0, 1), 
 
 //all post routes
 router.post("/private/state/:stateId/educationsystem", protect, authorize(1, 0), checkStateResponsibility, validate(stateSystemSchema), createStateSystem);
+router.post("/private/state/:stateId/educationsystem/typeofhei", protect, authorize(1, 0), checkStateResponsibility, createStateSystem);
+
+
+
 
 
 // all put routes
