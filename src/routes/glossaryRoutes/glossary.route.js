@@ -133,6 +133,9 @@ import {
 
 const router = express.Router();
 
+
+
+//private routes for glossary management
 // Countries
 router.get("/private/glossary/countrys", protect, authorize(1), getAllCountries);
 router.get("/private/glossary/country/:id", protect, authorize(1), getSingleCountry);

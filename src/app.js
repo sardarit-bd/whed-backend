@@ -19,6 +19,7 @@ import glossaryRoutes from "./routes/glossaryRoutes/glossary.route.js";
 import healthRoutes from "./routes/health/health.route.js";
 import instituteRoute from "./routes/instituteRoute/institute.route.js";
 import lookupRoute from './routes/lookupRoute/lookup.routes.js';
+import publicSiteRoutes from './routes/publicSiteRoutes/publicSite.route.js';
 import stateRoute from './routes/stateRoute/state.routes.js';
 import userRoutes from './routes/userroute/user.routes.js';
 
@@ -115,6 +116,9 @@ app.use("/api/v1", healthRoutes);
 
 
 
+
+/************** Public Site APi List here *******************/
+app.use("/api/v1/public", publicSiteRoutes);
 
 
 
