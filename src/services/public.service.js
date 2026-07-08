@@ -77,82 +77,12 @@ const getInstitutesByStateIDServices = async (stateId) => {
 
 
 const getInstituteByStateAndOrgIDServices = async (stateId, orgId) => {
+
+
+  console.log(stateId, orgId);
+
   const query = `
-    SELECT 
-        OrgID,
-        GlobalID,
-        iParentOrgID,
-        AliasID,
-        Family,
-        OrgName,
-        iBranchName,
-        InstNameEnglish,
-        iBranchNameEnglish,
-        CountryCode,
-        StateCode,
-        StateID,
-        BranchID,
-        OrgTypeCode,
-        InstNameAlt,
-        InstAcronym,
-        InstClassCode,
-        sInstTypeID,
-        InstFundingTypeCode,
-        iIAUMembershipOption,
-        iIAULogo,
-        iIAUNews,
-        iAAUMembershipOption,
-        iOtherSites,
-        iHistory,
-        iAdmissionRequirements,
-        iFeesN,
-        iFeesNCurrencyCode,
-        iFeesI,
-        iFeesICurrencyCode,
-        iAcademicYear,
-        iLanguagesUsed,
-        iLibrary,
-        iMainPress,
-        iResidentialFacilities,
-        iCreated,
-        iPresentStatusYear,
-        iStudentTotal,
-        iStudentForeignTotal,
-        iAccreditingAgency,
-        iAccreditationEndDate,
-        ReligionCode,
-        iStudentBody,
-        DPName,
-        DPEMail,
-        Street,
-        City,
-        Province,
-        PostCode,
-        Tel,
-        Fax,
-        EMail,
-        WWW,
-        iStaffStatisticsYear,
-        iStaffFullTimeTotal,
-        iStaffFullTimeMale,
-        iStaffFullTimeFemale,
-        iStaffPartTimeTotal,
-        iStaffPartTimeFemale,
-        iStaffPartTimeMale,
-        iStaffDocFullTimeTotal,
-        iStaffDocFullTimeMale,
-        iStaffDocFullTimeFemale,
-        iStudentStatisticsYear,
-        iStudentMale,
-        iStudentFemale,
-        iStudentForeignMale,
-        iStudentForeignFemale,
-        iStudentDistance,
-        iStudentsDisabilities,
-        iRecordHistory,
-        iDegreeNote
-    FROM whed_org
-    WHERE StateID = ? AND OrgID = ?
+    SELECT *FROM whed_org WHERE StateID = ? AND OrgID = ?
   `;
   const [rows] = await pool.query(query, [stateId, orgId]);
   const institute = rows[0];
@@ -341,6 +271,8 @@ const getInstituteByStateAndOrgIDServices = async (stateId, orgId) => {
     `, [orgId]);
 
 
+  console.log("Check Institute Periodicals in Backend:", periodicals);
+  console.log("Check Institute Logo in Backend:", institute.iLogo);
 
   return {
     ...institute,
