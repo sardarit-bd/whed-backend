@@ -1,8 +1,8 @@
-import { getCountriesWithResionaAndStatesServices, getInstituteByStateAndOrgIDServices, getInstitutesByStateIDServices } from '../../services/public.service.js';
+import { getCountriesWithResionaAndStatesServices, getEducationSystemAndCredientialListByCountryCodeServices, getEducationalSystemAndCredientialDetailesByStateIDServices, getInstituteByStateAndOrgIDServices, getInstitutesByStateIDServices } from '../../services/public.service.js';
 
 
 
-/********** get all institutes **********/
+
 const getCountriesWithResionaAndStates = async (req, res) => {
     try {
 
@@ -30,7 +30,7 @@ const getCountriesWithResionaAndStates = async (req, res) => {
     }
 };
 
-/********** get single institute **********/
+
 const getInstitutesByStateID = async (req, res) => {
     try {
 
@@ -60,7 +60,7 @@ const getInstitutesByStateID = async (req, res) => {
     }
 };
 
-/********** create institute **********/
+
 const getInstituteByStateAndOrgID = async (req, res) => {
     try {
 
@@ -96,6 +96,69 @@ const getInstituteByStateAndOrgID = async (req, res) => {
 
 
 
+const getEducationSystemAndCredientialListByCountryCode = async (req, res) => {
+    try {
 
-export { getCountriesWithResionaAndStates, getInstituteByStateAndOrgID, getInstitutesByStateID };
+
+        const { countryCode } = req.params;
+
+        const rows = await getEducationSystemAndCredientialListByCountryCodeServices(countryCode);
+
+        if (!rows || rows.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: "No Education System and Crediential List found"
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: "Education System and Crediential List fetched successfully",
+            data: rows
+        });
+    } catch (error) {
+        console.error('Get Education System and Crediential List Error:', error);
+        return res.status(500).json({
+            success: false,
+            message: 'Failed to fetch Education System and Crediential List.'
+        });
+    }
+}
+
+
+
+const getEducationalSystemAndCredientialDetailesByStateID = async (req, res) => {
+    try {
+
+
+        const { stateId } = req.params;
+
+        const rows = await getEducationalSystemAndCredientialDetailesByStateIDServices(stateId);
+
+        if (!rows || rows.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: "No Education System and Crediential Detailes found"
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: "Education System and Crediential Detailes fetched successfully",
+            data: rows
+        });
+    } catch (error) {
+        console.error('Get Education System and Crediential Detailes Error:', error);
+        return res.status(500).json({
+            success: false,
+            message: 'Failed to fetch Education System and Crediential Detailes.'
+        });
+    }
+}
+
+
+
+
+
+export { getCountriesWithResionaAndStates, getEducationSystemAndCredientialListByCountryCode, getEducationalSystemAndCredientialDetailesByStateID, getInstituteByStateAndOrgID, getInstitutesByStateID };
 

@@ -20,16 +20,17 @@ const getCountriesWithResionaAndStatesServices = async () => {
             c.RegionSiteIAU,
 
             (
-                SELECT JSON_OBJECT(
-                    'StateID', s.StateID,
-                    'State', s.State,
-                    'StateCode', s.StateCode,
-                    'ISO3', s.ISO3
+                SELECT JSON_ARRAYAGG(
+                    JSON_OBJECT(
+                        'StateID', s.StateID,
+                        'State', s.State,
+                        'StateCode', s.StateCode,
+                        'ISO3', s.ISO3
+                    )
                 )
                 FROM whed_state s
                 WHERE s.CountryCode = c.CountryCode
-                LIMIT 1
-            ) AS state
+            ) AS states
 
         FROM whed_lex_country c
         ORDER BY c.Country;
@@ -39,7 +40,7 @@ const getCountriesWithResionaAndStatesServices = async () => {
 
   const countries = rows.map((country) => ({
     ...country,
-    state: country.state ? JSON.parse(country.state) : null,
+    states: country.states ? JSON.parse(country.states) : [],
   }));
 
   return countries;
@@ -79,7 +80,6 @@ const getInstitutesByStateIDServices = async (stateId) => {
 const getInstituteByStateAndOrgIDServices = async (stateId, orgId) => {
 
 
-  console.log(stateId, orgId);
 
   const query = `
     SELECT *FROM whed_org WHERE StateID = ? AND OrgID = ?
@@ -287,17 +287,35 @@ const getInstituteByStateAndOrgIDServices = async (stateId, orgId) => {
 
 
 
+const getEducationSystemAndCredientialListByCountryCodeServices = async (CountryCode) => {
+  const query = `
+    SELECT
+      StateID,
+      State,
+      StateCode,
+      ISO3,
+      CountryCode
+    FROM whed_state
+    WHERE CountryCode = ?
+    ORDER BY State;
+  `;
+
+  const [states] = await pool.query(query, [CountryCode]);
+
+  return states;
+}
+
+
+
+
+const getEducationalSystemAndCredientialDetailesByStateIDServices = async (stateId) => {
+
+}
 
 
 
 
 
-
-
-
-
-
-
-export { getCountriesWithResionaAndStatesServices, getInstituteByStateAndOrgIDServices, getInstitutesByStateIDServices };
+export { getCountriesWithResionaAndStatesServices, getEducationalSystemAndCredientialDetailesByStateIDServices, getEducationSystemAndCredientialListByCountryCodeServices, getInstituteByStateAndOrgIDServices, getInstitutesByStateIDServices };
 
 
