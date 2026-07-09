@@ -13,6 +13,4 @@ router.get("/country/:countryCode/edusystemandcredentailslist", getEducationSyst
 router.get("/state/:stateId/edusystemandcredentailsDetailes", getEducationalSystemAndCredientialDetailesByStateID);
 
 
-
-
 export default router;

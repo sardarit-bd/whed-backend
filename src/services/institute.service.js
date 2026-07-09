@@ -925,6 +925,7 @@ const getInstituteByStateAndOrgID = async (stateId, orgId) => {
         InstFundingTypeCode,
         iIAUMembershipOption,
         iIAULogo,
+        iLogo,
         iIAUNews,
         iAAUMembershipOption,
         iOtherSites,

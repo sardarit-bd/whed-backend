@@ -12,10 +12,13 @@ export const credentialSchema = Joi.object({
 });
 
 export const updateCredentialSchema = Joi.object({
-    StateID: Joi.number().integer().optional(),
     Cred: Joi.string().max(255).optional(),
-    cDescription: Joi.string().optional().allow(""),
     cAcronym: Joi.string().max(50).optional().allow(""),
+    CredCatCode1: Joi.string().max(10).optional().allow(""),
+    CredCatCode2: Joi.string().max(10).optional().allow(""),
+    CredlevelCode: Joi.string().max(10).optional().allow(""),
+    cDescription: Joi.string().optional().allow(""),
+    cAlternativeQualification: Joi.string().optional().allow(""),
     cEntryExamNational: Joi.string().max(5).optional().allow(""),
     cEntryExamInst: Joi.string().max(5).optional().allow(""),
     CredLevelCode: Joi.string().max(10).optional().allow(""),

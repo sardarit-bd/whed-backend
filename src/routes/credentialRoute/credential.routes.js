@@ -1,8 +1,8 @@
 import express from "express";
-import { createCredential, getAllCredentials, getCredentialsByStateId, getSingleCredentialbystateID } from "../../controllers/credentialController/credential.controller.js";
+import { createCredential, getAllCredentials, getCredentialsByStateId, getSingleCredentialbystateID, updateCredential } from "../../controllers/credentialController/credential.controller.js";
 import { authorize, protect } from "../../middlewares/auth.middleware.js";
 import { checkStateResponsibility } from "../../middlewares/responsibility.middleware.js";
-import { credentialSchema, validate } from "../../validations/credential.validation.js";
+import { credentialSchema, updateCredentialSchema, validate } from "../../validations/credential.validation.js";
 
 const router = express.Router();
 
@@ -19,8 +19,9 @@ router.post("/private/state/:stateId/credential", protect, authorize(1, 0), chec
 // router.post("/private/state/:stateId/credential/:id/inst-types", protect, authorize(1, 0), checkStateResponsibility, validate(instTypeLinkSchema), addInstitutionTypes);
 
 
-// //all put route
-// router.put("/private/state/:stateId/credential/:id", protect, authorize(1, 0), checkStateResponsibility, validate(updateCredentialSchema), updateCredential);
+//all put route
+router.put("/private/state/:stateId/credential/:id", protect, authorize(1, 0), checkStateResponsibility, validate(updateCredentialSchema), updateCredential);
+
 // router.put("/private/state/:stateId/credential/:id/prerequisites", protect, authorize(1, 0), checkStateResponsibility, validate(updatePrerequisiteSchema), updatePrerequisites);
 // router.put("/private/state/:stateId/credential/:id/inst-types", protect, authorize(1, 0), checkStateResponsibility, validate(updateInstTypeLinkSchema), updateInstitutionTypes);
 
