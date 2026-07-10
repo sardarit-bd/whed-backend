@@ -21,22 +21,19 @@ export const updateCredentialSchema = Joi.object({
     cAlternativeQualification: Joi.string().optional().allow(""),
     cEntryExamNational: Joi.string().max(5).optional().allow(""),
     cEntryExamInst: Joi.string().max(5).optional().allow(""),
-    CredLevelCode: Joi.string().max(10).optional().allow(""),
 }).min(1).messages({
     "object.min": "At least one field must be provided to update",
 });
 
 export const prerequisiteSchema = Joi.object({
-    requiredCredIds: Joi.array().items(Joi.number().integer()).required().messages({
-        "array.base": "requiredCredIds must be an array of credential IDs",
-        "any.required": "requiredCredIds array is required",
+    CredID_Req: Joi.number().integer().required().messages({
+        "any.required": "CredID_Req Number is required",
     }),
 });
 
 export const instTypeLinkSchema = Joi.object({
-    instTypeIds: Joi.array().items(Joi.number().integer()).required().messages({
-        "array.base": "instTypeIds must be an array of institution type IDs",
-        "any.required": "instTypeIds array is required",
+    instTypeIds: Joi.number().integer().required().messages({
+        "any.required": "instTypeIds Number is required",
     }),
 });
 

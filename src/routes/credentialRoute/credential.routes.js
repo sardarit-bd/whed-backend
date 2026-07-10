@@ -1,8 +1,8 @@
 import express from "express";
-import { createCredential, getAllCredentials, getCredentialsByStateId, getSingleCredentialbystateID, updateCredential } from "../../controllers/credentialController/credential.controller.js";
+import { addInstitutionTypes, addPrerequisites, createCredential, deleteCredential, deleteInstitutionTypes, deletePrerequisites, getAllCredentials, getCredentialsByStateId, getSingleCredentialbystateID, updateCredential } from "../../controllers/credentialController/credential.controller.js";
 import { authorize, protect } from "../../middlewares/auth.middleware.js";
 import { checkStateResponsibility } from "../../middlewares/responsibility.middleware.js";
-import { credentialSchema, updateCredentialSchema, validate } from "../../validations/credential.validation.js";
+import { credentialSchema, instTypeLinkSchema, prerequisiteSchema, updateCredentialSchema, validate } from "../../validations/credential.validation.js";
 
 const router = express.Router();
 
@@ -14,22 +14,20 @@ router.get("/private/state/:stateId/credential/:id", protect, authorize(0, 1), g
 
 // //all post route
 router.post("/private/state/:stateId/credential", protect, authorize(1, 0), checkStateResponsibility, validate(credentialSchema), createCredential);
-
-// router.post("/private/state/:stateId/credential/:id/prerequisites", protect, authorize(1, 0), checkStateResponsibility, validate(prerequisiteSchema), addPrerequisites);
-// router.post("/private/state/:stateId/credential/:id/inst-types", protect, authorize(1, 0), checkStateResponsibility, validate(instTypeLinkSchema), addInstitutionTypes);
+router.post("/private/state/:stateId/credential/:id/prerequisites", protect, authorize(1, 0), checkStateResponsibility, validate(prerequisiteSchema), addPrerequisites);
+router.post("/private/state/:stateId/credential/:id/inst-types", protect, authorize(1, 0), checkStateResponsibility, validate(instTypeLinkSchema), addInstitutionTypes);
 
 
 //all put route
 router.put("/private/state/:stateId/credential/:id", protect, authorize(1, 0), checkStateResponsibility, validate(updateCredentialSchema), updateCredential);
 
-// router.put("/private/state/:stateId/credential/:id/prerequisites", protect, authorize(1, 0), checkStateResponsibility, validate(updatePrerequisiteSchema), updatePrerequisites);
-// router.put("/private/state/:stateId/credential/:id/inst-types", protect, authorize(1, 0), checkStateResponsibility, validate(updateInstTypeLinkSchema), updateInstitutionTypes);
 
 
-// // all delete route
-// router.delete("/private/state/:stateId/credential/:id", protect, authorize(1, 0), checkStateResponsibility, deleteCredential);
-// router.delete("/private/state/:stateId/credential/:id/prerequisites", protect, authorize(1, 0), checkStateResponsibility, validate(updatePrerequisiteSchema), updatePrerequisites);
-// router.delete("/private/state/:stateId/credential/:id/inst-types", protect, authorize(1, 0), checkStateResponsibility, validate(updateInstTypeLinkSchema), updateInstitutionTypes);
+
+// all delete route
+router.delete("/private/state/:stateId/credential/:id", protect, authorize(1, 0), checkStateResponsibility, deleteCredential);
+router.delete("/private/state/:stateId/credential/:id/prerequisites/:preId", protect, authorize(1, 0), checkStateResponsibility, deletePrerequisites);
+router.delete("/private/state/:stateId/credential/:id/inst-types/:instTypeId", protect, authorize(1, 0), checkStateResponsibility, deleteInstitutionTypes);
 
 
 

@@ -1,7 +1,8 @@
 import pool from '../config/db.js';
+import addHistoryLogforOrg from "../utils/addHistoryLogforOrg.js";
 
 const ALLOWED_CRED_FIELDS = new Set([
-    "StateID", "Cred", "cDescription", "cAcronym", "cEntryExamNational", "cEntryExamInst", "CredLevelCode"
+    "Cred", "cAcronym", "CredCatCode1", "CredCatCode2", "CredlevelCode", "cDescription", "cAlternativeQualification", "cEntryExamNational", "cEntryExamInst"
 ]);
 
 const getAllCredentials = async (stateId, levelCode) => {
@@ -127,14 +128,17 @@ const getSingleCredential = async (id) => {
 };
 
 
-const createCredential = async (credentialData) => {
+const createCredential = async (credentialData, user) => {
     const mappedData = {};
+
 
     // ==========================
     // Mapping
     // ==========================
     if (credentialData)
         mappedData.StateID = parseInt(credentialData.StateID, 10);
+
+    mappedData.UserID = user ? user.UserID : null;
 
     if (credentialData)
         mappedData.Cred = credentialData.Cred?.trim();
@@ -164,7 +168,6 @@ const createCredential = async (credentialData) => {
     if (credentialData)
         mappedData.cEntryExamInst = credentialData.cEntryExamInst ? parseInt(credentialData.cEntryExamInst, 10) : null;
 
-    if (credentialData) mappedData.UserID = credentialData.UserID ? credentialData.UserID : null;
 
     if (credentialData)
         mappedData.cRecordHistory = credentialData.cRecordHistory ? credentialData.cRecordHistory?.trim() : " ";
@@ -174,6 +177,7 @@ const createCredential = async (credentialData) => {
     mappedData.cMajorUpdateDateDP = new Date();
     mappedData.cWarning = 0;
     mappedData.cDelete = 0;
+
 
     // ==========================
     // Insert
@@ -198,19 +202,50 @@ const createCredential = async (credentialData) => {
 };
 
 
-const updateCredential = async (id, updateData) => {
-    const keys = Object.keys(updateData).filter(key => ALLOWED_CRED_FIELDS.has(key));
+const updateCredential = async (id, updateData, user) => {
+    const connection = await pool.getConnection();
 
-    if (keys.length === 0) {
-        return { affectedRows: 0 };
+    try {
+        await connection.beginTransaction();
+
+        // Whitelist and sanitize fields
+        const keys = Object.keys(updateData).filter(key =>
+            ALLOWED_CRED_FIELDS.has(key)
+        );
+
+        if (keys.length === 0) {
+            await connection.rollback();
+            return { affectedRows: 0 };
+        }
+
+        const values = keys.map(key => updateData[key]);
+
+        // Update Query
+        const setClause = keys.map(key => `${key} = ?`).join(", ");
+        const query = `UPDATE whed_cred SET ${setClause} WHERE CredID = ?`;
+
+        const [result] = await connection.query(query, [...values, id]);
+
+        // Add History
+        await addHistoryLogforOrg({
+            db: connection,
+            tableName: "whed_cred",
+            id,
+            idColumn: "CredID",
+            historyColumn: "cRecordHistory",
+            action: "MINOR update",
+            user: user?.name,
+        });
+
+        await connection.commit();
+
+        return result;
+    } catch (error) {
+        await connection.rollback();
+        throw error;
+    } finally {
+        connection.release();
     }
-
-    const values = keys.map(key => updateData[key]);
-    const setClause = keys.map(key => `${key} = ?`).join(', ');
-    const query = `UPDATE whed_cred SET ${setClause} WHERE CredID = ?`;
-
-    const [result] = await pool.query(query, [...values, id]);
-    return result;
 };
 
 const deleteCredential = async (id) => {
@@ -219,20 +254,20 @@ const deleteCredential = async (id) => {
     return result;
 };
 
-const linkPrerequisites = async (credId, requiredCredIds) => {
+const linkPrerequisites = async (credId, CredID_Req) => {
     let connection;
     try {
         connection = await pool.getConnection();
         await connection.beginTransaction();
 
         // Remove old links
-        await connection.query(`DELETE FROM whed_tblcredreqcredlink WHERE CredID = ?`, [credId]);
+        // await connection.query(`DELETE FROM whed_tblcredreqcredlink WHERE CredID = ?`, [credId]);
 
         // Insert new ones
-        if (requiredCredIds && requiredCredIds.length > 0) {
-            const values = requiredCredIds.map(reqId => [credId, reqId]);
-            await connection.query(`INSERT INTO whed_tblcredreqcredlink (CredID, CredID_Req) VALUES ?`, [values]);
-        }
+        await connection.query(
+            `INSERT INTO whed_tblcredreqcredlink (CredID, CredID_Req) VALUES (?, ?)`,
+            [credId, CredID_Req]
+        );
 
         await connection.commit();
         return { success: true };
@@ -251,13 +286,13 @@ const linkInstitutionTypes = async (credId, instTypeIds) => {
         await connection.beginTransaction();
 
         // Remove old links
-        await connection.query(`DELETE FROM whed_tblcredtypeinstlink WHERE CredID = ?`, [credId]);
+        // await connection.query(`DELETE FROM whed_tblcredtypeinstlink WHERE CredID = ?`, [credId]);
 
         // Insert new ones
-        if (instTypeIds && instTypeIds.length > 0) {
-            const values = instTypeIds.map(typeId => [credId, typeId]);
-            await connection.query(`INSERT INTO whed_tblcredtypeinstlink (CredID, sTypeInstID) VALUES ?`, [values]);
-        }
+        await connection.query(
+            `INSERT INTO whed_tblcredtypeinstlink (CredID, sTypeInstID) VALUES (?, ?)`,
+            [credId, instTypeIds]
+        );
 
         await connection.commit();
         return { success: true };
@@ -307,10 +342,25 @@ const getCredentialsByStateId = async (stateId) => {
     return rows;
 };
 
+
+
+const deletePrerequisitesService = async (credId, preId) => {
+    const query = `DELETE FROM whed_tblcredreqcredlink WHERE CredID = ? AND CredID_Req = ?`;
+    const [result] = await pool.query(query, [credId, preId]);
+    return result;
+};
+
+const deleteInstitutionTypesService = async (credId, instTypeId) => {
+    const query = `DELETE FROM whed_tblcredtypeinstlink WHERE CredID = ? AND sTypeInstID = ?`;
+    const [result] = await pool.query(query, [credId, instTypeId]);
+    return result;
+};
+
+
 export {
     createCredential,
-    deleteCredential,
-    getAllCredentials, getCredentialsByStateId, getSingleCredential,
+    deleteCredential, deleteInstitutionTypesService,
+    deletePrerequisitesService, getAllCredentials, getCredentialsByStateId, getSingleCredential,
     getTotalCredentials, linkInstitutionTypes,
     linkPrerequisites,
     updateCredential
