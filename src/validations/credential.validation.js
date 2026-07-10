@@ -19,8 +19,8 @@ export const updateCredentialSchema = Joi.object({
     CredlevelCode: Joi.string().max(10).optional().allow(""),
     cDescription: Joi.string().optional().allow(""),
     cAlternativeQualification: Joi.string().optional().allow(""),
-    cEntryExamNational: Joi.string().max(5).optional().allow(""),
-    cEntryExamInst: Joi.string().max(5).optional().allow(""),
+    cEntryExamNational: Joi.number().max(5).optional().allow(null),
+    cEntryExamInst: Joi.number().max(5).optional().allow(null),
 }).min(1).messages({
     "object.min": "At least one field must be provided to update",
 });
