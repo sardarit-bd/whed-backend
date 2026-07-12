@@ -16,12 +16,17 @@ const ALLOWED_SYSTEM_FIELDS = new Set([
 ]);
 
 const ALLOWED_SCHOOL_FIELDS = new Set([
-    "StateID", "sSchoolLevelCode", "sLength", "sAgeFrom", "sAgeTo", "sDiploma"
+    "sSchool", "sSchoolLevelCode", "sLength", "sAgeFrom", "sAgeTo", "sDiploma"
 ]);
 
 const ALLOWED_DECREE_FIELDS = new Set([
     "StateID", "sDecree", "sYearDecree", "sDecreeDesc"
 ]);
+
+const ALLOWED_TYPE_OF_HEIS_FIELDS = new Set([
+    "sInstType", "sInstTypeEnglish", "sInstTypeDescription"
+])
+
 
 const getStateSystems = async () => {
     const query = `
@@ -218,19 +223,109 @@ const createStateSystem = async (systemData) => {
 };
 
 const updateStateSystem = async (stateId, updateData) => {
-    const keys = Object.keys(updateData).filter(key => ALLOWED_SYSTEM_FIELDS.has(key));
+    const mapData = {
+        sAcademicYearFrom: updateData.sAcademicYearFrom,
+        sAcademicYearTo: updateData.sAcademicYearTo,
+
+        sAgeOfEntry: updateData.sAgeOfEntry,
+        sAgeOfExit: updateData.sAgeOfExit,
+
+        sSchoolSystem: updateData.sSchoolSystem,
+        sHESystem: updateData.sHESystem,
+        sSource: updateData.sSource,
+        sInCharge: updateData.sInCharge,
+        sNULAlternatives: updateData.sNULAlternatives,
+        sNULAdmissionTest: updateData.sNULAdmissionTest,
+        sNULOtherRequirements: updateData.sNULOtherRequirements,
+        sNULNumerusClausus: updateData.sNULNumerusClausus,
+
+        sULAlternatives: updateData.sULAlternatives,
+        sULAdmissionTest: updateData.sULAdmissionTest,
+        sULOtherRequirements: updateData.sULOtherRequirements,
+        sULNumerusClausus: updateData.sULNumerusClausus,
+
+        sFSDefinition: updateData.sFSDefinition,
+        sFSQuotas: updateData.sFSQuotas,
+        srFSAdmissionRequirements: updateData.srFSAdmissionRequirements,
+        sFSEntryRegulations: updateData.sFSEntryRegulations,
+        sFSHealth: updateData.sFSHealth,
+        sFSLanguageProficiency: updateData.sFSLanguageProficiency,
+
+        sFSIndividualInst: updateData.sFSIndividualInst,
+        sFSCentralBody: updateData.sFSCentralBody,
+
+        sRBSystemDesc: updateData.sRBSystemDesc,
+        sRBOtherInfoSources: updateData.sRBOtherInfoSources,
+        sRBNULStudies: updateData.sRBNULStudies,
+        sRBULStudies: updateData.sRBULStudies,
+        sRBPLStudies: updateData.sRBPLStudies,
+        sRBProfession: updateData.sRBProfession,
+
+        sSSHome: updateData.sSSHome,
+        sSSHAmount: updateData.sSSHAmount,
+        sSSHCurrencyCode: updateData.sSSHCurrencyCode,
+
+        sSSForeign: updateData.sSSForeign,
+        sSSFAmount: updateData.sSSFAmount,
+        sSSFCurrencyCode: updateData.sSSFCurrencyCode,
+        sSSFDetails: updateData.sSSFDetails,
+
+        sTCRoad: updateData.sTCRoad,
+        sTCRail: updateData.sTCRail,
+        sTCAir: updateData.sTCAir,
+        sTCforeign: updateData.sTCforeign,
+
+        sFNAvLivingCost: updateData.sFNAvLivingCost,
+        sFNALCCurrencyCode: updateData.sFNALCCurrencyCode,
+
+        sFNMinTuitionFee: updateData.sFNMinTuitionFee,
+        sFNMTFCCurrencyCode: updateData.sFNMTFCCurrencyCode,
+
+        sFNMaxTuitionFee: updateData.sFNMaxTuitionFee,
+        sFNMxTFCCurrencyCode: updateData.sFNMxTFCCurrencyCode,
+
+        sFNMinTuitionFeeForeign: updateData.sFNMinTuitionFeeForeign,
+        sFNMTFCfCurrencyCode: updateData.sFNMTFCfCurrencyCode,
+
+        sFNMaxTuitionFeeForeign: updateData.sFNMaxTuitionFeeForeign,
+        sFNMxTFCfCurrencyCode: updateData.sFNMxTFCfCurrencyCode,
+
+        sTrainingHETeachers: updateData.sTrainingHETeachers,
+        sDistanceHE: updateData.sDistanceHE,
+
+        sComment: updateData.sComment,
+
+        sRecordHistory: "-",
+    };
+
+    // শুধু undefined field-গুলো বাদ দিবে।
+    // null থাকলে update হবে।
+    const filteredData = Object.fromEntries(
+        Object.entries(mapData).filter(([_, value]) => value !== undefined)
+    );
+
+    const keys = Object.keys(filteredData);
 
     if (keys.length === 0) {
         return { affectedRows: 0 };
     }
 
-    const values = keys.map(key => updateData[key]);
-    const setClause = keys.map(key => `${key} = ?`).join(', ');
-    const query = `UPDATE whed_statesystem SET ${setClause} WHERE StateID = ?`;
+    const values = keys.map((key) => filteredData[key]);
+    const setClause = keys.map((key) => `${key} = ?`).join(", ");
+
+    const query = `
+        UPDATE whed_statesystem
+        SET ${setClause}
+        WHERE StateID = ?
+    `;
 
     const [result] = await pool.query(query, [...values, stateId]);
+
     return result;
 };
+
+
+
 
 const deleteStateSystem = async (stateId) => {
     const query = `DELETE FROM whed_statesystem WHERE StateID = ?`;
@@ -245,33 +340,66 @@ const getSchoolsByStateId = async (stateId) => {
     return rows;
 };
 
-const createSchool = async (schoolData) => {
-    const keys = Object.keys(schoolData).filter(key => ALLOWED_SCHOOL_FIELDS.has(key));
-    const values = keys.map(key => schoolData[key]);
+const createSchool = async (stateId, schoolData) => {
 
-    const placeholders = keys.map(() => "?").join(", ");
-    const columns = keys.join(", ");
-    const query = `INSERT INTO whed_tcsschool (${columns}) VALUES (${placeholders})`;
 
-    await pool.query(query, values);
-    return schoolData;
+    const mapData = {
+        StateID: stateId,
+        sSchool: schoolData.sSchool,
+        sSchoolLevelCode: schoolData.sSchoolLevelCode,
+        sLength: schoolData.sLength,
+        sAgeFrom: schoolData.sAgeFrom,
+        sAgeTo: schoolData.sAgeTo,
+        sDiploma: schoolData.sDiploma,
+    };
+
+
+    const query = `
+        INSERT INTO whed_tcsschool (
+            StateID,
+            sSchool,
+            sSchoolLevelCode,
+            sLength,
+            sAgeFrom,
+            sAgeTo,
+            sDiploma
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+    `;
+
+    const values = [
+        mapData.StateID,
+        mapData.sSchool,
+        mapData.sSchoolLevelCode,
+        mapData.sLength,
+        mapData.sAgeFrom,
+        mapData.sAgeTo,
+        mapData.sDiploma
+    ];
+
+    const [result] = await pool.query(query, values);
+
+    return {
+        insertId: result.insertId,
+        affectedRows: result.affectedRows,
+    };
 };
 
-const updateSchool = async (stateId, schoolLevelCode, updateData) => {
+const updateSchool = async (stateId, schoolId, updateData) => {
     const keys = Object.keys(updateData).filter(key => ALLOWED_SCHOOL_FIELDS.has(key));
     if (keys.length === 0) return { affectedRows: 0 };
 
     const values = keys.map(key => updateData[key]);
     const setClause = keys.map(key => `${key} = ?`).join(', ');
-    const query = `UPDATE whed_tcsschool SET ${setClause} WHERE StateID = ? AND sSchoolLevelCode = ?`;
+    const query = `UPDATE whed_tcsschool SET ${setClause} WHERE StateID = ? AND sSchoolID = ?`;
 
-    const [result] = await pool.query(query, [...values, stateId, schoolLevelCode]);
+    const [result] = await pool.query(query, [...values, stateId, schoolId]);
     return result;
 };
 
-const deleteSchool = async (stateId, schoolLevelCode) => {
-    const query = `DELETE FROM whed_tcsschool WHERE StateID = ? AND sSchoolLevelCode = ?`;
-    const [result] = await pool.query(query, [stateId, schoolLevelCode]);
+const deleteSchool = async (stateId, schoolId) => {
+    const query = `DELETE FROM whed_tcsschool WHERE StateID = ? AND sSchoolID = ?`;
+    const [result] = await pool.query(query, [stateId, schoolId]);
     return result;
 };
 
@@ -312,18 +440,98 @@ const deleteDecree = async (decreeId) => {
     return result;
 };
 
+
+
+
+const createTypeOfHeisService = async (stateId, InsData) => {
+
+    const mapData = {
+        StateID: stateId,
+        sInstType: InsData.sInstType,
+        sInstTypeEnglish: InsData.sInstTypeEnglish,
+        sInstTypeDescription: InsData.sInstTypeDescription,
+    };
+
+    const query = `
+        INSERT INTO whed_tcsinsttype (
+            StateID,
+            sInstType,
+            sInstTypeEnglish,
+            sInstTypeDescription
+        )
+        VALUES (?, ?, ?, ?)
+    `;
+
+    const values = [
+        mapData.StateID,
+        mapData.sInstType,
+        mapData.sInstTypeEnglish,
+        mapData.sInstTypeDescription,
+    ];
+
+    const [result] = await pool.query(query, values);
+
+    return {
+        insertId: result.insertId,
+        affectedRows: result.affectedRows,
+    };
+
+
+};
+
+
+const updateTypeOfHeisService = async (stateId, id, updateData) => {
+    const keys = Object.keys(updateData).filter(key =>
+        ALLOWED_TYPE_OF_HEIS_FIELDS.has(key)
+    );
+
+    if (keys.length === 0) {
+        return { affectedRows: 0 };
+    }
+
+    const values = keys.map(key => updateData[key]);
+
+    const setClause = keys.map(key => `${key} = ?`).join(", ");
+
+    const query = `
+        UPDATE whed_tcsinsttype
+        SET ${setClause}
+        WHERE StateID = ? AND sInstTypeID = ?
+    `;
+
+    const [result] = await pool.query(query, [
+        ...values,
+        stateId,
+        id,
+    ]);
+
+    return result;
+}
+
+
+
+const deleteTypeOfHeisService = async (stateId, id) => {
+
+    const query = `DELETE FROM whed_tcsinsttype WHERE StateID = ? AND sInstTypeID = ?`;
+    const [result] = await pool.query(query, [stateId, id]);
+    return result;
+};
+
+
+
+
+
 export {
     createDecree,
     createSchool,
-    createStateSystem,
-    deleteDecree,
+    createStateSystem, createTypeOfHeisService, deleteDecree,
     deleteSchool,
-    deleteStateSystem,
-    getDecreesByStateId, getEducationSystemByStateIdService, getSchoolsByStateId,
+    deleteStateSystem, deleteTypeOfHeisService, getDecreesByStateId, getEducationSystemByStateIdService, getSchoolsByStateId,
     getStateSystems,
     getTotalStateSystems,
     updateDecree,
     updateSchool,
-    updateStateSystem
+    updateStateSystem,
+    updateTypeOfHeisService
 };
 

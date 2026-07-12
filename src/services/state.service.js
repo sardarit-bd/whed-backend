@@ -257,9 +257,20 @@ const createMyState = async (stateData, userId) => {
     return result;
 };
 
+
+
+
+
+
+
+
+
+
+
+
+
 export {
-    createMyState, createState,
-    deleteState,
+    createMyState, createState, deleteState,
     getAllStates, getMyStates, getSingleState, getTotalMyStates, getTotalStates,
     updateState
 };

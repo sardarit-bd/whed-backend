@@ -2,17 +2,20 @@ import {
   createDecree as createDecreeService,
   createSchool as createSchoolService,
   createStateSystem as createStateSystemService,
+  createTypeOfHeisService,
   deleteDecree as deleteDecreeService,
   deleteSchool as deleteSchoolService,
   deleteStateSystem as deleteStateSystemService,
+  deleteTypeOfHeisService,
   getDecreesByStateId as getDecreesByStateIdService,
   getEducationSystemByStateIdService,
   getSchoolsByStateId as getSchoolsByStateIdService,
   getStateSystems as getStateSystemsService,
   updateDecree as updateDecreeService,
   updateSchool as updateSchoolService,
-  updateStateSystem as updateStateSystemService
-} from "../../services/stateSystem.service.js";
+  updateStateSystem as updateStateSystemService,
+  updateTypeOfHeisService
+} from "../../services/educationSystem.service.js";
 
 /********** get all state systems **********/
 const getAllStateSystems = async (req, res) => {
@@ -90,8 +93,45 @@ const createStateSystem = async (req, res) => {
   }
 };
 
+
+
+
+
+
+/********** create state system **********/
+const createTypeOfHeis = async (req, res) => {
+  try {
+    const { stateId } = req.params;
+    if (!stateId || isNaN(stateId)) {
+      return res.status(400).json({ success: false, message: "Invalid state ID format." });
+    }
+    const result = await createTypeOfHeisService(stateId, req.validatedBody);
+    res.status(201).json({
+      success: true,
+      message: "State system created successfully!",
+      data: result
+    });
+  } catch (error) {
+    console.error("Create State System Error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to create state system."
+    });
+  }
+};
+
+
+
+
+
+
+
+
+
+
 /********** update state system **********/
 const updateStateSystem = async (req, res) => {
+
   try {
     const { stateId } = req.params;
     if (!stateId || isNaN(stateId)) {
@@ -102,6 +142,10 @@ const updateStateSystem = async (req, res) => {
     }
 
     const updateData = { ...req.validatedBody };
+
+
+    console.log(updateData);
+
 
     const result = await updateStateSystemService(stateId, updateData);
     if (result.affectedRows === 0) {
@@ -122,6 +166,34 @@ const updateStateSystem = async (req, res) => {
     });
   }
 };
+
+
+
+
+const updatetypeOfHeis = async (req, res) => {
+  try {
+    const { stateId, id } = req.params;
+    if (!stateId || isNaN(stateId) || !id || isNaN(id)) {
+      return res.status(400).json({ success: false, message: "Invalid state ID format." });
+    }
+    const result = await updateTypeOfHeisService(stateId, id, req.validatedBody);
+    res.status(200).json({
+      success: true,
+      message: "Type of Heis updated successfully!",
+      data: result
+    });
+  } catch (error) {
+    console.error("Error updating Type of Heis:", error.message);
+    res.status(500).json({
+      success: false,
+      message: "Something went wrong while updating the Type of Heis.",
+    });
+  }
+}
+
+
+
+
 
 /********** delete state system **********/
 const removeEducationsystem = async (req, res) => {
@@ -165,8 +237,16 @@ const getSchools = async (req, res) => {
 };
 
 const addSchool = async (req, res) => {
+
   try {
-    const result = await createSchoolService(req.validatedBody);
+
+    const { stateId } = req.params;
+
+    if (!stateId || isNaN(stateId)) {
+      return res.status(400).json({ success: false, message: "Invalid state ID format." });
+    }
+
+    const result = await createSchoolService(stateId, req.validatedBody);
     res.status(201).json({ success: true, data: result });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -175,8 +255,8 @@ const addSchool = async (req, res) => {
 
 const editSchool = async (req, res) => {
   try {
-    const { stateId, levelCode } = req.params;
-    const result = await updateSchoolService(stateId, levelCode, req.validatedBody);
+    const { stateId, schoolId } = req.params;
+    const result = await updateSchoolService(stateId, schoolId, req.validatedBody);
     res.status(200).json({ success: true, message: "School updated successfully!" });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -185,8 +265,8 @@ const editSchool = async (req, res) => {
 
 const removeSchool = async (req, res) => {
   try {
-    const { stateId, levelCode } = req.params;
-    await deleteSchoolService(stateId, levelCode);
+    const { stateId, schoolId } = req.params;
+    await deleteSchoolService(stateId, schoolId);
     res.status(200).json({ success: true, message: "School deleted successfully!" });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -233,15 +313,28 @@ const removeDecree = async (req, res) => {
   }
 };
 
+
+const removeTypeOfHeis = async (req, res) => {
+  try {
+    const { stateId, id } = req.params;
+
+    await deleteTypeOfHeisService(stateId, id);
+    res.status(200).json({ success: true, message: "Type of Heis deleted successfully!" });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+
+
+
 export {
   addDecree,
   addSchool,
-  createStateSystem,
-  editDecree,
+  createStateSystem, createTypeOfHeis, editDecree,
   editSchool,
   getAllStateSystems,
   getDecrees, getEducationSystemByStateID, getSchools,
-  removeDecree, removeEducationsystem, removeSchool,
-  updateStateSystem
+  removeDecree, removeEducationsystem, removeSchool, removeTypeOfHeis, updateStateSystem, updatetypeOfHeis
 };
 
