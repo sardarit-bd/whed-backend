@@ -1,18 +1,60 @@
 import pool from '../config/db.js';
 
 const ALLOWED_SYSTEM_FIELDS = new Set([
-    "StateID", "sAgeOfEntry", "sAgeOfExit", "sSchoolSystem", "sHESystem",
-    "sTrainingHETeachers", "sDistanceHE", "sNULAlternatives", "sNULAdmissionTest",
-    "sNULNumerusClausus", "sNULOtherRequirements", "sULAlternatives",
-    "sULAdmissionTest", "sULNumerusClausus", "sULOtherRequirements",
-    "sFSDefinition", "srFSAdmissionRequirements", "sFSQuotas", "sFSHealth",
-    "sFSLanguageProficiency", "sFSEntryRegulations", "sFSIndividualInst",
-    "sFSCentralBody", "sRBSystemDesc", "sRBNULStudies", "sRBULStudies",
-    "sRBPLStudies", "sRBProfession", "sRBOtherInfoSources", "sSSHome",
-    "sSSHAmount", "sSSForeign", "sSSFAmount", "sSSFDetails", "sTCRoad",
-    "sTCRail", "sTCAir", "sTCforeign", "sFNAvLivingCost", "sFNMinTuitionFee",
-    "sFNMaxTuitionFee", "sFNMinTuitionFeeForeign", "sFNMaxTuitionFeeForeign",
-    "sAcademicYearFrom", "sAcademicYearTo", "sSource", "sMajorUpdateDate"
+    "sAcademicYearFrom",
+    "sAcademicYearTo",
+    "sAgeOfEntry",
+    "sAgeOfExit",
+    "sSchoolSystem",
+    "sHESystem",
+    "sSource",
+    "sInCharge",
+    "sNULAlternatives",
+    "sNULAdmissionTest",
+    "sNULOtherRequirements",
+    "sNULNumerusClausus",
+    "sULAlternatives",
+    "sULAdmissionTest",
+    "sULOtherRequirements",
+    "sULNumerusClausus",
+    "sFSDefinition",
+    "sFSQuotas",
+    "srFSAdmissionRequirements",
+    "sFSEntryRegulations",
+    "sFSHealth",
+    "sFSLanguageProficiency",
+    "sFSIndividualInst",
+    "sFSCentralBody",
+    "sRBSystemDesc",
+    "sRBOtherInfoSources",
+    "sRBNULStudies",
+    "sRBULStudies",
+    "sRBPLStudies",
+    "sRBProfession",
+    "sSSHome",
+    "sSSHAmount",
+    "sSSHCurrencyCode",
+    "sSSForeign",
+    "sSSFAmount",
+    "sSSFCurrencyCode",
+    "sSSFDetails",
+    "sTCRoad",
+    "sTCRail",
+    "sTCAir",
+    "sTCforeign",
+    "sFNAvLivingCost",
+    "sFNALCCurrencyCode",
+    "sFNMinTuitionFee",
+    "sFNMTFCCurrencyCode",
+    "sFNMaxTuitionFee",
+    "sFNMxTFCCurrencyCode",
+    "sFNMinTuitionFeeForeign",
+    "sFNMTFCfCurrencyCode",
+    "sFNMaxTuitionFeeForeign",
+    "sFNMxTFCfCurrencyCode",
+    "sTrainingHETeachers",
+    "sDistanceHE",
+    "sComment"
 ]);
 
 const ALLOWED_SCHOOL_FIELDS = new Set([
@@ -103,8 +145,6 @@ const getEducationSystemByStateIdService = async (stateId) => {
 
 
 
-
-
     const responseObject = {
         StateID: system.StateID,
 
@@ -141,17 +181,28 @@ const getEducationSystemByStateIdService = async (stateId) => {
 
         AdmissionToHigherEducation: {
 
-            secondarySchoolCredentialsRequiredForNonUniversityLevelAdmission: {},
-            alternatives: {},
-            admissionTest: {},
-            numerusClauses: {},
-            otherRequirements: {},
-            secondarySchoolCredentialsRequiredForUniversityLevelAdmission: {},
-            alternatives: {},
-            admissionTest: {},
-            numerusClauses: {},
-            otherRequirements: {},
-            foreignStudentsAdmission: {},
+            secondarySchoolCredentialsRequiredForNonUniversityLevelAdmission: [],
+            nualternatives: system.sNULAlternatives,
+            nuadmissionTest: system.sNULAdmissionTest,
+            nunumerusClauses: system.sNULNumerusClausus,
+            nuotherRequirements: system.sNULOtherRequirements,
+
+            secondarySchoolCredentialsRequiredForUniversityLevelAdmission: [],
+            ualternatives: system.sULAlternatives,
+            uadmissionTest: system.sULAdmissionTest,
+            unumerusClauses: system.sULNumerusClausus,
+            uotherRequirements: system.sULOtherRequirements,
+
+            foreignStudentsAdmission: {
+                defination: system.sFSDefinition,
+                admissionRequirements: system.srFSAdmissionRequirements,
+                quotas: system.sFSQuotas,
+                health: system.sFSHealth,
+                languageProficiency: system.sFSLanguageProficiency,
+                entryRequlation: system.sFSEntryRegulations,
+                applicationIndividualInst: system.sFSIndividualInst,
+                applicationToCentralBody: system.sFSCentralBody,
+            },
         },
 
         RecongnitionOfStudies: {
@@ -162,16 +213,35 @@ const getEducationSystemByStateIdService = async (stateId) => {
         },
 
         StudentLife: {
-            socialSecurityOrHealthInsuranceForHomeStudents: {},
-            socialSecurityOrHealthInsuranceForForeignStudents: {},
-            specialtravelConcessions: {},
+            socialSecurityOrHealthInsuranceForHomeStudents: {
+                isThereSocialSecurity: system.sSSHome,
+                costPerYear: system.sSSHAmount,
+                currency: system.sSSHCurrencyCode
+            },
+            socialSecurityOrHealthInsuranceForForeignStudents: {
+                isThereSocialSecurity: system.sSSForeign,
+                costPerYear: system.sSSFAmount,
+                currency: system.sSSFCurrencyCode,
+                detailes: system.sSSFDetails
+            },
+            specialtravelConcessions: {
+                byRoad: system.sTCRoad,
+                byAir: system.sTCAir,
+                byRail: system.sTCRail,
+                availableToForeignStudent: system.sTCforeign
+            },
             studentExpensesAndAid: {
                 livingCost: system.sFNAvLivingCost,
+                livingCostCurrency: system.sFNALCCurrencyCode,
                 tuitionFees: {
-                    minTuitionFee: system.sFNMinTuitionFee,
-                    maxTuitionFee: system.sFNMaxTuitionFee,
-                    minTuitionFeeForeign: system.sFNMinTuitionFeeForeign,
-                    maxTuitionFeeForeign: system.sFNMaxTuitionFeeForeign
+                    minTuitionFeeForNationStudent: system.sFNMinTuitionFee,
+                    minTuitionFeeCurrencyForNationStudent: system.sFNMTFCCurrencyCode,
+                    maxTuitionFeeForNationStudent: system.sFNMaxTuitionFee,
+                    maxTuitionFeeCurrencyForNationStudent: system.sFNMxTFCCurrencyCode,
+                    minTuitionFeeForForeignStudent: system.sFNMinTuitionFeeForeign,
+                    minTuitionFeeCurrencyForForeignStudent: system.sFNMTFCfCurrencyCode,
+                    maxTuitionFeeForForeignStudent: system.sFNMaxTuitionFeeForeign,
+                    maxTuitionFeeCurrencyForForeignStudent: system.sFNMxTFCfCurrencyCode
                 }
             },
             publicationsListingFinancialAid: {},
@@ -186,7 +256,9 @@ const getEducationSystemByStateIdService = async (stateId) => {
                 to: system.sAcademicYearTo
             },
             source: system.sSource,
-            personInchargeOfUpdate: '',
+            comment: system.sComment,
+            bodiesUpdate: system.sBodiesUpdated,
+            personInchargeOfUpdate: system.sInCharge,
         },
 
         Management: {
@@ -295,7 +367,7 @@ const updateStateSystem = async (stateId, updateData) => {
 
         sComment: updateData.sComment,
 
-        sRecordHistory: "-",
+        sRecordHistory: "",
     };
 
     // শুধু undefined field-গুলো বাদ দিবে।

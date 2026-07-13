@@ -73,8 +73,8 @@ export const preHeis = Joi.object({
 export const updateStateSystemSchema = Joi.object({
 
 
-    sAcademicYearFrom: Joi.number().integer(),
-    sAcademicYearTo: Joi.number().integer(),
+    sAcademicYearFrom: Joi.number().integer().allow(null),
+    sAcademicYearTo: Joi.number().integer().allow(null),
 
     sAgeOfEntry: Joi.number().integer().max(50).allow(null),
     sAgeOfExit: Joi.number().integer().max(50).allow(null),
@@ -100,8 +100,8 @@ export const updateStateSystemSchema = Joi.object({
     sFSHealth: Joi.string().allow(null),
     sFSLanguageProficiency: Joi.string().allow(null),
 
-    sFSIndividualInst: Joi.number().integer(),
-    sFSCentralBody: Joi.number().integer(),
+    sFSIndividualInst: Joi.number().integer().allow(null),
+    sFSCentralBody: Joi.number().integer().allow(null),
 
     sRBSystemDesc: Joi.string().allow(null),
     sRBOtherInfoSources: Joi.string().allow(null),
@@ -110,30 +110,30 @@ export const updateStateSystemSchema = Joi.object({
     sRBPLStudies: Joi.string().allow(null),
     sRBProfession: Joi.string().allow(null),
 
-    sSSHome: Joi.number().integer(),
-    sSSHAmount: Joi.number(),
+    sSSHome: Joi.number().integer().allow(null),
+    sSSHAmount: Joi.number().allow(null),
     sSSHCurrencyCode: Joi.string().max(4).allow(null),
 
-    sSSForeign: Joi.number().integer(),
-    sSSFAmount: Joi.number(),
+    sSSForeign: Joi.number().integer().allow(null),
+    sSSFAmount: Joi.number().allow(null),
     sSSFCurrencyCode: Joi.string().max(4).allow(null),
     sSSFDetails: Joi.string().allow(null),
 
-    sTCRoad: Joi.number().integer(),
-    sTCRail: Joi.number().integer(),
-    sTCAir: Joi.number().integer(),
-    sTCforeign: Joi.number().integer(),
+    sTCRoad: Joi.number().integer().allow(null),
+    sTCRail: Joi.number().integer().allow(null),
+    sTCAir: Joi.number().integer().allow(null),
+    sTCforeign: Joi.number().integer().allow(null),
 
-    sFNAvLivingCost: Joi.number().integer(),
+    sFNAvLivingCost: Joi.number().integer().allow(null),
     sFNALCCurrencyCode: Joi.string().max(4).allow(null),
 
-    sFNMinTuitionFee: Joi.number().integer(),
+    sFNMinTuitionFee: Joi.number().integer().allow(null),
     sFNMTFCCurrencyCode: Joi.string().max(4).allow(null),
 
-    sFNMaxTuitionFee: Joi.number().integer(),
+    sFNMaxTuitionFee: Joi.number().integer().allow(null),
     sFNMxTFCCurrencyCode: Joi.string().max(4).allow(null),
 
-    sFNMinTuitionFeeForeign: Joi.number().integer(),
+    sFNMinTuitionFeeForeign: Joi.number().integer().allow(null),
     sFNMTFCfCurrencyCode: Joi.string().max(4).allow(null),
 
     sFNMaxTuitionFeeForeign: Joi.number().integer().allow(null),

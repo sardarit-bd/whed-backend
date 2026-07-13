@@ -144,9 +144,6 @@ const updateStateSystem = async (req, res) => {
     const updateData = { ...req.validatedBody };
 
 
-    console.log(updateData);
-
-
     const result = await updateStateSystemService(stateId, updateData);
     if (result.affectedRows === 0) {
       return res.status(404).json({

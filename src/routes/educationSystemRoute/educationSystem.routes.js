@@ -1,5 +1,5 @@
 import express from "express";
-import { addSchool, createStateSystem, createTypeOfHeis, editSchool, getAllStateSystems, getEducationSystemByStateID, removeSchool, removeTypeOfHeis, updatetypeOfHeis } from "../../controllers/educationSystemController/educationSystem.controller.js";
+import { addSchool, createStateSystem, createTypeOfHeis, editSchool, getAllStateSystems, getEducationSystemByStateID, removeSchool, removeTypeOfHeis, updateStateSystem, updatetypeOfHeis } from "../../controllers/educationSystemController/educationSystem.controller.js";
 import { authorize, protect } from "../../middlewares/auth.middleware.js";
 import { checkStateResponsibility } from "../../middlewares/responsibility.middleware.js";
 import { preHeis, stateSystemSchema, typeOfHeis, updateStateSystemSchema, validate } from "../../validations/educationSystem.validation.js";
@@ -22,7 +22,7 @@ router.post("/private/state/:stateId/educationsystem/preheischool", protect, aut
 
 
 // all put routes
-router.put("/private/state/:stateId/educationsystem", protect, authorize(1, 0), checkStateResponsibility, validate(updateStateSystemSchema), createStateSystem);
+router.put("/private/state/:stateId/educationsystem", protect, authorize(1, 0), checkStateResponsibility, validate(updateStateSystemSchema), updateStateSystem);
 router.put("/private/state/:stateId/typeofhei/:id", protect, authorize(1, 0), checkStateResponsibility, validate(typeOfHeis), updatetypeOfHeis);
 router.put("/private/state/:stateId/preheischool/:schoolId", protect, authorize(1, 0), checkStateResponsibility, validate(preHeis), editSchool);
 
