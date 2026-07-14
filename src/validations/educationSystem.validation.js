@@ -167,17 +167,35 @@ export const updateSchoolSchema = Joi.object({
 }).min(1);
 
 export const decreeSchema = Joi.object({
-    StateID: Joi.number().integer().required(),
     sDecree: Joi.string().max(255).required(),
     sYearDecree: Joi.number().integer().optional(),
-    sDecreeDesc: Joi.string().optional().allow(""),
+    sDecreeDesc: Joi.string().optional().allow(null),
 });
 
 export const updateDecreeSchema = Joi.object({
     sDecree: Joi.string().max(255).optional(),
     sYearDecree: Joi.number().integer().optional(),
-    sDecreeDesc: Joi.string().optional().allow(""),
+    sDecreeDesc: Joi.string().optional().allow(null),
 }).min(1);
+
+
+export const agreementSchama = Joi.object({
+    sAgreement: Joi.string().max(255).required(),
+    sAgreementYear: Joi.number().integer().allow(null).optional(),
+})
+
+export const languageSchama = Joi.object({
+    LanguageCode: Joi.string().max(255).required(),
+})
+
+
+export const stageSchema = Joi.object({
+    StageCode: Joi.string().max(255).required(),
+    sStageName: Joi.string().allow(null).optional(),
+    sStageDescription: Joi.string().allow(null).optional(),
+})
+
+
 
 export const validate = (schema) => (req, res, next) => {
     const { error, value } = schema.validate(req.body, {

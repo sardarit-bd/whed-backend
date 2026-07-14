@@ -1,18 +1,26 @@
 import {
+  createAgreementService,
   createDecree as createDecreeService,
+  createLanguageService,
   createSchool as createSchoolService,
+  createStageService,
   createStateSystem as createStateSystemService,
   createTypeOfHeisService,
+  deleteAgreement,
   deleteDecree as deleteDecreeService,
+  deleteLanguage,
   deleteSchool as deleteSchoolService,
+  deleteStage,
   deleteStateSystem as deleteStateSystemService,
   deleteTypeOfHeisService,
+  getAgreementByStateIDService,
   getDecreesByStateId as getDecreesByStateIdService,
   getEducationSystemByStateIdService,
   getSchoolsByStateId as getSchoolsByStateIdService,
   getStateSystems as getStateSystemsService,
   updateDecree as updateDecreeService,
   updateSchool as updateSchoolService,
+  updateStageServices,
   updateStateSystem as updateStateSystemService,
   updateTypeOfHeisService
 } from "../../services/educationSystem.service.js";
@@ -283,7 +291,8 @@ const getDecrees = async (req, res) => {
 
 const addDecree = async (req, res) => {
   try {
-    const result = await createDecreeService(req.validatedBody);
+    const { stateId } = req.params;
+    const result = await createDecreeService(stateId, req.validatedBody);
     res.status(201).json({ success: true, data: result });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -292,8 +301,8 @@ const addDecree = async (req, res) => {
 
 const editDecree = async (req, res) => {
   try {
-    const { decreeId } = req.params;
-    await updateDecreeService(decreeId, req.validatedBody);
+    const { stateId, decreeID } = req.params;
+    await updateDecreeService(stateId, decreeID, req.validatedBody);
     res.status(200).json({ success: true, message: "Decree updated successfully!" });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -302,8 +311,8 @@ const editDecree = async (req, res) => {
 
 const removeDecree = async (req, res) => {
   try {
-    const { decreeId } = req.params;
-    await deleteDecreeService(decreeId);
+    const { stateId, decreeID } = req.params;
+    await deleteDecreeService(stateId, decreeID);
     res.status(200).json({ success: true, message: "Decree deleted successfully!" });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -324,14 +333,116 @@ const removeTypeOfHeis = async (req, res) => {
 
 
 
+const getAgreementByStateID = async (req, res) => {
+  try {
+    const { stateId } = req.params;
+
+    if (!stateId || isNaN(stateId)) {
+      return res.status(400).json({ success: false, message: "Invalid state ID format." });
+    }
+    const system = await getAgreementByStateIDService(stateId);
+
+    res.status(200).json({
+      success: true,
+      data: system,
+    });
+  } catch (error) {
+    console.error("Error fetching state system:", error.message);
+    res.status(500).json({
+      success: false,
+      message: "Something went wrong while fetching the state system!",
+    });
+  }
+}
+
+const addAgreement = async (req, res) => {
+  try {
+    const { stateId } = req.params;
+    const result = await createAgreementService(stateId, req.validatedBody);
+    res.status(201).json({ success: true, data: result });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+
+
+const removeAgreement = async (req, res) => {
+  try {
+    const { stateId, agreementId } = req.params;
+    await deleteAgreement(stateId, agreementId);
+    res.status(200).json({ success: true, message: "Agreement deleted successfully!" });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+
+
+
+const addLanguage = async (req, res) => {
+  try {
+    const { stateId } = req.params;
+    const result = await createLanguageService(stateId, req.validatedBody);
+    res.status(201).json({ success: true, data: result });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+
+
+const removeLanguage = async (req, res) => {
+  try {
+    const { stateId, languagecode } = req.params;
+    await deleteLanguage(stateId, languagecode);
+    res.status(200).json({ success: true, message: "Language deleted successfully!" });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+
+
+
+const addStage = async (req, res) => {
+  try {
+    const { stateId } = req.params;
+    const result = await createStageService(stateId, req.validatedBody);
+    res.status(201).json({ success: true, data: result });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+
+
+const updateStage = async (req, res) => {
+  try {
+    const { stateId, stageCode } = req.params;
+    await updateStageServices(stateId, stageCode, req.validatedBody);
+    res.status(200).json({ success: true, message: "Stage updated successfully!" });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+
+const removeStage = async (req, res) => {
+  try {
+    const { stateId, stageCode } = req.params;
+    await deleteStage(stateId, stageCode);
+    res.status(200).json({ success: true, message: "Stage deleted successfully!" });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+
 
 export {
-  addDecree,
-  addSchool,
-  createStateSystem, createTypeOfHeis, editDecree,
-  editSchool,
-  getAllStateSystems,
-  getDecrees, getEducationSystemByStateID, getSchools,
-  removeDecree, removeEducationsystem, removeSchool, removeTypeOfHeis, updateStateSystem, updatetypeOfHeis
+  addAgreement, addDecree, addLanguage, addSchool, addStage, createStateSystem, createTypeOfHeis, editDecree,
+  editSchool, getAgreementByStateID, getAllStateSystems,
+  getDecrees, getEducationSystemByStateID, getSchools, removeAgreement, removeDecree, removeEducationsystem, removeLanguage, removeSchool, removeStage, removeTypeOfHeis, updateStage, updateStateSystem, updatetypeOfHeis
 };
 

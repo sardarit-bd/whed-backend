@@ -62,13 +62,21 @@ const ALLOWED_SCHOOL_FIELDS = new Set([
 ]);
 
 const ALLOWED_DECREE_FIELDS = new Set([
-    "StateID", "sDecree", "sYearDecree", "sDecreeDesc"
+    "sDecree", "sYearDecree", "sDecreeDesc"
 ]);
 
 const ALLOWED_TYPE_OF_HEIS_FIELDS = new Set([
     "sInstType", "sInstTypeEnglish", "sInstTypeDescription"
 ])
 
+
+const ALLOWED_STAGE_FIELDS = new Set([
+    "StageCode", "Stage", "StageTypeOption"
+])
+
+const ALLOWED_AGREEMENT_FIELDS = new Set([
+    "sAgreement", "sAgreementYear"
+])
 
 const getStateSystems = async () => {
     const query = `
@@ -142,6 +150,16 @@ const getEducationSystemByStateIdService = async (stateId) => {
 
 
 
+    const agreementQuery = `SELECT * FROM whed_tcsagreement WHERE StateID = ?`;
+    const [agreementRows] = await pool.query(agreementQuery, [stateId]);
+    const agreement = agreementRows;
+
+
+    const exchangeProgramQuery = `SELECT * FROM whed_tcsexchangeprogram WHERE StateID = ?`;
+    const [exchangeProgramRows] = await pool.query(exchangeProgramQuery, [stateId]);
+    const exchangeProgram = exchangeProgramRows;
+
+
 
 
 
@@ -166,7 +184,7 @@ const getEducationSystemByStateIdService = async (stateId) => {
             stagesOfHigherEducation: stageRows,
             trainingOfHigherEducationTeachers: system.sTrainingHETeachers,
             distanceHigherEducation: system.sDistanceHE,
-            educationExchangePrograms: '',
+            educationExchangePrograms: exchangeProgram,
         },
 
 
@@ -207,8 +225,11 @@ const getEducationSystemByStateIdService = async (stateId) => {
 
         RecongnitionOfStudies: {
             systemOfReconignition: system.sRBSystemDesc,
-            specialprovisionForRecognition: {},
-            multilateralAgreements: {},
+            sRBNULStudies: system?.sRBNULStudies,
+            sRBULStudies: system?.sRBULStudies,
+            sRBPLStudies: system?.sRBPLStudies,
+            sRBProfession: system?.sRBProfession,
+            multilateralAgreements: agreement,
             otherInformationSources: system.sRBOtherInfoSources,
         },
 
@@ -482,33 +503,55 @@ const getDecreesByStateId = async (stateId) => {
     return rows;
 };
 
-const createDecree = async (decreeData) => {
-    const keys = Object.keys(decreeData).filter(key => ALLOWED_DECREE_FIELDS.has(key));
-    const values = keys.map(key => decreeData[key]);
+const createDecree = async (stateID, decreeData) => {
 
-    const placeholders = keys.map(() => "?").join(", ");
-    const columns = keys.join(", ");
-    const query = `INSERT INTO whed_tcsdecree (${columns}) VALUES (${placeholders})`;
+    const mapData = {
+        StateID: stateID,
+        sDecree: decreeData.sDecree,
+        sYearDecree: decreeData.sYearDecree,
+        sDecreeDesc: decreeData.sDecreeDesc,
+    };
+
+    const query = `
+        INSERT INTO whed_tcsdecree (
+            StateID,   
+            sDecree,
+            sYearDecree,
+            sDecreeDesc
+        )
+        VALUES (?, ?, ?, ?)
+    `;
+
+    const values = [
+        mapData.StateID,
+        mapData.sDecree,
+        mapData.sYearDecree,
+        mapData.sDecreeDesc,
+    ];
 
     const [result] = await pool.query(query, values);
-    return { id: result.insertId };
+
+    return {
+        insertId: result.insertId,
+        affectedRows: result.affectedRows,
+    };
 };
 
-const updateDecree = async (decreeId, updateData) => {
+const updateDecree = async (stateId, decreeID, updateData) => {
     const keys = Object.keys(updateData).filter(key => ALLOWED_DECREE_FIELDS.has(key));
     if (keys.length === 0) return { affectedRows: 0 };
 
     const values = keys.map(key => updateData[key]);
     const setClause = keys.map(key => `${key} = ?`).join(', ');
-    const query = `UPDATE whed_tcsdecree SET ${setClause} WHERE DecreeID = ?`;
+    const query = `UPDATE whed_tcsdecree SET ${setClause} WHERE sDecreeID = ? AND StateID = ?`;
 
-    const [result] = await pool.query(query, [...values, decreeId]);
+    const [result] = await pool.query(query, [...values, decreeID, stateId]);
     return result;
 };
 
-const deleteDecree = async (decreeId) => {
-    const query = `DELETE FROM whed_tcsdecree WHERE DecreeID = ?`;
-    const [result] = await pool.query(query, [decreeId]);
+const deleteDecree = async (stateId, decreeId) => {
+    const query = `DELETE FROM whed_tcsdecree WHERE sDecreeID = ? AND StateID = ?`;
+    const [result] = await pool.query(query, [decreeId, stateId]);
     return result;
 };
 
@@ -591,19 +634,160 @@ const deleteTypeOfHeisService = async (stateId, id) => {
 
 
 
+const getAgreementByStateIDService = async (stateId) => {
+    const agreementQuery = `SELECT * FROM whed_tcsagreement WHERE StateID = ?`;
+    const [agreementRows] = await pool.query(agreementQuery, [stateId]);
+    const agreement = agreementRows;
+    if (!agreement) return null;
+    return agreement;
+}
+
+
+const createAgreementService = async (stateId, agreementData) => {
+
+    const mapData = {
+        StateID: stateId,
+        sAgreement: agreementData.sAgreement,
+        sAgreementYear: agreementData.sAgreementYear
+    };
+
+
+    const query = `
+        INSERT INTO whed_tcsagreement (
+            StateID,
+            sAgreement,
+            sAgreementYear
+        )
+        VALUES (?, ?, ?)
+    `;
+
+    const values = [
+        mapData.StateID,
+        mapData.sAgreement,
+        mapData.sAgreementYear
+    ];
+
+    const [result] = await pool.query(query, values);
+
+    return {
+        insertId: result.insertId,
+        affectedRows: result.affectedRows,
+    };
+};
+
+
+const deleteAgreement = async (stateId, agreementId) => {
+    const query = `DELETE FROM whed_tcsagreement WHERE StateID = ? AND sAgreementID = ?`;
+    const [result] = await pool.query(query, [stateId, agreementId]);
+    return result;
+};
+
+
+
+const createLanguageService = async (stateId, languageData) => {
+
+    const mapData = {
+        StateID: stateId,
+        LanguageCode: languageData.LanguageCode
+    };
+
+
+    const query = `
+        INSERT INTO whed_tlsstatelanguagelink (
+            StateID,
+            LanguageCode
+        )
+        VALUES (?, ?)
+    `;
+
+    const values = [
+        mapData.StateID,
+        mapData.LanguageCode
+    ];
+
+    const [result] = await pool.query(query, values);
+
+    return {
+        insertId: result.insertId,
+        affectedRows: result.affectedRows,
+    };
+};
+
+
+
+const deleteLanguage = async (stateId, languageCode) => {
+    const query = `DELETE FROM whed_tlsstatelanguagelink WHERE StateID = ? AND LanguageCode = ?`;
+    const [result] = await pool.query(query, [stateId, languageCode]);
+    return result;
+};
+
+
+
+const createStageService = async (stateId, stageData) => {
+
+    const mapData = {
+        StateID: stateId,
+        StageCode: stageData.StageCode,
+        sStageName: stageData.sStageName,
+        sStageDescription: stageData.sStageDescription,
+    };
+
+
+
+    const query = `
+        INSERT INTO whed_tlsstatestagelink (
+            StateID,
+            StageCode,
+            sStageName,
+            sStageDescription
+        )
+        VALUES (?, ?, ?,?)
+    `;
+
+    const values = [
+        mapData.StateID,
+        mapData.StageCode,
+        mapData.sStageName,
+        mapData.sStageDescription
+    ];
+
+    const [result] = await pool.query(query, values);
+
+    return {
+        insertId: result.insertId,
+        affectedRows: result.affectedRows,
+    };
+};
+
+
+const updateStageServices = async (stateId, stageCode, updateData) => {
+    const keys = Object.keys(updateData).filter(key => ALLOWED_STAGE_FIELDS.has(key));
+    if (keys.length === 0) return { affectedRows: 0 };
+
+    const values = keys.map(key => updateData[key]);
+    const setClause = keys.map(key => `${key} = ?`).join(', ');
+    const query = `UPDATE whed_tlsstatestagelink SET ${setClause} WHERE StageCode = ? AND StateID = ?`;
+
+    const [result] = await pool.query(query, [...values, stageCode, stateId]);
+    return result;
+};
+
+
+
+const deleteStage = async (stateId, stageCode) => {
+    const query = `DELETE FROM whed_tlsstatestagelink WHERE StateID = ? AND StageCode = ?`;
+    const [result] = await pool.query(query, [stateId, stageCode]);
+    return result;
+};
+
 
 
 export {
-    createDecree,
-    createSchool,
-    createStateSystem, createTypeOfHeisService, deleteDecree,
-    deleteSchool,
-    deleteStateSystem, deleteTypeOfHeisService, getDecreesByStateId, getEducationSystemByStateIdService, getSchoolsByStateId,
+    createAgreementService, createDecree, createLanguageService, createSchool, createStageService, createStateSystem, createTypeOfHeisService, deleteAgreement, deleteDecree, deleteLanguage, deleteSchool, deleteStage, deleteStateSystem, deleteTypeOfHeisService, getAgreementByStateIDService, getDecreesByStateId, getEducationSystemByStateIdService, getSchoolsByStateId,
     getStateSystems,
     getTotalStateSystems,
     updateDecree,
-    updateSchool,
-    updateStateSystem,
+    updateSchool, updateStageServices, updateStateSystem,
     updateTypeOfHeisService
 };
 
