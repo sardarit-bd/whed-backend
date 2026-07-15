@@ -1,24 +1,28 @@
 import pool from "../config/db.js";
 
 export const checkStateResponsibility = async (req, res, next) => {
-  // ১. এডমিন হলে সরাসরি পাস (Role 1)
+
+  // admin user passed directly
   if (req.user && req.user.role === 1) {
     return next();
   }
 
-  // ২. ইউজার আইডি চেক
+  // user Id Check
   const userId = req.user ? req.user.UserID : null;
   if (!userId) {
-    return res.status(401).json({ success: false, message: "Unauthorized: Missing user credentials" });
+    return res.status(401).json({ success: false, message: "Unauthorized: Missing User Access Credentials" });
   }
+
+
 
   try {
     let stateId = req.params.stateId || req.params.id || req.body.StateID;
-    const idIsNumber = /^\d+$/.test(req.params.id); // আইডি সংখ্যা কিনা চেক করার নিরাপদ উপায়
+    const idIsNumber = /^\d+$/.test(req.params.id);
 
     const originalUrl = req.originalUrl;
 
-    // ৩. ইনস্টিটিউট রাউটের জন্য StateID বের করা
+
+    // get StateID for Institute route
     if (originalUrl.includes("/institute") && req.params.id && idIsNumber) {
       const [orgRows] = await pool.query("SELECT StateID FROM whed_org WHERE OrgID = ?", [req.params.id]);
       if (orgRows.length > 0) {
@@ -26,7 +30,7 @@ export const checkStateResponsibility = async (req, res, next) => {
       }
     }
 
-    // ৩.১ ক্রেডেনশিয়াল রাউটের জন্য StateID বের করা
+    // get StateID for Credential route
     if (originalUrl.includes("/credential") && req.params.id && idIsNumber) {
       const [credRows] = await pool.query("SELECT StateID FROM whed_cred WHERE CredID = ?", [req.params.id]);
       if (credRows.length > 0) {
@@ -55,12 +59,12 @@ export const checkStateResponsibility = async (req, res, next) => {
       }
     }
 
-    // ৫. সিকিউরিটি চেক: যদি StateID কোনোভাবেই না পাওয়া যায়
+    // security check : if not found the StateID
     if (!stateId || isNaN(stateId)) {
       return res.status(400).json({ success: false, message: "Bad Request: Unable to identify State ID for verification" });
     }
 
-    // ৬. এডিটরের দায়িত্ব বা পারমিশন চেক
+    // Permission check for edit
     const checkQuery = `
       SELECT StateID FROM whed_resp_country WHERE UserID = ? AND StateID = ?
       UNION
@@ -75,6 +79,8 @@ export const checkStateResponsibility = async (req, res, next) => {
       });
     }
 
+
+    // Finally go to next middleware
     next();
   } catch (error) {
     console.error("Responsibility check middleware error:", error);
