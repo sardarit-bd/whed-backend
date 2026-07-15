@@ -81,6 +81,8 @@ export const updateStateSystemSchema = Joi.object({
 
     sSchoolSystem: Joi.string().allow(null),
     sHESystem: Joi.string().allow(null),
+    sTrainingHETeachers: Joi.string().optional().allow(""),
+    sDistanceHE: Joi.string().optional().allow(""),
     sSource: Joi.string().allow(null),
     sInCharge: Joi.string().allow(null),
     sNULAlternatives: Joi.string().allow(null),
@@ -195,6 +197,11 @@ export const stageSchema = Joi.object({
     sStageDescription: Joi.string().allow(null).optional(),
 })
 
+
+
+export const exchangeProgram = Joi.object({
+    sExchangeProgram: Joi.string().max(255).required(),
+})
 
 
 export const validate = (schema) => (req, res, next) => {

@@ -1,6 +1,7 @@
 import {
   createAgreementService,
   createDecree as createDecreeService,
+  createExchangeprogramService,
   createLanguageService,
   createSchool as createSchoolService,
   createStageService,
@@ -8,6 +9,7 @@ import {
   createTypeOfHeisService,
   deleteAgreement,
   deleteDecree as deleteDecreeService,
+  deleteExchangeprogram,
   deleteLanguage,
   deleteSchool as deleteSchoolService,
   deleteStage,
@@ -420,6 +422,8 @@ const addStage = async (req, res) => {
 const updateStage = async (req, res) => {
   try {
     const { stateId, stageCode } = req.params;
+
+
     await updateStageServices(stateId, stageCode, req.validatedBody);
     res.status(200).json({ success: true, message: "Stage updated successfully!" });
   } catch (error) {
@@ -440,9 +444,37 @@ const removeStage = async (req, res) => {
 
 
 
+
+const addExchangeprogram = async (req, res) => {
+  try {
+    const { stateId } = req.params;
+    const result = await createExchangeprogramService(stateId, req.validatedBody);
+    res.status(201).json({ success: true, data: result });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+
+
+const removeExchangeProgram = async (req, res) => {
+  try {
+    const { stateId, exchangeId } = req.params;
+    await deleteExchangeprogram(stateId, exchangeId);
+    res.status(200).json({ success: true, message: "Exchange program deleted successfully!" });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+
+
+
+
+
 export {
-  addAgreement, addDecree, addLanguage, addSchool, addStage, createStateSystem, createTypeOfHeis, editDecree,
+  addAgreement, addDecree, addExchangeprogram, addLanguage, addSchool, addStage, createStateSystem, createTypeOfHeis, editDecree,
   editSchool, getAgreementByStateID, getAllStateSystems,
-  getDecrees, getEducationSystemByStateID, getSchools, removeAgreement, removeDecree, removeEducationsystem, removeLanguage, removeSchool, removeStage, removeTypeOfHeis, updateStage, updateStateSystem, updatetypeOfHeis
+  getDecrees, getEducationSystemByStateID, getSchools, removeAgreement, removeDecree, removeEducationsystem, removeExchangeProgram, removeLanguage, removeSchool, removeStage, removeTypeOfHeis, updateStage, updateStateSystem, updatetypeOfHeis
 };
 

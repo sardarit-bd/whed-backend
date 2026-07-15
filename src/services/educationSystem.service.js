@@ -7,6 +7,8 @@ const ALLOWED_SYSTEM_FIELDS = new Set([
     "sAgeOfExit",
     "sSchoolSystem",
     "sHESystem",
+    "sTrainingHETeachers",
+    "sDistanceHE",
     "sSource",
     "sInCharge",
     "sNULAlternatives",
@@ -71,7 +73,7 @@ const ALLOWED_TYPE_OF_HEIS_FIELDS = new Set([
 
 
 const ALLOWED_STAGE_FIELDS = new Set([
-    "StageCode", "Stage", "StageTypeOption"
+    "StageCode", "sStageName", "sStageDescription"
 ])
 
 const ALLOWED_AGREEMENT_FIELDS = new Set([
@@ -160,9 +162,6 @@ const getEducationSystemByStateIdService = async (stateId) => {
     const exchangeProgram = exchangeProgramRows;
 
 
-
-
-
     const responseObject = {
         StateID: system.StateID,
 
@@ -181,7 +180,7 @@ const getEducationSystemByStateIdService = async (stateId) => {
             stucture: system.sHESystem,
             lowsAndDecrees: decreeRows,
             languageOfInstruction: languageRows,
-            stagesOfHigherEducation: stageRows,
+            stagesOfHigherEducation: stageRows?.sort((a, b) => Number(a.code.slice(1)) - Number(b.code.slice(1))),
             trainingOfHigherEducationTeachers: system.sTrainingHETeachers,
             distanceHigherEducation: system.sDistanceHE,
             educationExchangePrograms: exchangeProgram,
@@ -416,9 +415,6 @@ const updateStateSystem = async (stateId, updateData) => {
 
     return result;
 };
-
-
-
 
 const deleteStateSystem = async (stateId) => {
     const query = `DELETE FROM whed_statesystem WHERE StateID = ?`;
@@ -761,6 +757,7 @@ const createStageService = async (stateId, stageData) => {
 
 
 const updateStageServices = async (stateId, stageCode, updateData) => {
+
     const keys = Object.keys(updateData).filter(key => ALLOWED_STAGE_FIELDS.has(key));
     if (keys.length === 0) return { affectedRows: 0 };
 
@@ -770,6 +767,7 @@ const updateStageServices = async (stateId, stageCode, updateData) => {
 
     const [result] = await pool.query(query, [...values, stageCode, stateId]);
     return result;
+
 };
 
 
@@ -781,9 +779,49 @@ const deleteStage = async (stateId, stageCode) => {
 };
 
 
+const createExchangeprogramService = async (stateId, exchangeprogramData) => {
+
+    const mapData = {
+        StateID: stateId,
+        sExchangeProgram: exchangeprogramData.sExchangeProgram
+    };
+
+
+
+    const query = `
+        INSERT INTO whed_tcsexchangeprogram (
+            StateID,
+            sExchangeProgram
+        )
+        VALUES (?, ?)
+    `;
+
+    const values = [
+        mapData.StateID,
+        mapData.sExchangeProgram
+    ];
+
+    const [result] = await pool.query(query, values);
+
+    return {
+        insertId: result.insertId,
+        affectedRows: result.affectedRows,
+    };
+};
+
+
+
+const deleteExchangeprogram = async (stateId, exchangeId) => {
+    const query = `DELETE FROM whed_tcsexchangeprogram WHERE StateID = ? AND sExchangeProgramID = ?`;
+    const [result] = await pool.query(query, [stateId, exchangeId]);
+    return result;
+};
+
+
+
 
 export {
-    createAgreementService, createDecree, createLanguageService, createSchool, createStageService, createStateSystem, createTypeOfHeisService, deleteAgreement, deleteDecree, deleteLanguage, deleteSchool, deleteStage, deleteStateSystem, deleteTypeOfHeisService, getAgreementByStateIDService, getDecreesByStateId, getEducationSystemByStateIdService, getSchoolsByStateId,
+    createAgreementService, createDecree, createExchangeprogramService, createLanguageService, createSchool, createStageService, createStateSystem, createTypeOfHeisService, deleteAgreement, deleteDecree, deleteExchangeprogram, deleteLanguage, deleteSchool, deleteStage, deleteStateSystem, deleteTypeOfHeisService, getAgreementByStateIDService, getDecreesByStateId, getEducationSystemByStateIdService, getSchoolsByStateId,
     getStateSystems,
     getTotalStateSystems,
     updateDecree,
