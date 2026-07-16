@@ -1,6 +1,7 @@
 import {
   assignCountry as assignCountryService,
   assignInstitution as assignInstitutionService,
+  educationSystemCredWithinInstitutionServices,
   getCountryAssignments as getCountryAssignmentsService,
   getInstitutionAssignments as getInstitutionAssignmentsService,
   removeCountryAssignment as removeCountryAssignmentService,
@@ -73,11 +74,24 @@ const removeInstitutionAssignmentController = async (req, res) => {
   }
 };
 
+
+
+const educationSystemCredWithinInstitutionController = async (req, res) => {
+  try {
+    const result = await educationSystemCredWithinInstitutionServices(req.validatedBody);
+    res.status(200).json({ success: true, data: result });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+
+
 export {
   assignCountryController,
-  assignInstitutionController,
-  getCountryAssignmentsController,
+  assignInstitutionController, educationSystemCredWithinInstitutionController, getCountryAssignmentsController,
   getInstitutionAssignmentsController,
   removeCountryAssignmentController,
   removeInstitutionAssignmentController
 };
+

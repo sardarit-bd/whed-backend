@@ -19,6 +19,21 @@ export const institutionAssignmentSchema = Joi.object({
     Exclusif: Joi.number().integer().optional().default(0),
 });
 
+
+export const educationSystemCredWithinInstitutionSchama = Joi.object({
+
+    StateID: Joi.number().integer().required().messages({
+        "any.required": "StateID is required",
+    }),
+    eduSystemCredUserID: Joi.number().integer().required().messages({
+        "any.required": "UserID is required",
+    }),
+    InstituteCredUserID: Joi.number().integer().required().messages({
+        "any.required": "UserID is required",
+    }),
+    Exclusif: Joi.number().integer().optional().default(1),
+})
+
 export const validate = (schema) => (req, res, next) => {
     const { error, value } = schema.validate(req.body, {
         abortEarly: false,

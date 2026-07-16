@@ -73,11 +73,72 @@ const removeInstitutionAssignment = async (userId, stateId) => {
     return result;
 };
 
+
+
+const educationSystemCredWithinInstitutionServices = async (updateAssignData) => {
+
+    const {
+        StateID,
+        eduSystemCredUserID,
+        InstituteCredUserID,
+        Exclusif,
+    } = updateAssignData;
+
+    const connection = await pool.getConnection();
+
+    try {
+        await connection.beginTransaction();
+
+        // Update whed_resp_institution
+        const institutionQuery = `
+            UPDATE whed_resp_institution
+            SET
+                UserID = ?,
+                Exclusif = ?
+            WHERE StateID = ?
+        `;
+
+        await connection.query(institutionQuery, [
+            InstituteCredUserID,
+            Exclusif,
+            StateID,
+        ]);
+
+        // Update whed_resp_country
+        const countryQuery = `
+            UPDATE whed_resp_country
+            SET
+                UserID = ?
+            WHERE StateID = ?
+        `;
+
+        await connection.query(countryQuery, [
+            eduSystemCredUserID,
+            StateID,
+        ]);
+
+        await connection.commit();
+
+        return {
+            success: true,
+        };
+    } catch (error) {
+        await connection.rollback();
+        throw error;
+    } finally {
+        connection.release();
+    }
+
+}
+
+
+
+
 export {
     assignCountry,
-    assignInstitution,
-    getCountryAssignments,
+    assignInstitution, educationSystemCredWithinInstitutionServices, getCountryAssignments,
     getInstitutionAssignments,
     removeCountryAssignment,
     removeInstitutionAssignment
 };
+
