@@ -41,7 +41,7 @@ router.delete("/private/state/:stateId/typeofhei/:id", protect, authorize(1, 0),
 router.delete("/private/state/:stateId/preheischool/:schoolId", protect, authorize(1, 0), checkStateResponsibility, removeSchool);
 router.delete("/private/state/:stateId/educationsystem/agreement/:agreementId", protect, authorize(1, 0), checkStateResponsibility, removeAgreement);
 router.delete("/private/state/:stateId/educationsystem/low/:decreeID", protect, authorize(1, 0), checkStateResponsibility, removeDecree);
-router.delete("/private/state/:stateId/educationsystem/language/:languagecode", protect, authorize(1, 0), checkStateResponsibility, removeLanguage);
+router.delete("/private/state/:stateId/educationsystem/language/:languagecode", protect, authorize(1, 0), removeLanguage);
 router.delete("/private/state/:stateId/educationsystem/stage/:stageCode", protect, authorize(1, 0), checkStateResponsibility, removeStage);
 router.delete("/private/state/:stateId/educationsystem/exchangeprogram/:exchangeId", protect, authorize(1, 0), checkStateResponsibility, removeExchangeProgram);
 
