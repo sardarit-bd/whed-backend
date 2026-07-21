@@ -162,6 +162,187 @@ const getEducationSystemByStateIdService = async (stateId) => {
     const exchangeProgram = exchangeProgramRows;
 
 
+
+
+    const bodiesQuery = `
+    SELECT *
+    FROM whed_org
+    WHERE StateID = ?
+    AND OrgTypeCode != 'IN'
+`;
+
+    const [bodies] = await pool.query(bodiesQuery, [stateId]);
+
+    const supplementaryTableMap = {
+        FB: "whed_orgfinaidbody",
+        GB: "whed_orggovbody",
+        GP: "whed_orggovbody",
+        CB: "whed_intcoop",
+        RB: "whed_orgrecbody",
+        RP: "whed_orgrecbody",
+        SA: "whed_orgstudentassoc",
+        SS: "whed_orgstudentservice",
+    };
+
+    if (!bodies.length) {
+        return {
+            GB: [],
+            GP: [],
+            FB: [],
+            CB: [],
+            RB: [],
+            RP: [],
+            SA: [],
+            SS: [],
+        };
+    }
+
+    const orgIds = bodies.map(body => body.OrgID);
+
+    /**
+     * Get all contacts
+     */
+    const [contacts] = await pool.query(
+        `SELECT * FROM whed_contact WHERE OrgID IN (?)`,
+        [orgIds]
+    );
+
+    /**
+     * Contact Map
+     * {
+     *   1: [{...}, {...}],
+     *   2: [{...}]
+     * }
+     */
+    const contactMap = {};
+
+    for (const contact of contacts) {
+        if (!contactMap[contact.OrgID]) {
+            contactMap[contact.OrgID] = [];
+        }
+
+        contactMap[contact.OrgID].push(contact);
+    }
+
+    /**
+     * Group OrgIDs by OrgTypeCode
+     * {
+     *   FB: [1,2],
+     *   GB: [3,4]
+     * }
+     */
+    const groupedByType = {};
+
+    for (const body of bodies) {
+        if (!groupedByType[body.OrgTypeCode]) {
+            groupedByType[body.OrgTypeCode] = [];
+        }
+
+        groupedByType[body.OrgTypeCode].push(body.OrgID);
+    }
+
+    /**
+     * Supplementary Map
+     * {
+     *   1: {...},
+     *   2: {...}
+     * }
+     */
+    const supplementaryMap = {};
+
+    for (const [orgTypeCode, ids] of Object.entries(groupedByType)) {
+        const tableName = supplementaryTableMap[orgTypeCode];
+
+        if (!tableName) continue;
+
+        const [rows] = await pool.query(
+            `SELECT * FROM ${tableName} WHERE OrgID IN (?)`,
+            [ids]
+        );
+
+        for (const row of rows) {
+            supplementaryMap[row.OrgID] = row;
+        }
+    }
+
+    /**
+     * Final Grouped Result
+     * {
+     *   GB: [...],
+     *   FB: [...]
+     * }
+     */
+    const groupedBodies = {
+        GB: [],
+        GP: [],
+        FB: [],
+        CB: [],
+        RB: [],
+        RP: [],
+        SA: [],
+        SS: [],
+    };
+
+    for (const body of bodies) {
+        const orgTypeCode = body.OrgTypeCode;
+
+        const item = {
+            genaralInfo: body,
+            supplementary: supplementaryMap[body.OrgID] || {},
+            contactInfo: contactMap[body.OrgID] || [],
+        };
+
+        if (!groupedBodies[orgTypeCode]) {
+            groupedBodies[orgTypeCode] = [];
+        }
+
+        groupedBodies[orgTypeCode].push(item);
+    }
+
+
+    const resReady = [
+        {
+            id: "govBody",
+            Title: "Governing bodies and other organizations / associations",
+            button: "Add Governing Body",
+            data: [...groupedBodies.GB, ...groupedBodies.GP]
+        },
+        {
+            id: "recognitionBody",
+            Title: "Bodies responsible for recognition",
+            button: "Add Recognition Body",
+            data: [...groupedBodies.RB, ...groupedBodies.RP]
+        },
+        {
+            id: "studentServicesBody",
+            Title: "Bodies responsible for Student Srvices",
+            button: "Add Student Services Body",
+            data: [...groupedBodies.SS]
+        },
+        {
+            id: "studentAccociationBody",
+            Title: "Bodies responsible for Student Accociation",
+            button: "Add Student Accocition Body",
+            data: [...groupedBodies.SA]
+        },
+        {
+            id: "financialAidBody",
+            Title: "Bodies responsible for Financial Aid",
+            button: "Add Financial Aid Body",
+            data: [...groupedBodies.FB]
+        },
+        {
+            id: "internationalCooperationBody",
+            Title: "Bodies responsible for International Cooperation",
+            button: "Add International Cooperation Body",
+            data: [...groupedBodies.CB]
+        },
+    ]
+
+
+
+
+
     const responseObject = {
         StateID: system.StateID,
 
@@ -187,14 +368,7 @@ const getEducationSystemByStateIdService = async (stateId) => {
         },
 
 
-        Bodis: {
-            governmentBodiesAndOthersOrgAccociations: {},
-            bodiesReponsibleForRecognition: {},
-            bodyiesResponsibleForStudentServices: {},
-            studentAssociation: {},
-            bodiesResponsibleForFinancialAid: {},
-            bodiesResponsibleForInternationalCooperation: {},
-        },
+        Bodis: resReady,
 
         AdmissionToHigherEducation: {
 
