@@ -260,7 +260,101 @@ const createMyState = async (stateData, userId) => {
 
 
 
+const getStatisticsByStateIDService = async (stateId) => {
 
+
+
+    const credquery = `
+    SELECT COUNT(*) AS total
+    FROM whed_cred
+    WHERE StateID = ?
+    `;
+    const [credis] = await pool.query(credquery, [stateId]);
+    const cred = credis[0].total;
+
+
+    const bodiesquery = `
+    SELECT COUNT(*) AS total
+    FROM whed_org
+    WHERE StateID = ? AND OrgTypeCode != 'IN'
+    `;
+    const [bodiess] = await pool.query(bodiesquery, [stateId]);
+    const bodies = bodiess[0].total;
+
+
+    const instquery = `
+    SELECT COUNT(*) AS total
+    FROM whed_org
+    WHERE StateID = ? AND OrgTypeCode = 'IN'
+    `;
+    const [insts] = await pool.query(instquery, [stateId]);
+    const inst = insts[0].total;
+
+
+
+    const contactquery = `
+    SELECT COUNT(*) AS total
+    FROM whed_contact c
+    INNER JOIN whed_org o ON o.OrgID = c.OrgID
+    WHERE o.StateID = ?
+`;
+
+    const [rows] = await pool.query(contactquery, [stateId]);
+    const totalContacts = rows[0].total;
+
+
+
+
+
+
+    const educationsystemquery = `
+    SELECT sMajorUpdateDate, sMinorUpdateDate,sMajorUpdateDateDP,sRecordHistory
+    FROM whed_statesystem
+    WHERE StateID = ?
+    `;
+    const [edusystems] = await pool.query(educationsystemquery, [stateId]);
+    const edusystem = edusystems[0];
+
+
+
+
+
+
+
+
+
+
+
+
+    return {
+        info: {
+            credentials: cred,
+            bodies: bodies,
+            institutions: inst,
+            contact: totalContacts
+        },
+        educationSystemUpdates: {
+            lastMajorUpdate: edusystem?.sMajorUpdateDate,
+            lastMinorUpdate: edusystem?.sMinorUpdateDate,
+            lastMajorUpdateDP: edusystem?.sMajorUpdateDateDP,
+            history: edusystem?.sRecordHistory
+        },
+        institutionBreckdown: {
+            iauCompleted: 0,
+            iauCompletedDP: 0,
+            dataProviderUnknown: 0,
+            dueDataExpired: 0,
+            totalInstitutions: inst,
+        },
+        systemPlusCred: {
+            dataProviderUnknown: 0,
+        },
+        RecordHistory: {
+            logCount: 0,
+            history: []
+        }
+    }
+}
 
 
 
@@ -271,7 +365,7 @@ const createMyState = async (stateData, userId) => {
 
 export {
     createMyState, createState, deleteState,
-    getAllStates, getMyStates, getSingleState, getTotalMyStates, getTotalStates,
+    getAllStates, getMyStates, getSingleState, getStatisticsByStateIDService, getTotalMyStates, getTotalStates,
     updateState
 };
 

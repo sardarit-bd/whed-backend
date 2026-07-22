@@ -1,4 +1,4 @@
-import { createState as createStateService, deleteState as deleteStateService, getAllStates as getAllStatesService, getMyStates as getMyStatesService, getSingleState as getSingleStateService, updateState as updateStateService } from '../../services/state.service.js';
+import { createState as createStateService, deleteState as deleteStateService, getAllStates as getAllStatesService, getMyStates as getMyStatesService, getSingleState as getSingleStateService, getStatisticsByStateIDService, updateState as updateStateService } from '../../services/state.service.js';
 
 /********** get all states **********/
 const getAllStates = async (req, res) => {
@@ -36,10 +36,12 @@ const getMyStates = async (req, res) => {
 
     const rows = await getMyStatesService(req.user.UserID);
 
+
     if (!rows || rows.length === 0) {
-      return res.status(404).json({
-        success: false,
-        message: "No states found"
+      return res.status(200).json({
+        success: true,
+        message: "No assigned states",
+        data: []
       });
     }
 
@@ -92,7 +94,7 @@ const getStatisticsByStateID = async (req, res) => {
     if (!id || isNaN(id)) {
       return res.status(400).json({ error: "Invalid ID format." });
     }
-    const state = await getSingleStateService(id);
+    const state = await getStatisticsByStateIDService(id);
     if (!state) {
       return res.status(404).json({ error: "State not found." });
     }

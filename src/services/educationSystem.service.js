@@ -177,7 +177,7 @@ const getEducationSystemByStateIdService = async (stateId) => {
         FB: "whed_orgfinaidbody",
         GB: "whed_orggovbody",
         GP: "whed_orggovbody",
-        CB: "whed_intcoop",
+        CB: "whed_orgintcoop",
         RB: "whed_orgrecbody",
         RP: "whed_orgrecbody",
         SA: "whed_orgstudentassoc",
