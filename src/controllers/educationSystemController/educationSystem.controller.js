@@ -1,5 +1,7 @@
 import {
   createAgreementService,
+  createBodiesContactService,
+  createBodiesService,
   createDecree as createDecreeService,
   createExchangeprogramService,
   createLanguageService,
@@ -8,6 +10,8 @@ import {
   createStateSystem as createStateSystemService,
   createTypeOfHeisService,
   deleteAgreement,
+  deleteBodiesContactServices,
+  deleteBodiesServices,
   deleteDecree as deleteDecreeService,
   deleteExchangeprogram,
   deleteLanguage,
@@ -469,11 +473,59 @@ const removeExchangeProgram = async (req, res) => {
 
 
 
+const addBodies = async (req, res) => {
+  try {
+    const { stateId } = req.params;
+    const result = await createBodiesService(stateId, req.validatedBody, req?.user);
+    res.status(201).json({ success: true, data: result });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+
+
+const addBodiesContact = async (req, res) => {
+  try {
+    const { stateId, orgId } = req.params;
+    const result = await createBodiesContactService(stateId, orgId, req.validatedBody);
+    res.status(201).json({ success: true, data: result });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+
+
+
+const deleteBodies = async (req, res) => {
+  try {
+    const { orgId, orgTypeCode } = req.params;
+    await deleteBodiesServices(orgId, orgTypeCode);
+    res.status(200).json({ success: true, message: "Bodies deleted successfully!" });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+
+
+const deleteBodiesContact = async (req, res) => {
+  try {
+    const { contactID } = req.params;
+
+    await deleteBodiesContactServices(contactID);
+    res.status(200).json({ success: true, message: "Bodies contact deleted successfully!" });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
 
 
 
 export {
-  addAgreement, addDecree, addExchangeprogram, addLanguage, addSchool, addStage, createStateSystem, createTypeOfHeis, editDecree,
+  addAgreement, addBodies, addBodiesContact, addDecree, addExchangeprogram, addLanguage, addSchool, addStage, createStateSystem, createTypeOfHeis, deleteBodies, deleteBodiesContact, editDecree,
   editSchool, getAgreementByStateID, getAllStateSystems,
   getDecrees, getEducationSystemByStateID, getSchools, removeAgreement, removeDecree, removeEducationsystem, removeExchangeProgram, removeLanguage, removeSchool, removeStage, removeTypeOfHeis, updateStage, updateStateSystem, updatetypeOfHeis
 };

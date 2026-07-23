@@ -204,6 +204,85 @@ export const exchangeProgram = Joi.object({
 })
 
 
+export const bodies = Joi.object({
+
+
+    OrgName: Joi.string().trim().max(160).required().messages({
+        "string.empty": "OrgName is Required"
+    }),
+    OrgTypeCode: Joi.string().max(2).required().messages({
+        "string.empty": "OrgTypeCode is Required"
+    }),
+
+
+    InstNameEnglish: Joi.string().trim().max(160).allow(null).optional().messages({
+        "string.empty": "InstNameEnglish cannot be empty or just spaces"
+    }),
+
+    InstAcronym: Joi.string().max(50).allow(null).optional(),
+
+
+    Street: Joi.string().allow(null).optional(),
+    City: Joi.string().max(60).allow(null).optional(),
+    Province: Joi.string().max(60).allow(null).optional(),
+    PostCode: Joi.string().max(40).allow(null).optional(),
+    Tel: Joi.string().max(60).allow(null).optional(),
+    Fax: Joi.string().max(60).allow(null).optional(),
+    EMail: Joi.string().max(100).allow(null).optional(),
+    WWW: Joi.string().uri().allow(null).optional(),
+
+
+    Role: Joi.string().allow(null).optional(),
+    Academic: Joi.number().integer().allow(null).optional(),
+    International: Joi.number().integer().allow(null).optional(),
+    IAUMembership: Joi.number().integer().allow(null).optional(),
+
+
+    FaGrants: Joi.number().integer().allow(null).optional(),
+    faLoans: Joi.number().integer().allow(null).optional(),
+    faStudentCat: Joi.string().allow(null).optional(),
+
+
+    rbRecServices: Joi.string().allow(null).optional(),
+    rbForeignCredProfession: Joi.number().integer().allow(null).optional(),
+    rbForeignCredInstitution: Joi.number().integer().allow(null).optional(),
+
+})
+
+
+
+
+export const bodiesContact = Joi.object({
+
+    Surname: Joi.string().trim().max(100).required().messages({
+        "any.required": "Surename is required",
+        "string.empty": "Surename is required",
+    }),
+
+    FirstName: Joi.string().trim().max(100).required().messages({
+        "any.required": "FristName is required",
+        "string.empty": "FristName is required",
+    }),
+
+    JobFunctionCode: Joi.string().trim().max(50).required().messages({
+        "any.required": "JobFunctionCode is required",
+        "string.empty": "JobFunctionCode is required",
+    }),
+
+    JobTitle: Joi.string().trim().max(255).allow(null),
+
+    YearsOfOffice: Joi.number().integer().allow(null),
+
+    ContactTel: Joi.string().trim().max(100).allow(null),
+
+    ContactEMail: Joi.string().email().allow(null).messages({
+        "string.email": "ContactEMail must be a valid email",
+    }),
+
+    Sex: Joi.string().trim().max(10).allow(null),
+});
+
+
 export const validate = (schema) => (req, res, next) => {
     const { error, value } = schema.validate(req.body, {
         abortEarly: false,

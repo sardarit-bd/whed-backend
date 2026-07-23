@@ -1,8 +1,8 @@
 import express from "express";
-import { addAgreement, addDecree, addExchangeprogram, addLanguage, addSchool, addStage, createStateSystem, createTypeOfHeis, editDecree, editSchool, getAgreementByStateID, getAllStateSystems, getEducationSystemByStateID, removeAgreement, removeDecree, removeExchangeProgram, removeLanguage, removeSchool, removeStage, removeTypeOfHeis, updateStage, updateStateSystem, updatetypeOfHeis } from "../../controllers/educationSystemController/educationSystem.controller.js";
+import { addAgreement, addBodies, addBodiesContact, addDecree, addExchangeprogram, addLanguage, addSchool, addStage, createStateSystem, createTypeOfHeis, deleteBodies, deleteBodiesContact, editDecree, editSchool, getAgreementByStateID, getAllStateSystems, getEducationSystemByStateID, removeAgreement, removeDecree, removeExchangeProgram, removeLanguage, removeSchool, removeStage, removeTypeOfHeis, updateStage, updateStateSystem, updatetypeOfHeis } from "../../controllers/educationSystemController/educationSystem.controller.js";
 import { authorize, protect } from "../../middlewares/auth.middleware.js";
 import { checkStateResponsibility } from "../../middlewares/responsibility.middleware.js";
-import { agreementSchama, exchangeProgram, languageSchama, preHeis, stageSchema, stateSystemSchema, typeOfHeis, updateDecreeSchema, updateStateSystemSchema, validate } from "../../validations/educationSystem.validation.js";
+import { agreementSchama, bodies, bodiesContact, exchangeProgram, languageSchama, preHeis, stageSchema, stateSystemSchema, typeOfHeis, updateDecreeSchema, updateStateSystemSchema, validate } from "../../validations/educationSystem.validation.js";
 
 const router = express.Router();
 
@@ -23,6 +23,8 @@ router.post("/private/state/:stateId/educationsystem/low", protect, authorize(1,
 router.post("/private/state/:stateId/educationsystem/language", protect, authorize(1, 0), checkStateResponsibility, validate(languageSchama), addLanguage);
 router.post("/private/state/:stateId/educationsystem/stage", protect, authorize(1, 0), checkStateResponsibility, validate(stageSchema), addStage);
 router.post("/private/state/:stateId/educationsystem/exchangeprogram", protect, authorize(1, 0), checkStateResponsibility, validate(exchangeProgram), addExchangeprogram);
+router.post("/private/state/:stateId/educationsystem/bodies", protect, authorize(1, 0), checkStateResponsibility, validate(bodies), addBodies);
+router.post("/private/state/:stateId/educationsystem/bodies/contact/:orgId", protect, authorize(1, 0), checkStateResponsibility, validate(bodiesContact), addBodiesContact);
 
 
 
@@ -44,6 +46,8 @@ router.delete("/private/state/:stateId/educationsystem/low/:decreeID", protect, 
 router.delete("/private/state/:stateId/educationsystem/language/:languagecode", protect, authorize(1, 0), removeLanguage);
 router.delete("/private/state/:stateId/educationsystem/stage/:stageCode", protect, authorize(1, 0), checkStateResponsibility, removeStage);
 router.delete("/private/state/:stateId/educationsystem/exchangeprogram/:exchangeId", protect, authorize(1, 0), checkStateResponsibility, removeExchangeProgram);
+router.delete("/private/state/:stateId/educationsystem/bodies/:orgId/:orgTypeCode", protect, authorize(1, 0), checkStateResponsibility, deleteBodies);
+router.delete("/private/state/:stateId/educationsystem/bodies/person/contact/:contactID", protect, authorize(1, 0), checkStateResponsibility, deleteBodiesContact);
 
 
 

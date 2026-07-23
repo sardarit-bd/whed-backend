@@ -994,8 +994,325 @@ const deleteExchangeprogram = async (stateId, exchangeId) => {
 
 
 
+
+const createBodiesService = async (stateId, instituteData, user) => {
+
+    //  get all state Information by stateID Frist
+    const query = `
+    SELECT 
+        StateID as id,
+        Country as country,
+        State as state,
+        CountryCode as countryCode,
+        StateCode as stateCode,
+        StateAlpha as stateAlpha,
+        ProxyStateID as proxyStateId,
+        Palgrave as palgrave,
+        UseCountryCreds as useCountryCreds,
+        EdSysLocked as edSysLocked,
+        InstLocked as instLocked,
+        Stub as stub,
+        CredLocked as credLocked,
+        Regions as regions,
+        ISO3 as iso3
+    FROM whed_state
+    WHERE StateID = ?
+  `;
+    const [rows] = await pool.query(query, [stateId]);
+    const stateInfo = rows[0];
+
+
+    const mappedData = {};
+
+
+    mappedData.UserID = user ? user.UserID : null;
+    mappedData.OrgName = instituteData.OrgName ? instituteData.OrgName.trim() : '';
+    mappedData.InstNameEnglish = instituteData.InstNameEnglish ? instituteData.InstNameEnglish.trim() : '';
+    mappedData.iBranchName = instituteData.branchof ? instituteData.branchof.trim() : '';
+    mappedData.iBranchNameEnglish = instituteData.branchof ? instituteData.branchof.trim() : '';
+    mappedData.iRecordHistory = instituteData.recordHistory ? instituteData.recordHistory.trim() : '';
+    mappedData.iInstClassHistory = instituteData.iInstClassHistory ? instituteData.iInstClassHistory.trim() : '';
+
+
+    if (instituteData.GlobalID) mappedData.GlobalID = instituteData.GlobalID.trim();
+    if (stateInfo) mappedData.StateID = parseInt(stateInfo?.id, 10);
+    if (stateInfo) mappedData.CountryCode = stateInfo?.countryCode;
+    if (stateInfo) mappedData.StateCode = stateInfo?.stateCode;
+
+    if (instituteData.OrgTypeCode) mappedData.OrgTypeCode = instituteData.OrgTypeCode.trim();
+    if (instituteData.acronym) mappedData.InstAcronym = instituteData.acronym.trim();
+
+
+    if (instituteData.street) mappedData.Street = instituteData.street.trim();
+    if (instituteData.city) mappedData.City = instituteData.city.trim();
+    if (instituteData.province) mappedData.Province = instituteData.province.trim();
+    if (instituteData.postalCode) mappedData.PostCode = instituteData.postalCode.trim();
+    if (instituteData.tel) mappedData.Tel = instituteData.tel.trim();
+    if (instituteData.fax) mappedData.Fax = instituteData.fax.trim();
+    if (instituteData.email) mappedData.EMail = instituteData.email.trim();
+    if (instituteData.website) mappedData.WWW = instituteData.website.trim();
+    if (instituteData.logo) mappedData.iLogo = instituteData.logo.trim();
+    mappedData.iInputDate = new Date();
+    mappedData.iWebUpdateDate = new Date();
+
+
+
+    // ==========================================
+    // ১১. ডাটাবেজ ট্রানজেকশন এক্সিকিউশন
+    // ==========================================
+    let connection;
+    try {
+        connection = await pool.getConnection();
+        await connection.beginTransaction();
+
+        const keys = Object.keys(mappedData);
+        const values = Object.values(mappedData);
+
+        if (keys.length === 0) {
+            throw new Error("No valid fields provided for database insertion.");
+        }
+
+        const placeholders = keys.map(() => "?").join(", ");
+        const columns = keys.join(", ");
+        const query = `INSERT INTO whed_org (${columns}) VALUES (${placeholders})`;
+
+        const [result] = await connection.query(query, values);
+
+        const insertId = Array.isArray(result) ? result[0].insertId : result.insertId;
+
+        const globalId = `IAU-${String(insertId).padStart(6, "0")}`;
+
+        await connection.query(
+            `UPDATE whed_org
+                SET GlobalID = ?
+                WHERE OrgID = ?`,
+            [globalId, insertId]
+        );
+
+
+
+
+        // OrgTypeCode -> Table Mapping
+        const supplementaryDataForGOVBody = {
+            OrgID: insertId,
+            GovBodyRole: instituteData.Role ?? null,
+            GovBodyAcademic: instituteData.Academic ?? null,
+            GovBodyInternational: instituteData.International ?? null,
+            GovBodyIAUMembership: instituteData.IAUMembership ?? null,
+        };
+        const supplementaryDataForFinancialAID = {
+            OrgID: insertId,
+            faRole: instituteData.Role ?? null,
+            faAcademic: instituteData.Academic ?? null,
+            faInternational: instituteData.International ?? null,
+            faIAUMembership: instituteData.IAUMembership ?? null,
+            FaGrants: instituteData.FaGrants ?? null,
+            FaLoans: instituteData.FaLoans ?? null,
+            FaStudentCat: instituteData.FaStudentCat ?? null,
+
+        };
+        const supplementaryDataForCOOP = {
+            OrgID: insertId,
+            icRole: instituteData.Role ?? null,
+            icAcademic: instituteData.Academic ?? null,
+            icInternational: instituteData.International ?? null,
+            icIAUMembership: instituteData.IAUMembership ?? null,
+        };
+        const supplementaryDataForRecognition = {
+            OrgID: insertId,
+            rbRole: instituteData.Role ?? null,
+            rbAcademic: instituteData.Academic ?? null,
+            rbInternational: instituteData.International ?? null,
+            rbIAUMembership: instituteData.IAUMembership ?? null,
+            rbForeignCredInstitution: instituteData.rbForeignCredInstitution ?? null,
+            rbForeignCredProfession: instituteData.rbForeignCredProfession ?? null,
+            rbRecServices: instituteData.rbRecServices ?? null,
+        };
+        const supplementaryDataForStudentAssociation = {
+            OrgID: insertId,
+            saRole: instituteData.Role ?? null,
+            saAcademic: instituteData.Academic ?? null,
+            saInternational: instituteData.International ?? null,
+            saIAUMembership: instituteData.IAUMembership ?? null,
+        };
+        const supplementaryDataForStudentService = {
+            OrgID: insertId,
+            ssRole: instituteData.Role ?? null,
+            ssAcademic: instituteData.Academic ?? null,
+            ssInternational: instituteData.International ?? null,
+            ssIAUMembership: instituteData.IAUMembership ?? null,
+        };
+
+
+        const orgTypeTableMap = {
+            FB: "whed_orgfinaidbody",
+            GB: "whed_orggovbody",
+            CB: "whed_orgintcoop",
+            RB: "whed_orgrecbody",
+            SA: "whed_orgstudentassoc",
+            SS: "whed_orgstudentservice",
+        };
+        const orgTypeSupplementaryDataMap = {
+            FB: supplementaryDataForFinancialAID,
+            GB: supplementaryDataForGOVBody,
+            CB: supplementaryDataForCOOP,
+            RB: supplementaryDataForRecognition,
+            SA: supplementaryDataForStudentAssociation,
+            SS: supplementaryDataForStudentService,
+        };
+
+
+        const targetTable = orgTypeTableMap[instituteData.OrgTypeCode];
+        const supplementaryData = orgTypeSupplementaryDataMap[instituteData.OrgTypeCode];
+
+
+
+        if (targetTable && supplementaryData) {
+
+            const keys = Object.keys(supplementaryData);
+            const values = Object.values(supplementaryData);
+
+            const columns = keys.join(", ");
+            const placeholders = keys.map(() => "?").join(", ");
+
+            await connection.query(
+                `INSERT INTO ${targetTable} (${columns}) VALUES (${placeholders})`,
+                values
+            );
+        }
+
+
+
+        await connection.commit();
+
+
+        return { id: insertId || null };
+
+    } catch (error) {
+        if (connection) await connection.rollback();
+        console.error("Database Service Transaction Error:", error.message);
+        throw error;
+    } finally {
+        if (connection) connection.release();
+    }
+
+
+};
+
+
+
+const createBodiesContactService = async (stateId, orgID, contactData) => {
+
+    const mapData = {
+
+        OrgID: orgID,
+        Surname: contactData.Surname,
+        FirstName: contactData.FirstName,
+        JobTitle: contactData.JobTitle,
+        JobFunctionCode: contactData.JobFunctionCode,
+        YearsOfOffice: contactData.YearsOfOffice,
+        ContactTel: contactData.ContactTel,
+        ContactEMail: contactData.ContactEMail,
+        Sex: contactData.Sex,
+    };
+
+
+
+    const query = `
+        INSERT INTO whed_contact (
+            OrgID,
+            Surname,
+            FirstName,
+            JobTitle,
+            JobFunctionCode,
+            YearsOfOffice,
+            ContactTel,
+            ContactEMail,
+            Sex
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `;
+
+    const values = [
+        mapData.OrgID,
+        mapData.Surname,
+        mapData.FirstName,
+        mapData.JobTitle,
+        mapData.JobFunctionCode,
+        mapData.YearsOfOffice,
+        mapData.ContactTel,
+        mapData.ContactEMail,
+        mapData.Sex
+    ];
+
+    const [result] = await pool.query(query, values);
+
+    return {
+        insertId: result.insertId,
+        affectedRows: result.affectedRows,
+    };
+};
+
+
+const deleteBodiesServices = async (orgId, orgTypeCode) => {
+
+    const connection = await pool.getConnection();
+
+    try {
+        await connection.beginTransaction();
+
+        const orgTypeTableMap = {
+            FB: "whed_orgfinaidbody",
+            GB: "whed_orggovbody",
+            CB: "whed_orgintcoop",
+            RB: "whed_orgrecbody",
+            SA: "whed_orgstudentassoc",
+            SS: "whed_orgstudentservice",
+        };
+
+        const targetTable = orgTypeTableMap[orgTypeCode];
+
+        if (!targetTable) {
+            throw new Error("Invalid OrgTypeCode");
+        }
+
+        const deleteSupplementaryQuery = `
+            DELETE FROM ${targetTable}
+            WHERE OrgID = ?
+        `;
+
+        const deleteOrgQuery = `
+            DELETE FROM whed_org
+            WHERE OrgID = ?
+        `;
+
+        await connection.query(deleteSupplementaryQuery, [orgId]);
+        const [result] = await connection.query(deleteOrgQuery, [orgId]);
+
+        await connection.commit();
+
+        return result;
+    } catch (error) {
+        await connection.rollback();
+        throw error;
+    } finally {
+        connection.release();
+    }
+};
+
+
+const deleteBodiesContactServices = async (contactID) => {
+
+    const query = `DELETE FROM whed_contact WHERE  ContactID = ?`;
+    const [result] = await pool.query(query, [contactID]);
+    return result;
+
+};
+
+
+
 export {
-    createAgreementService, createDecree, createExchangeprogramService, createLanguageService, createSchool, createStageService, createStateSystem, createTypeOfHeisService, deleteAgreement, deleteDecree, deleteExchangeprogram, deleteLanguage, deleteSchool, deleteStage, deleteStateSystem, deleteTypeOfHeisService, getAgreementByStateIDService, getDecreesByStateId, getEducationSystemByStateIdService, getSchoolsByStateId,
+    createAgreementService, createBodiesContactService, createBodiesService, createDecree, createExchangeprogramService, createLanguageService, createSchool, createStageService, createStateSystem, createTypeOfHeisService, deleteAgreement, deleteBodiesContactServices, deleteBodiesServices, deleteDecree, deleteExchangeprogram, deleteLanguage, deleteSchool, deleteStage, deleteStateSystem, deleteTypeOfHeisService, getAgreementByStateIDService, getDecreesByStateId, getEducationSystemByStateIdService, getSchoolsByStateId,
     getStateSystems,
     getTotalStateSystems,
     updateDecree,
