@@ -1311,11 +1311,269 @@ const deleteBodiesContactServices = async (contactID) => {
 
 
 
+const updateBodiesService = async (stateId, orgId, orgCodeType, bodiesData) => {
+
+    // Get State Information
+    const [rows] = await pool.query(
+        `
+        SELECT
+            StateID,
+            CountryCode,
+            StateCode
+        FROM whed_state
+        WHERE StateID = ?
+        `,
+        [stateId]
+    );
+
+    const stateInfo = rows[0];
+
+    const mappedData = {};
+
+    mappedData.OrgName = bodiesData.OrgName?.trim() || "";
+    mappedData.InstNameEnglish = bodiesData.InstNameEnglish?.trim() || "";
+    mappedData.iBranchName = bodiesData.branchof?.trim() || "";
+    mappedData.iBranchNameEnglish = bodiesData.branchof?.trim() || "";
+    mappedData.iRecordHistory = bodiesData.recordHistory?.trim() || "";
+    mappedData.iInstClassHistory = bodiesData.iInstClassHistory?.trim() || "";
+
+    if (bodiesData.GlobalID) mappedData.GlobalID = bodiesData.GlobalID.trim();
+
+    if (stateInfo) {
+        mappedData.StateID = stateInfo.StateID;
+        mappedData.CountryCode = stateInfo.CountryCode;
+        mappedData.StateCode = stateInfo.StateCode;
+    }
+
+    if (bodiesData.OrgTypeCode)
+        mappedData.OrgTypeCode = bodiesData.OrgTypeCode.trim();
+
+    if (bodiesData.acronym)
+        mappedData.InstAcronym = bodiesData.acronym.trim();
+
+    if (bodiesData.street)
+        mappedData.Street = bodiesData.street.trim();
+
+    if (bodiesData.city)
+        mappedData.City = bodiesData.city.trim();
+
+    if (bodiesData.province)
+        mappedData.Province = bodiesData.province.trim();
+
+    if (bodiesData.postalCode)
+        mappedData.PostCode = bodiesData.postalCode.trim();
+
+    if (bodiesData.tel)
+        mappedData.Tel = bodiesData.tel.trim();
+
+    if (bodiesData.fax)
+        mappedData.Fax = bodiesData.fax.trim();
+
+    if (bodiesData.email)
+        mappedData.EMail = bodiesData.email.trim();
+
+    if (bodiesData.website)
+        mappedData.WWW = bodiesData.website.trim();
+
+    if (bodiesData.logo)
+        mappedData.iLogo = bodiesData.logo.trim();
+
+    mappedData.iWebUpdateDate = new Date();
+
+    let connection;
+
+    try {
+
+        connection = await pool.getConnection();
+        await connection.beginTransaction();
+
+        // ===============================
+        // Update whed_org
+        // ===============================
+
+        const columns = Object.keys(mappedData)
+            .map((key) => `${key} = ?`)
+            .join(", ");
+
+        const values = [
+            ...Object.values(mappedData),
+            orgId,
+        ];
+
+        await connection.query(
+            `UPDATE whed_org
+             SET ${columns}
+             WHERE OrgID = ?`,
+            values
+        );
+
+        // ===============================
+        // Supplementary Data
+        // ===============================
+
+        const supplementaryDataForGOVBody = {
+            GovBodyRole: bodiesData.Role ?? null,
+            GovBodyAcademic: bodiesData.Academic ?? null,
+            GovBodyInternational: bodiesData.International ?? null,
+            GovBodyIAUMembership: bodiesData.IAUMembership ?? null,
+        };
+
+        const supplementaryDataForFinancialAID = {
+            faRole: bodiesData.Role ?? null,
+            faAcademic: bodiesData.Academic ?? null,
+            faInternational: bodiesData.International ?? null,
+            faIAUMembership: bodiesData.IAUMembership ?? null,
+            FaGrants: bodiesData.FaGrants ?? null,
+            FaLoans: bodiesData.FaLoans ?? null,
+            FaStudentCat: bodiesData.FaStudentCat ?? null,
+        };
+
+        const supplementaryDataForCOOP = {
+            icRole: bodiesData.Role ?? null,
+            icAcademic: bodiesData.Academic ?? null,
+            icInternational: bodiesData.International ?? null,
+            icIAUMembership: bodiesData.IAUMembership ?? null,
+        };
+
+        const supplementaryDataForRecognition = {
+            rbRole: bodiesData.Role ?? null,
+            rbAcademic: bodiesData.Academic ?? null,
+            rbInternational: bodiesData.International ?? null,
+            rbIAUMembership: bodiesData.IAUMembership ?? null,
+            rbForeignCredInstitution: bodiesData.rbForeignCredInstitution ?? null,
+            rbForeignCredProfession: bodiesData.rbForeignCredProfession ?? null,
+            rbRecServices: bodiesData.rbRecServices ?? null,
+        };
+
+        const supplementaryDataForStudentAssociation = {
+            saRole: bodiesData.Role ?? null,
+            saAcademic: bodiesData.Academic ?? null,
+            saInternational: bodiesData.International ?? null,
+            saIAUMembership: bodiesData.IAUMembership ?? null,
+        };
+
+        const supplementaryDataForStudentService = {
+            ssRole: bodiesData.Role ?? null,
+            ssAcademic: bodiesData.Academic ?? null,
+            ssInternational: bodiesData.International ?? null,
+            ssIAUMembership: bodiesData.IAUMembership ?? null,
+        };
+
+        const orgTypeTableMap = {
+            FB: "whed_orgfinaidbody",
+            GB: "whed_orggovbody",
+            CB: "whed_orgintcoop",
+            RB: "whed_orgrecbody",
+            SA: "whed_orgstudentassoc",
+            SS: "whed_orgstudentservice",
+        };
+
+        const orgTypeSupplementaryDataMap = {
+            FB: supplementaryDataForFinancialAID,
+            GB: supplementaryDataForGOVBody,
+            CB: supplementaryDataForCOOP,
+            RB: supplementaryDataForRecognition,
+            SA: supplementaryDataForStudentAssociation,
+            SS: supplementaryDataForStudentService,
+        };
+
+        const table = orgTypeTableMap[orgCodeType];
+        const supplementaryData = orgTypeSupplementaryDataMap[orgCodeType];
+
+        if (table && supplementaryData) {
+
+            const setClause = Object.keys(supplementaryData)
+                .map((key) => `${key} = ?`)
+                .join(", ");
+
+            const values = [
+                ...Object.values(supplementaryData),
+                orgId,
+            ];
+
+            await connection.query(
+                `UPDATE ${table}
+                 SET ${setClause}
+                 WHERE OrgID = ?`,
+                values
+            );
+        }
+
+        await connection.commit();
+
+        return {
+            success: true,
+            id: orgId,
+        };
+
+    } catch (error) {
+
+        if (connection) await connection.rollback();
+        throw error;
+
+    } finally {
+
+        if (connection) connection.release();
+
+    }
+
+};
+
+
+
+
+const updateBodiesContactService = async (contactId, contactID, contactData) => {
+
+    const mapData = {
+        Surname: contactData.Surname,
+        FirstName: contactData.FirstName,
+        JobTitle: contactData.JobTitle,
+        JobFunctionCode: contactData.JobFunctionCode,
+        YearsOfOffice: contactData.YearsOfOffice,
+        ContactTel: contactData.ContactTel,
+        ContactEMail: contactData.ContactEMail,
+        Sex: contactData.Sex,
+    };
+
+    const query = `
+        UPDATE whed_contact
+        SET
+            Surname = ?,
+            FirstName = ?,
+            JobTitle = ?,
+            JobFunctionCode = ?,
+            YearsOfOffice = ?,
+            ContactTel = ?,
+            ContactEMail = ?,
+            Sex = ?
+        WHERE ContactID = ?
+    `;
+
+    const values = [
+        mapData.Surname,
+        mapData.FirstName,
+        mapData.JobTitle,
+        mapData.JobFunctionCode,
+        mapData.YearsOfOffice,
+        mapData.ContactTel,
+        mapData.ContactEMail,
+        mapData.Sex,
+        contactID
+    ];
+
+    const [result] = await pool.query(query, values);
+
+    return {
+        affectedRows: result.affectedRows,
+        changedRows: result.changedRows,
+    };
+};
+
+
 export {
     createAgreementService, createBodiesContactService, createBodiesService, createDecree, createExchangeprogramService, createLanguageService, createSchool, createStageService, createStateSystem, createTypeOfHeisService, deleteAgreement, deleteBodiesContactServices, deleteBodiesServices, deleteDecree, deleteExchangeprogram, deleteLanguage, deleteSchool, deleteStage, deleteStateSystem, deleteTypeOfHeisService, getAgreementByStateIDService, getDecreesByStateId, getEducationSystemByStateIdService, getSchoolsByStateId,
     getStateSystems,
-    getTotalStateSystems,
-    updateDecree,
+    getTotalStateSystems, updateBodiesContactService, updateBodiesService, updateDecree,
     updateSchool, updateStageServices, updateStateSystem,
     updateTypeOfHeisService
 };

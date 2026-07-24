@@ -1,5 +1,5 @@
 import express from "express";
-import { addAgreement, addBodies, addBodiesContact, addDecree, addExchangeprogram, addLanguage, addSchool, addStage, createStateSystem, createTypeOfHeis, deleteBodies, deleteBodiesContact, editDecree, editSchool, getAgreementByStateID, getAllStateSystems, getEducationSystemByStateID, removeAgreement, removeDecree, removeExchangeProgram, removeLanguage, removeSchool, removeStage, removeTypeOfHeis, updateStage, updateStateSystem, updatetypeOfHeis } from "../../controllers/educationSystemController/educationSystem.controller.js";
+import { addAgreement, addBodies, addBodiesContact, addDecree, addExchangeprogram, addLanguage, addSchool, addStage, createStateSystem, createTypeOfHeis, deleteBodies, deleteBodiesContact, editDecree, editSchool, getAgreementByStateID, getAllStateSystems, getEducationSystemByStateID, removeAgreement, removeDecree, removeExchangeProgram, removeLanguage, removeSchool, removeStage, removeTypeOfHeis, updateBodies, updateBodiesContact, updateStage, updateStateSystem, updatetypeOfHeis } from "../../controllers/educationSystemController/educationSystem.controller.js";
 import { authorize, protect } from "../../middlewares/auth.middleware.js";
 import { checkStateResponsibility } from "../../middlewares/responsibility.middleware.js";
 import { agreementSchama, bodies, bodiesContact, exchangeProgram, languageSchama, preHeis, stageSchema, stateSystemSchema, typeOfHeis, updateDecreeSchema, updateStateSystemSchema, validate } from "../../validations/educationSystem.validation.js";
@@ -35,6 +35,8 @@ router.put("/private/state/:stateId/typeofhei/:id", protect, authorize(1, 0), ch
 router.put("/private/state/:stateId/preheischool/:schoolId", protect, authorize(1, 0), checkStateResponsibility, validate(preHeis), editSchool);
 router.put("/private/state/:stateId/educationsystem/low/:decreeID", protect, authorize(1, 0), checkStateResponsibility, validate(updateDecreeSchema), editDecree);
 router.put("/private/state/:stateId/educationsystem/stage/:stageCode", protect, authorize(1, 0), checkStateResponsibility, validate(stageSchema), updateStage);
+router.put("/private/state/:stateId/educationsystem/bodies/:orgId/:orgCodeType", protect, authorize(1, 0), checkStateResponsibility, validate(bodies), updateBodies);
+router.put("/private/state/:stateId/educationsystem/bodies/person/contact/:contactID", protect, authorize(1, 0), checkStateResponsibility, validate(bodiesContact), updateBodiesContact);
 
 
 

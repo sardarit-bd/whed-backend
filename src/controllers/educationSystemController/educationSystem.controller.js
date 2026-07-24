@@ -24,6 +24,8 @@ import {
   getEducationSystemByStateIdService,
   getSchoolsByStateId as getSchoolsByStateIdService,
   getStateSystems as getStateSystemsService,
+  updateBodiesContactService,
+  updateBodiesService,
   updateDecree as updateDecreeService,
   updateSchool as updateSchoolService,
   updateStageServices,
@@ -524,9 +526,35 @@ const deleteBodiesContact = async (req, res) => {
 
 
 
+const updateBodies = async (req, res) => {
+  try {
+    const { stateId, orgId, orgCodeType } = req.params;
+
+    const result = await updateBodiesService(stateId, orgId, orgCodeType, req.validatedBody);
+    res.status(201).json({ success: true, data: result });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+
+
+const updateBodiesContact = async (req, res) => {
+  try {
+    const { stateId, contactID } = req.params;
+    const result = await updateBodiesContactService(stateId, contactID, req.validatedBody);
+    res.status(201).json({ success: true, data: result });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+
+
+
 export {
   addAgreement, addBodies, addBodiesContact, addDecree, addExchangeprogram, addLanguage, addSchool, addStage, createStateSystem, createTypeOfHeis, deleteBodies, deleteBodiesContact, editDecree,
   editSchool, getAgreementByStateID, getAllStateSystems,
-  getDecrees, getEducationSystemByStateID, getSchools, removeAgreement, removeDecree, removeEducationsystem, removeExchangeProgram, removeLanguage, removeSchool, removeStage, removeTypeOfHeis, updateStage, updateStateSystem, updatetypeOfHeis
+  getDecrees, getEducationSystemByStateID, getSchools, removeAgreement, removeDecree, removeEducationsystem, removeExchangeProgram, removeLanguage, removeSchool, removeStage, removeTypeOfHeis, updateBodies, updateBodiesContact, updateStage, updateStateSystem, updatetypeOfHeis
 };
 
